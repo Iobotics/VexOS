@@ -1,9 +1,22 @@
 //
 //  Command.c
-//  VexOS
+//  VexOS for Vex Cortex
 //
-//  Created by Jeff Malins on 12/6/12.
+//  Created by Jeff Malins on 12/06/2012.
 //  Copyright (c) 2012 Jeff Malins. All rights reserved.
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
 #include "Command.h"
@@ -133,7 +146,7 @@ void Command_require(Command* cmd, Subsystem* sys) {
     ErrorMsgIf(cmd->status & CommandStatus_Locked, VEXOS_OPINVALID,
                "Cannot add Subsystem, Command is locked: %s", Command_getName(cmd));
     ErrorIf(sys == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(!Subsystem_isRegistered(sys), VEXOS_OPINVALID, "Subsystem is not registered: %s",
+    ErrorMsgIf(!Subsystem_isInitialized(sys), VEXOS_OPINVALID, "Subsystem is not initialized: %s",
                Subsystem_getName(sys));
                 
     if(!Command_doesRequireSubsystem(cmd, sys)) {

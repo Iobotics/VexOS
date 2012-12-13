@@ -1,9 +1,22 @@
 //
 //  LCD.c
-//  VexOS
+//  VexOS for Vex Cortex
 //
-//  Created by Jeff Malins on 12/6/12.
+//  Created by Jeff Malins on 12/06/2012.
 //  Copyright (c) 2012 Jeff Malins. All rights reserved.
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
 #include "LCD.h"
@@ -33,7 +46,7 @@ static LCDButtonType getButtons() {
     // check the button and debounce //
     LCDButtonType pressed = 0;
     GetLCDButtonsWatcher(lcdUartPort, &button[0], &button[1], &button[2]);
-    char i;
+    int i;
     for(i = 0; i < BUTTON_COUNT; i++) {
         if(button[i]) {
             if(!lastState[i]) {

@@ -1,9 +1,22 @@
 //
 //  VexOS.c
-//  VexOS
+//  VexOS for Vex Cortex
 //
-//  Created by Jeff Malins on 12/6/12.
+//  Created by Jeff Malins on 12/06/2012.
 //  Copyright (c) 2012 Jeff Malins. All rights reserved.
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
 #include "Dashboard.h"
@@ -15,6 +28,9 @@
 /********************************************************************
  * Private API: General                                             *
  ********************************************************************/
+
+// internal headers //
+void Subsystem_initialize();
 
 // event handling //
 #define EVENT_COUNT     7
@@ -179,7 +195,7 @@ static bool lcdInitialized;
 
 // handle the title (main) LCD menu //
 static void drawLCDTitleScreen(LCDScreen* screen, LCDButtonType pressed) {
-    const char* modeStr;
+    const char* modeStr = NULL;
     switch(VexOS_getRunMode()) {
         case RunMode_VexOS_Setup:   modeStr = "VexOS";    break;
         case RunMode_Initialize:    modeStr = "Disabled"; break;
@@ -483,6 +499,8 @@ void VexOS_Initialize() {
     ErrorCode err;
     switch(err = setjmp(ErrorEvn)) {
         case VEXOS_NOERROR:
+            // initialize all declared Subsystems //
+            Subsystem_initialize();
             // call robot initializer //
             runMode = RunMode_Initialize;
             InitializeRobot();
