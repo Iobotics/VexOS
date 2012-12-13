@@ -118,6 +118,7 @@ typedef struct LCDScreen     LCDScreen;
 typedef struct PowerScaler   PowerScaler;
 typedef struct DebugValue    DebugValue;
 typedef struct PIDController PIDController;
+typedef struct Timer         Timer;
 
 typedef const char* String;
 typedef float       Power;
@@ -172,16 +173,16 @@ bool VexOS_hasEventHandler(EventType, EventHandler*);
  * Public API: Subsystem                                            *
  ********************************************************************/
 
-String Subsystem_getName(Subsystem*);
-bool Subsystem_isInitialized(Subsystem*);
+String   Subsystem_getName(Subsystem*);
+bool     Subsystem_isInitialized(Subsystem*);
 Command* Subsystem_getCurrentCommand(Subsystem*);
 
 /********************************************************************
  * Public API: CommandClass                                         *
  ********************************************************************/
 
-const char* CommandClass_getName(CommandClass*);
-bool CommandClass_isInitialized(CommandClass*);
+String CommandClass_getName(CommandClass*);
+bool   CommandClass_isInitialized(CommandClass*);
 
 /********************************************************************
  * Public API: Command                                              *
@@ -194,19 +195,19 @@ typedef enum {
     CommandStatus_Initialized = 0x08
 } CommandStatus;
 
-Command* Command_new(CommandClass*, ...);
-void Command_start(Command*);
-void Command_cancel(Command*);
-String Command_getName(Command*);
+Command*      Command_new(CommandClass*, ...);
+void          Command_start(Command*);
+void          Command_cancel(Command*);
+String        Command_getName(Command*);
 CommandClass* Command_getClass(Command*);
-Command* Command_getParent(Command*);
+Command*      Command_getParent(Command*);
 CommandStatus Command_getStatus(Command*);
-bool Command_isInterruptible(Command*);
-bool Command_getRunWhenDisabled(Command*);
-void Command_setRunWhenDisabled(Command*, bool);
-bool Command_doesRequireSubsystem(Command*, Subsystem*);
+bool          Command_isInterruptible(Command*);
+bool          Command_getRunWhenDisabled(Command*);
+void          Command_setRunWhenDisabled(Command*, bool);
+bool          Command_doesRequireSubsystem(Command*, Subsystem*);
 unsigned long Command_timeSinceInitialized(Command*);
-Command* Command_delete(Command*);
+Command*      Command_delete(Command*);
 
 /********************************************************************
  * Public API: CommandGroup                                         *
@@ -222,21 +223,21 @@ void CommandGroup_addParallelWithTimeout(Command*, Command*, unsigned long);
  ********************************************************************/
 
 String ButtonClass_getName(ButtonClass*);
-bool ButtonClass_isInitialized(ButtonClass*);
+bool   ButtonClass_isInitialized(ButtonClass*);
 
 /********************************************************************
  * Public API: Button                                               *
  ********************************************************************/
 
 Button* Button_new(ButtonClass*, ...);
-String Button_getName(Button*);
-bool Button_get(Button*);
-void Button_whenPressed(Button*, Command*);
-void Button_whileHeld(Button*, Command*);
-void Button_whenReleased(Button*, Command*);
-void Button_whileToggled(Button*, Command*);
-unsigned int Button_getToggleGroup(Button*);
-void Button_setToggleGroup(Button*, unsigned int);
+String  Button_getName(Button*);
+bool    Button_get(Button*);
+void    Button_whenPressed(Button*, Command*);
+void    Button_whileHeld(Button*, Command*);
+void    Button_whenReleased(Button*, Command*);
+void    Button_whileToggled(Button*, Command*);
+int     Button_getToggleGroup(Button*);
+void    Button_setToggleGroup(Button*, int);
 Button* Button_delete(Button*);
 
 /********************************************************************
@@ -270,11 +271,11 @@ typedef enum {
 
 typedef void (WindowDrawCallback)(Window*, bool);
 
-Window* Window_new(unsigned char, unsigned char, String, WindowDrawCallback*);
-char Window_getWidth(Window*);
-char Window_getHeight(Window*);
-String Window_getTitle(Window*);
-bool Window_move(Window*, unsigned char, unsigned char);
+Window* Window_new(char, char, String, WindowDrawCallback*);
+char    Window_getWidth(Window*);
+char    Window_getHeight(Window*);
+String  Window_getTitle(Window*);
+bool    Window_move(Window*, char, char);
 Window* Window_delete(Window*);
 
 /********************************************************************
@@ -298,10 +299,10 @@ LCDScreen* LCDScreen_delete(LCDScreen*);
  ********************************************************************/
 
 PowerScaler* PowerScaler_new(String);
-String PowerScaler_getName(PowerScaler*);
-void PowerScaler_addPoint(PowerScaler*, Power, Power);
-Power PowerScaler_get(PowerScaler*, Power);
-String PowerScaler_toString(PowerScaler*);
+String       PowerScaler_getName(PowerScaler*);
+void         PowerScaler_addPoint(PowerScaler*, Power, Power);
+Power        PowerScaler_get(PowerScaler*, Power);
+String       PowerScaler_toString(PowerScaler*);
 PowerScaler* PowerScaler_delete(PowerScaler*);
 
 /********************************************************************
@@ -319,11 +320,11 @@ typedef enum {
 DebugValue* DebugValue_new(String, DebugValueType);
 DebugValue* DebugValue_newWithFormat(String, DebugValueType, String);
 DebugValue* DebugValue_delete(DebugValue*);
-void DebugValue_unregister(DebugValue*);
-void DebugValue_set(DebugValue*, ...);
+void        DebugValue_unregister(DebugValue*);
+void        DebugValue_set(DebugValue*, ...);
 DebugValue* DebugValue_delete(DebugValue*);
-Window* DebugValue_getWindow();
-LCDScreen* DebugValue_getLCDScreen();
+Window*     DebugValue_getWindow();
+LCDScreen*  DebugValue_getLCDScreen();
 
 /********************************************************************
  * Public API: PIDController                                        *
@@ -336,24 +337,24 @@ typedef void (PIDOutput)(void*, double);
 
 PIDController* PIDController_new(double, double, double, PIDInput, PIDOutput, void*);
 PIDController* PIDController_delete(PIDController*);
-void* PIDController_getState(PIDController*);
-double PIDController_get(PIDController*);
-double PIDController_getError(PIDController*);
-double PIDController_getP(PIDController*);
-double PIDController_getI(PIDController*);
-double PIDController_getD(PIDController*);
-double PIDController_getSetpoint(PIDController*);
-bool PIDController_onTarget(PIDController*);
-void PIDController_reset(PIDController*);
-bool PIDController_isContinuous(PIDController*);
-void PIDController_setContinuous(PIDController*, bool);
-bool PIDController_isEnabled(PIDController*);
-void PIDController_setEnabled(PIDController*, bool);
-void PIDController_setInputRange(PIDController*, double, double);
-void PIDController_setOutputRange(PIDController*, double, double);
-void PIDController_setPID(PIDController*, double, double, double);
-void PIDController_setSetpoint(PIDController*, double);
-void PIDController_setTolerance(PIDController*, double);
+void*   PIDController_getState(PIDController*);
+double  PIDController_get(PIDController*);
+double  PIDController_getError(PIDController*);
+double  PIDController_getP(PIDController*);
+double  PIDController_getI(PIDController*);
+double  PIDController_getD(PIDController*);
+double  PIDController_getSetpoint(PIDController*);
+bool    PIDController_onTarget(PIDController*);
+void    PIDController_reset(PIDController*);
+bool    PIDController_isContinuous(PIDController*);
+void    PIDController_setContinuous(PIDController*, bool);
+bool    PIDController_isEnabled(PIDController*);
+void    PIDController_setEnabled(PIDController*, bool);
+void    PIDController_setInputRange(PIDController*, double, double);
+void    PIDController_setOutputRange(PIDController*, double, double);
+void    PIDController_setPID(PIDController*, double, double, double);
+void    PIDController_setSetpoint(PIDController*, double);
+void    PIDController_setTolerance(PIDController*, double);
 
 /********************************************************************
  * Public API: Scheduler                                            *
@@ -368,7 +369,7 @@ Window* Scheduler_getWindow();
 bool Dashboard_isEnabled();
 void Dashboard_setEnabled(bool);
 void Dashboard_refresh();
-void Dashboard_addWindow(Window*, unsigned char, unsigned char);
+void Dashboard_addWindow(Window*, char, char);
 void Dashboard_removeWindow(Window*);
 
 /********************************************************************
@@ -390,6 +391,23 @@ bool LCD_getBacklight();
 void LCD_addScreen(LCDScreen*);
 void LCD_setText(unsigned char line, LCDTextOptions, String, ...);
 void LCD_removeScreen(LCDScreen*);
+
+/********************************************************************
+ * Public API: Timer                                                  *
+ ********************************************************************/
+
+#define TIMER_COUNT 6
+typedef enum {
+    Timer_1 = 1, Timer_2, Timer_3, Timer_4, Timer_5, Timer_6
+} TimerId;
+
+Timer*        Timer_new(String, TimerId);
+Timer*        Timer_delete(Timer*);
+String        Timer_getName(Timer*);
+bool          Timer_getEnabled(Timer*);
+void          Timer_setEnabled(Timer*, bool);
+void          Timer_preset(Timer*, unsigned long);
+unsigned long Timer_get(Timer*);
 
 /********************************************************************
  * Public API: List                                                 *

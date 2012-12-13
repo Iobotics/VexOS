@@ -47,11 +47,11 @@ struct ButtonScheduler {
  ********************************************************************/
 
 typedef struct {
-    unsigned int id;
+    int id;
     List* list;
 } ToggleGroup;
 
-static unsigned int lastObjectId = 0;
+static int lastObjectId = 0;
 
 static List toggleGroups;
 
@@ -70,7 +70,7 @@ static ToggleGroup* findToggleGroup(Button* button) {
     return NULL;
 }
 
-static ToggleGroup* getToggleGroup(unsigned int id) {
+static ToggleGroup* getToggleGroup(int id) {
     ListNode* node = toggleGroups.firstNode;
     ToggleGroup* group = NULL;
     while(node != NULL) {
@@ -302,14 +302,14 @@ void Button_whileToggled(Button* button, Command* cmd) {
     Scheduler_addButtonScheduler(getScheduler(button, cmd, ButtonSchedulerType_WhileToggled));
 }
 
-unsigned int Button_getToggleGroup(Button* button) {
+int Button_getToggleGroup(Button* button) {
     ErrorIf(button == NULL, VEXOS_ARGNULL);
     
     ToggleGroup* group = findToggleGroup(button);
     return (group != NULL)? group->id: -1;
 }
 
-void Button_setToggleGroup(Button* button, unsigned int id) {
+void Button_setToggleGroup(Button* button, int id) {
     ErrorIf(button == NULL, VEXOS_ARGNULL);
     
     ToggleGroup* group = findToggleGroup(button);

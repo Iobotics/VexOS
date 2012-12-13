@@ -92,7 +92,7 @@ void Dashboard_refresh() {
     lastWindowNode = NULL;
 }
 
-void Dashboard_addWindow(Window* win, unsigned char xpos, unsigned char ypos) {
+void Dashboard_addWindow(Window* win, char xpos, char ypos) {
     ErrorIf(win == NULL, VEXOS_ARGNULL);
     
     if(!Window_move(win, xpos, ypos)) return;

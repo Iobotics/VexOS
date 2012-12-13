@@ -53,7 +53,7 @@ void Window_draw(Window* win, bool full) {
  * Public API                                                       *
  ********************************************************************/
 
-Window* Window_new(unsigned char width, unsigned char height, const char* name, WindowDrawCallback* draw) {
+Window* Window_new(char width, char height, const char* name, WindowDrawCallback* draw) {
     ErrorIf(width < 0 || width > 78, VEXOS_ARGRANGE);
     ErrorIf(height < 0 || height > 27, VEXOS_ARGRANGE);
     ErrorIf(name == NULL, VEXOS_ARGNULL);
@@ -105,7 +105,7 @@ String Window_getTitle(Window* win) {
     return win->name;
 }
 
-bool Window_move(Window* win, unsigned char xpos, unsigned char ypos) {
+bool Window_move(Window* win, char xpos, char ypos) {
     ErrorIf(win == NULL, VEXOS_ARGNULL);
     ErrorIf(xpos < 0 || xpos > 79, VEXOS_ARGRANGE);
     ErrorIf(ypos < 0 || ypos > 30, VEXOS_ARGRANGE);

@@ -38,7 +38,7 @@ CFLAGS   := -mthumb -D DEBUG -O3 -Wall -c
 # objects #
 OS_OBJS  := Button.o Command.o CommandGroup.o  Dashboard.o DebugValue.o Error.o LCD.o \
 			LCDScreen.o List.o PIDController.o PowerScaler.o Scheduler.o Subsystem.o \
-			VexOS.o Window.o
+			Timer.o VexOS.o Window.o
 CMD_OBJS := PrintCommand.o StartCommand.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
 BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
 ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS)
