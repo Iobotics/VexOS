@@ -21,6 +21,7 @@
 
 #include "Hardware.h"
 #include "Device.h"
+#include "Motor.h"
 #include "Error.h"
 
 /********************************************************************
@@ -28,19 +29,6 @@
  ********************************************************************/
 
 #define MAX_MOTOR_POWER     127
-
-struct Motor {
-    // device header //
-    unsigned char deviceId;
-    DeviceType    type;
-    String        name;
-    // device item fields //
-    PWMPort       port;
-    MotorType     motorType;
-    I2c           i2c;
-    MotorGroup*   parent;
-    Power         power;
-};
 
 /********************************************************************
  * Protected API                                                    *
