@@ -80,6 +80,12 @@ AnalogIn* AnalogIn_delete(AnalogIn* in) {
     return NULL;
 }
 
+AnalogPort AnalogIn_getPort(AnalogIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+    
+    return in->port;
+}
+
 int AnalogIn_get(AnalogIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
     

@@ -79,6 +79,18 @@ Encoder* Encoder_delete(Encoder* encoder) {
     return NULL;
 }
 
+DigitalPort Encoder_getPort(Encoder* encoder) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+    
+    return encoder->portA;
+}
+
+DigitalPort Encoder_getPort2(Encoder* encoder) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+    
+    return encoder->portB;
+}
+
 bool Encoder_getEnabled(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
 

@@ -61,6 +61,12 @@ Accelerometer* Accelerometer_delete(Accelerometer* accel) {
     return NULL;
 }
 
+AnalogPort Accelerometer_getPort(Accelerometer* accel) {
+    ErrorIf(accel == NULL, VEXOS_ARGNULL);
+    
+    return accel->port;
+}
+
 void Accelerometer_init(Accelerometer* accel) {
     ErrorIf(accel == NULL, VEXOS_ARGNULL);
 

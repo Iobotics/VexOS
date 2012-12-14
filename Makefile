@@ -43,7 +43,7 @@ OS_OBJS  := Button.o Command.o CommandGroup.o  Dashboard.o DebugValue.o Error.o 
 CMD_OBJS := PrintCommand.o StartCommand.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
 BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
 HDW_OBJS := Device.o DigitalIn.o Encoder.o Sonar.o AnalogIn.o Gyro.o Accelerometer.o \
-			DigitalOut.o Servo.o PowerExpander.o SerialPort.o
+			DigitalOut.o Motor.o MotorGroup.o Servo.o PowerExpander.o SerialPort.o
 ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS) $(HDW_OBJS)
 
 # make everything to the build directory #

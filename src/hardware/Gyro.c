@@ -65,6 +65,12 @@ Gyro* Gyro_delete(Gyro* gyro) {
     return NULL;
 }
 
+AnalogPort Gyro_getPort(Gyro* gyro) {
+    ErrorIf(gyro == NULL, VEXOS_ARGNULL);
+    
+    return gyro->port;
+}
+
 void Gyro_init(Gyro* gyro) {
     ErrorIf(gyro == NULL, VEXOS_ARGNULL);
 

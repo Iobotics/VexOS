@@ -74,6 +74,12 @@ DigitalOut* DigitalOut_delete(DigitalOut* out) {
     return NULL;
 }
 
+DigitalPort DigitalOut_getPort(DigitalOut* out) {
+    ErrorIf(out == NULL, VEXOS_ARGNULL);
+    
+    return out->port;
+}
+
 bool DigitalOut_get(DigitalOut* out) {
     ErrorIf(out == NULL, VEXOS_ARGNULL);
 

@@ -63,6 +63,12 @@ Servo* Servo_delete(Servo* servo) {
     return NULL;
 }
 
+PWMPort Servo_getPort(Servo* servo) {
+    ErrorIf(servo == NULL, VEXOS_ARGNULL);
+    
+    return servo->port;
+}
+
 float Servo_getAngleDegrees(Servo* servo) {
     ErrorIf(servo == NULL, VEXOS_ARGNULL);
 

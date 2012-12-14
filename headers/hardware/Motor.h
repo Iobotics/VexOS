@@ -1,8 +1,8 @@
 //
-//  Device.h
+//  Motor.h
 //  VexOS for Vex Cortex, Hardware Abstraction Layer
 //
-//  Created by Jeff Malins on 12/12/2012.
+//  Created by Jeff Malins on 12/13/2012.
 //  Copyright (c) 2012 Jeff Malins. All rights reserved.
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -19,25 +19,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#ifndef _Device_h
-#define _Device_h
+#ifndef _Motor_h
+#define _Motor_h
 
 /********************************************************************
  * Protected API                                                    *
  ********************************************************************/
 
-struct Device {
+struct Motor {
+    // device header //
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    // device item fields //
+    PWMPort       port;
+    MotorType     motorType;
+    I2c           i2c;
+    MotorGroup*   parent;
+    Power         power;
 };
 
-void Device_addDigital(DigitalPort, DigitalPortMode, Device*);
-void Device_addAnalog(AnalogPort, Device*);
-void Device_addPWM(PWMPort, Device*);
-void Device_setPWMExpander(PWMPort, PowerExpander*);
-void Device_addUART(UARTPort, Device*);
-void Device_addVirtualDevice(Device*);
-void Device_remove(Device*);
+void Motor_setGroup(Motor*, MotorGroup*);
 
-#endif // _Device_h
+#endif // _Motor_h

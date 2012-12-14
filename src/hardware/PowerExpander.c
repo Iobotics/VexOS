@@ -53,6 +53,7 @@ PowerExpander* PowerExpander_new(String name, PowerExpanderType type, AnalogPort
     ret->expandType = type;
     ret->statusPort = port;
     memset(ret->pwmPorts, 0, 4 * sizeof(PWMPort));
+    Device_addVirtualDevice((Device*) ret);
     if(port) {
         Device_addAnalog(port, (Device*) ret);
     }

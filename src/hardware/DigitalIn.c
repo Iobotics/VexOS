@@ -84,6 +84,12 @@ DigitalIn* DigitalIn_delete(DigitalIn* in) {
     return NULL;
 }
 
+DigitalPort DigitalIn_getPort(DigitalIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    return in->port;
+}
+
 bool DigitalIn_get(DigitalIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
 

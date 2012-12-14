@@ -48,6 +48,7 @@ typedef enum {
     // miscellaneous devices //,
     DeviceType_PowerExpander,
     DeviceType_SerialPort,
+    DeviceType_MotorGroup,
     // motors //
     DeviceType_Motor,
     DeviceType_Servo,
@@ -65,6 +66,9 @@ typedef enum {
  * Public Object Definitions                                        *
  ********************************************************************/
 
+// base device class //
+typedef struct Device        Device;
+// subclasses //
 typedef struct DigitalIn     DigitalIn;
 typedef struct Encoder       Encoder;
 typedef struct Sonar         Sonar;
@@ -80,6 +84,19 @@ typedef struct MotorGroup    MotorGroup;
 typedef struct Servo         Servo;
 
 /********************************************************************
+ * Public API: Device (applies to all Device types with cast)       *
+ ********************************************************************/
+
+String          Device_getName(Device*);
+DeviceType      Device_getType(Device*);
+Device*         Device_getDigitalDevice(DigitalPort);
+DigitalPortMode Device_getDigitalPortMode(DigitalPort);
+Device*         Device_getAnalogDevice(AnalogPort);
+Device*         Device_getPWMDevice(PWMPort);
+PowerExpander*  Device_getPWMExpander(PWMPort);
+Device*         Device_getUARTDevice(UARTPort);
+
+/********************************************************************
  * Public API: DigitalIn                                            *
  ********************************************************************/
 
@@ -93,6 +110,7 @@ DigitalIn*    DigitalIn_createBump(String, DigitalPort);
 DigitalIn*    DigitalIn_createLimit(String, DigitalPort);
 DigitalIn*    DigitalIn_createJumper(String, DigitalPort);
 DigitalIn*    DigitalIn_delete(DigitalIn*);
+DigitalPort   DigitalIn_getPort(DigitalIn*);
 bool          DigitalIn_get(DigitalIn*);
 InterruptMode DigitalIn_getInterruptMode(DigitalIn*);
 void          DigitalIn_setInterruptMode(DigitalIn*, InterruptMode);
@@ -106,13 +124,15 @@ Button*       DigitalIn_getButton(DigitalIn*);
 #define TicksPerRev_QUAD_ENCODER    360.0
 #define TicksPerRev_OLD_ENCODER     100.0
 
-Encoder* Encoder_createQuadrature(String, DigitalPort, DigitalPort, bool);
-Encoder* Encoder_create(String, DigitalPort);
-Encoder* Encoder_delete(Encoder*);
-bool     Encoder_getEnabled(Encoder*);
-void     Encoder_setEnabled(Encoder*, bool);
-long     Encoder_get(Encoder*);
-void     Encoder_set(Encoder*, long);
+Encoder*    Encoder_createQuadrature(String, DigitalPort, DigitalPort, bool);
+Encoder*    Encoder_create(String, DigitalPort);
+Encoder*    Encoder_delete(Encoder*);
+DigitalPort Encoder_getPort(Encoder*);
+DigitalPort Encoder_getPort2(Encoder*);
+bool        Encoder_getEnabled(Encoder*);
+void        Encoder_setEnabled(Encoder*, bool);
+long        Encoder_get(Encoder*);
+void        Encoder_set(Encoder*, long);
 
 /********************************************************************
  * Public API: Sonar                                                *
@@ -120,6 +140,8 @@ void     Encoder_set(Encoder*, long);
 
 Sonar* Sonar_new(String, DigitalPort, DigitalPort);
 Sonar* Sonar_delete(Sonar*);
+DigitalPort Sonar_getInputPort(Sonar*);
+DigitalPort Sonar_getOutputPort(Sonar*);
 bool   Sonar_getEnabled(Sonar*);
 void   Sonar_setEnabled(Sonar*, bool);
 int    Sonar_getDistanceInches(Sonar*);
@@ -129,11 +151,12 @@ float  Sonar_getDistanceCentimeters(Sonar*);
  * Public API: AnalogIn                                             *
  ********************************************************************/
 
-AnalogIn* AnalogIn_createPotentiometer(String, AnalogPort);
-AnalogIn* AnalogIn_createLineFollower(String, AnalogPort);
-AnalogIn* AnalogIn_createLightSensor(String, AnalogPort);
-AnalogIn* AnalogIn_delete(AnalogIn*);
-int       AnalogIn_get(AnalogIn*);
+AnalogIn*  AnalogIn_createPotentiometer(String, AnalogPort);
+AnalogIn*  AnalogIn_createLineFollower(String, AnalogPort);
+AnalogIn*  AnalogIn_createLightSensor(String, AnalogPort);
+AnalogIn*  AnalogIn_delete(AnalogIn*);
+AnalogPort AnalogIn_getPort(AnalogIn*);
+int        AnalogIn_get(AnalogIn*);
 
 /********************************************************************
  * Public API: Gyro                                                 *
@@ -141,14 +164,15 @@ int       AnalogIn_get(AnalogIn*);
 
 #define GYRO_DEFAULT_DEADBAND 3
 
-Gyro* Gyro_new(String, AnalogPort);
-Gyro* Gyro_delete(Gyro*);
-void  Gyro_init(Gyro*);
-bool  Gyro_getEnabled(Gyro*);
-void  Gyro_setEnabled(Gyro*, bool);
-int   Gyro_getDeadband(Gyro*);
-void  Gyro_setDeadband(Gyro*, int);
-float Gyro_getAngleDegrees(Gyro *);
+Gyro*      Gyro_new(String, AnalogPort);
+Gyro*      Gyro_delete(Gyro*);
+AnalogPort Gyro_getPort(Gyro*);
+void       Gyro_init(Gyro*);
+bool       Gyro_getEnabled(Gyro*);
+void       Gyro_setEnabled(Gyro*, bool);
+int        Gyro_getDeadband(Gyro*);
+void       Gyro_setDeadband(Gyro*, int);
+float      Gyro_getAngleDegrees(Gyro *);
 
 /********************************************************************
  * Public API: Accelerometer                                        *
@@ -156,6 +180,7 @@ float Gyro_getAngleDegrees(Gyro *);
 
 Accelerometer* Accelerometer_new(String, AnalogPort);
 Accelerometer* Accelerometer_delete(Accelerometer*);
+AnalogPort     Accelerometer_getPort(Accelerometer*);
 void           Accelerometer_init(Accelerometer*);
 bool           Accelerometer_getEnabled(Accelerometer*);
 void           Accelerometer_setEnabled(Accelerometer*, bool);
@@ -168,11 +193,12 @@ float          Accelerometer_getAccelerationG(Accelerometer*);
 DigitalOut* DigitalOut_createPneumaticValve(String, DigitalPort);
 DigitalOut* DigitalOut_createLED(String, DigitalPort);
 DigitalOut* DigitalOut_delete(DigitalOut*);
+DigitalPort DigitalOut_getPort(DigitalOut*);
 bool        DigitalOut_get(DigitalOut*);
 void        DigitalOut_set(DigitalOut*, bool);
 
 /********************************************************************
- * Public API: MotorGroup                                           *
+ * Public API: Motor                                                *
  ********************************************************************/
 
 typedef enum {
@@ -192,8 +218,25 @@ typedef enum {
 #define TicksPerRev_IME_393HS       392.0
 #define TicksPerRev_IME_293         240.448
 
-MotorGroup* MotorGroup_create(String);
-void        MotorGroup_addMotor(MotorGroup*, String, MotorType, PWMPort, I2c, bool);
+Motor*      Motor_new(String, PWMPort, MotorType);
+Motor*      Motor_newWithIME(String, PWMPort, MotorType, I2c);
+Motor*      Motor_delete(Motor*);
+PWMPort     Motor_getPort(Motor*);
+MotorType   Motor_getMotorType(Motor*);
+I2c         Motor_getI2c(Motor*);
+MotorGroup* Motor_getGroup(Motor*);
+Power       Motor_get(Motor*);
+void        Motor_set(Motor*, Power);
+
+/********************************************************************
+ * Public API: MotorGroup                                           *
+ ********************************************************************/
+
+MotorGroup* MotorGroup_new(String);
+MotorGroup* MotorGroup_delete(MotorGroup*);
+void        MotorGroup_addMotor(MotorGroup*, Motor*);
+void        MotorGroup_removeMotor(MotorGroup*, Motor*);
+const List* MotorGroup_getMotorList(MotorGroup*);
 Power       MotorGroup_get(MotorGroup*);
 void        MotorGroup_set(MotorGroup*, Power);
 

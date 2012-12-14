@@ -64,6 +64,18 @@ Sonar* Sonar_delete(Sonar* sonar) {
     return NULL;
 }
 
+DigitalPort Sonar_getInputPort(Sonar* sonar) {
+    ErrorIf(sonar == NULL, VEXOS_ARGNULL);
+    
+    return sonar->inputPort;
+}
+
+DigitalPort Sonar_getOutputPort(Sonar* sonar) {
+    ErrorIf(sonar == NULL, VEXOS_ARGNULL);
+    
+    return sonar->outputPort;
+}
+
 bool Sonar_getEnabled(Sonar* sonar) {
     ErrorIf(sonar == NULL, VEXOS_ARGNULL);
 
