@@ -52,10 +52,6 @@ static const char* programName;
 static unsigned long nextDashTime;
 static unsigned long nextLCDTime;
 
-// power expander handling //
-static AnalogPort        expanderPort;
-//static PowerExpanderType expanderType;
-
 // autonomous programs //
 static List autonomousPrograms;
 static ListNode* activeAutonomous;
@@ -133,12 +129,12 @@ static void batteryWinUpdate(Window* win, bool full) {
     volts = GetMainBattery();
     PrintTextToGD(top, left, Color_Black, "Main:\n");
     PrintTextToGD(top++, left + 10, getBatteyColor(volts, false), "%1.2f V\n", volts);
-    // expander battery //
+    /*// expander battery //
     if(expanderPort > 0) {
         //volts = GetExpanderBattery();
         PrintTextToGD(top,   left, Color_Black, "Expander:\n");
         PrintTextToGD(top++, left + 10, getBatteyColor(volts, false), "%1.2f V\n", volts);
-    }
+    }*/
     // backup battery //
     volts = GetBackupBattery();
     PrintTextToGD(top,   left, Color_Black, "Backup:\n");
@@ -208,15 +204,15 @@ static void drawLCDTitleScreen(LCDScreen* screen, LCDButtonType pressed) {
 
 // handle the battery LCD menu //
 static void drawLCDBatteryScreen(LCDScreen* screen, LCDButtonType pressed) {
-    if(expanderPort != 0) {
+    /*if(expanderPort != 0) {
         LCD_setText(1, LCDTextOptions_Centered, "Main Expd Back");
         LCD_setText(2, LCDTextOptions_Centered, "%1.1fV %1.1fV %1.1fV", GetMainBattery(),
-                    /*GetExpanderBattery()*/0.0, GetBackupBattery());
+                    GetExpanderBattery(), GetBackupBattery());
     } else {
         LCD_setText(1, LCDTextOptions_Centered, "Main Back");
         LCD_setText(2, LCDTextOptions_Centered, "%1.1fV %1.1fV", GetMainBattery(),
                     GetBackupBattery());
-    }
+    }*/
 }
 
 // handle the autonomous LCD window //
@@ -359,24 +355,6 @@ void VexOS_setProgramName(const char* name) {
 const char* VexOS_getProgramName() {
     return programName;
 }
-
-/*void VOS_SetPowerExpander(AnalogPort port, PowerExpanderType type) {
-    expanderPort = port;
-    expanderType = type;
-}
-
-AnalogPort VOS_GetExpanderPort() {
-    return expanderPort;
-}
-
-PowerExpanderType VOS_GetExpanderType() {
-    return expanderType;
-}
-
-float VOS_GetExpanderBattery() {
-    if(!expanderPort || !expanderType) return 0.0f;
-    return ((GetAnalogInput(expanderPort) * 10.0f) / expanderType);
-}*/
 
 bool VexOS_addEventHandler(EventType type, EventHandler* handler) {
     ErrorMsgIf(type < EventType_DisabledStart || type > EventType_OperatorPeriodic, VEXOS_ARGRANGE, "Invalid EventType");

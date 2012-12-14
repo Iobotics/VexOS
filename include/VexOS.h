@@ -52,25 +52,13 @@ typedef enum {
 } AnalogPort;
 
 typedef enum {
-    MotorPort_1 = 1, MotorPort_2, MotorPort_3, MotorPort_4, MotorPort_5,
-    MotorPort_6,     MotorPort_7, MotorPort_8, MotorPort_9, MotorPort_10
-} MotorPort;
+    PWMPort_1 = 1, PWMPort_2, PWMPort_3, PWMPort_4, PWMPort_5,
+    PWMPort_6,     PWMPort_7, PWMPort_8, PWMPort_9, PWMPort_10
+} PWMPort;
 
 typedef enum {
     UARTPort_1 = 1, UARTPort_2
 } UARTPort;
-
-typedef enum {
-    PowerExpanderType_Rev_A1 = 456,
-    PowerExpanderType_Rev_A2 = 700
-} PowerExpanderType;
-
-// encoder ticks per revolution //
-#define TicksPerRev_IME_393HT       627.2
-#define TicksPerRev_IME_393HS       392.0
-#define TicksPerRev_IME_293         240.448
-#define TicksPerRev_QUAD_ENCODER    360.0
-#define TicksPerRev_OLD_ENCODER     100.0
 
 /********************************************************************
  * VEXnet Joystick Hardware                                         *

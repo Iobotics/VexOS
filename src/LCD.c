@@ -21,6 +21,7 @@
 
 #include "LCD.h"
 #include "LCDScreen.h"
+#include "Hardware.h"
 #include "Error.h"
 
 /********************************************************************

@@ -32,7 +32,8 @@ TOOLSBIN := $(TOOLS)\arm-gcc\bin
 STEMDIR  := $(TOOLS)\STM32F103VD
 CC := $(TOOLSBIN)\arm-none-eabi-gcc.exe
 AR := $(TOOLSBIN)\arm-none-eabi-ar.exe
-INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(STEMDIR)\inc -I $(TOOLS)\API
+INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)\hardware -I $(STEMDIR)\inc \
+			-I $(TOOLS)\API
 CFLAGS   := -mthumb -D DEBUG -O3 -Wall -c
 
 # objects #
@@ -41,11 +42,13 @@ OS_OBJS  := Button.o Command.o CommandGroup.o  Dashboard.o DebugValue.o Error.o 
 			Timer.o VexOS.o Window.o
 CMD_OBJS := PrintCommand.o StartCommand.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
 BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
-ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS)
+HDW_OBJS := Device.o DigitalIn.o Encoder.o Sonar.o AnalogIn.o Gyro.o Accelerometer.o \
+			DigitalOut.o Servo.o PowerExpander.o SerialPort.o
+ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS) $(HDW_OBJS)
 
 # make everything to the build directory #
-vpath %.h $(INCPUBDIR);$(INCINTDIR)
-vpath %.c $(SRCDIR);$(SRCDIR)/buttons;$(SRCDIR)/commands
+vpath %.h $(INCPUBDIR);$(INCINTDIR);$(INCINTDIR)/hardware
+vpath %.c $(SRCDIR);$(SRCDIR)/buttons;$(SRCDIR)/commands;$(SRCDIR)/hardware
 OBJS := $(addprefix $(OBJDIR)/,$(ALL_OBJS))
 
 # everything is combined into VexOS.lib #
@@ -74,6 +77,7 @@ $(OBJS) : VexOS.h Error.h
 # built-in objects depend on their class headers #
 $(addprefix $(OBJDIR)/,$(BTN_OBJS)) : ButtonClass.h
 $(addprefix $(OBJDIR)/,$(CMD_OBJS)) : CommandClass.h
+$(addprefix $(OBJDIR)/,$(HDW_OBJS)) : Device.h Hardware.h
 
 # install into easyC project directory #
 .PHONY : project-install
