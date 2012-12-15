@@ -35,7 +35,7 @@
 #include "Command.h"
 #include "CommandGroup.h"
 #include "Subsystem.h"
-#include "Window.h"
+#include "UserInterface.h"
 #include "Error.h"
 
 /********************************************************************
@@ -56,8 +56,6 @@ typedef struct {
     unsigned int objectId;
     Color        color;
 } DisplayLine;
-
-static Window* schedulerWindow;
 
 static ListNode* getNode(void* data) {
     ListNode* node = nodeCache.firstNode;
@@ -156,15 +154,17 @@ static void removeRunningNode(ListNode* node) {
     Command_removed(cmd);
 }
 
-static void printCommands(Command* cmd, DisplayLine* cache, Window* win, unsigned char* line, int indent) {
+static void printCommands(Command* cmd, DisplayLine* cache, unsigned char* line, int indent,
+    Rect innerRect, unsigned char height, unsigned char width) 
+{
     // make sure we don't overflow the window //
-    if(*line >= win->height) return;
+    if(*line >= height) return;
 
     // NULL indicates root node, print scheduler Commands //
     if(!cmd) {
         ListNode* node = runningList.firstNode;
         while(node != NULL) {
-            printCommands(node->data, cache, win, line, indent);
+            printCommands(node->data, cache, line, indent, innerRect, height, width);
             node = node->next;
         }
         return;
@@ -181,11 +181,12 @@ static void printCommands(Command* cmd, DisplayLine* cache, Window* win, unsigne
     // print this Command if changed //
     if(cmd->objectId != cache[*line].objectId || color != cache[*line].color) {
         // compute display characteristics: position //
-        unsigned char top   = win->innerRect.top + *line;
-        unsigned char left  = win->innerRect.left;
-        unsigned char width = win->width - indent;
+        unsigned char top    = innerRect.top + *line;
+        unsigned char left   = innerRect.left;
+        unsigned char xwidth = width - indent;
         // print command and increment line counter //
-        PrintTextToGD(top, left, color, "%*s%-*.*s\n", indent, "", width, width, Command_getName(cmd));
+        PrintTextToGD(top, left, color, "%*s%-*.*s\n", indent, "", xwidth, xwidth, 
+                      Command_getName(cmd));
         cache[*line] = (DisplayLine) { .objectId = cmd->objectId, .color = color };
     }
     (*line)++;
@@ -195,37 +196,41 @@ static void printCommands(Command* cmd, DisplayLine* cache, Window* win, unsigne
         ListNode* node = CommandGroup_getChildList(cmd)->firstNode;
         while(node != NULL) {
             GroupEntry* entry = node->data;
-            printCommands(entry->command, cache, win, line, indent + 2);
+            printCommands(entry->command, cache, line, indent + 2, innerRect, height, width);
             node = node->next;
         }
         // print current node last //
         Command* xcmd = CommandGroup_getCurrentCommand(cmd);
-        if(xcmd) printCommands(xcmd, cache, win, line, indent + 2);
+        if(xcmd) printCommands(xcmd, cache, line, indent + 2, innerRect, height, width);
     }
 }
 
 static void updateWindow(Window* win, bool full) {
     static DisplayLine*  lineCache = NULL;
     static unsigned char lastCount = 0;
+
+    Rect innerRect       = Window_getInnerRect(win);
+    unsigned char height = Window_getHeight(win);
+    unsigned char width  = Window_getWidth(win);
     
     // create the line ID cache if it doesn't exist //
     if(!lineCache) {
-        lineCache = malloc(win->height * sizeof(DisplayLine));
+        lineCache = malloc(height * sizeof(DisplayLine));
     }
     // clear out ID cache to force a full redraw //
     if(full) {
-        memset(lineCache, 0, win->height * sizeof(DisplayLine));
+        memset(lineCache, 0, height * sizeof(DisplayLine));
     }
 
     // recursively print nodes //
     unsigned char line = 0;
-    printCommands(NULL, lineCache, win, &line, 0);
+    printCommands(NULL, lineCache, &line, 0, innerRect, height, width);
     
     // check to see if we printed less than last time //
     if(line < lastCount) {
         // clear remaining lines //
-        ClearGD(win->innerRect.top + line, win->innerRect.left, win->innerRect.bottom, 
-                win->innerRect.right, false);
+        ClearGD(innerRect.top + line, innerRect.left, innerRect.bottom, 
+                innerRect.right, false);
     }
     lastCount = line;
 }
@@ -284,10 +289,14 @@ void Scheduler_run() {
 }
 
 /********************************************************************
- * Public API                                                       *
+ * Public API (UI Hooks)                                            *
  ********************************************************************/
 
 Window* Scheduler_getWindow() {
-    if(schedulerWindow) return schedulerWindow;
-    return (schedulerWindow = Window_new(40, 17, "Running Commands", &updateWindow));
+    static Window* window = NULL;
+    if(window) return window;
+    window = Window_new("Running Commands", &updateWindow);
+    Window_setSize(window, 40, 17);
+    return window;
 }
+

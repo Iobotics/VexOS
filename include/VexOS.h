@@ -37,30 +37,6 @@
 void InitializeRobot();
 
 /********************************************************************
- * VEX Cortex Hardware                                              *
- ********************************************************************/
-
-typedef enum {
-    DigitalPort_1 = 1, DigitalPort_2, DigitalPort_3, DigitalPort_4, DigitalPort_5,
-    DigitalPort_6,     DigitalPort_7, DigitalPort_8, DigitalPort_9, DigitalPort_10,
-    DigitalPort_11,    DigitalPort_12
-} DigitalPort;
-
-typedef enum {
-    AnalogPort_1 = 1, AnalogPort_2, AnalogPort_3, AnalogPort_4, AnalogPort_5,
-    AnalogPort_6,     AnalogPort_7, AnalogPort_8
-} AnalogPort;
-
-typedef enum {
-    PWMPort_1 = 1, PWMPort_2, PWMPort_3, PWMPort_4, PWMPort_5,
-    PWMPort_6,     PWMPort_7, PWMPort_8, PWMPort_9, PWMPort_10
-} PWMPort;
-
-typedef enum {
-    UARTPort_1 = 1, UARTPort_2
-} UARTPort;
-
-/********************************************************************
  * VEXnet Joystick Hardware                                         *
  ********************************************************************/
 
@@ -88,8 +64,8 @@ typedef enum {
 
 // global data slots //
 #define GLOBALDATA_AUTO_PROGRAM     20
-#define GLOBALDATA_DASH_ENABLED     19
-#define GLOBALDATA_LCD_MENU         18
+#define GLOBALDATA_DASH_NUMBER      19
+#define GLOBALDATA_LCD_SCREEN       18
 #define GLOBALDATA_DEBUG_VALUE      17
 
 /********************************************************************
@@ -101,8 +77,6 @@ typedef struct CommandClass  CommandClass;
 typedef struct Command       Command;
 typedef struct ButtonClass   ButtonClass;
 typedef struct Button        Button;
-typedef struct Window        Window;
-typedef struct LCDScreen     LCDScreen;
 typedef struct PowerScaler   PowerScaler;
 typedef struct DebugValue    DebugValue;
 typedef struct PIDController PIDController;
@@ -112,7 +86,7 @@ typedef const char* String;
 typedef float       Power;
 
 /********************************************************************
- * Public API: Operating System Functions                           *
+ * Public API: Operating System Functions and Events                *
  ********************************************************************/
 
 typedef enum {
@@ -122,25 +96,6 @@ typedef enum {
     RunMode_Operator
 } RunMode;
 
-RunMode VexOS_getRunMode();
-unsigned long VexOS_getRunTime();
-double VexOS_getLoopFrequency();
-String VexOS_getProgramName();
-void VexOS_setProgramName(String);
-
-unsigned int VexOS_addAutonomous(Command*);
-bool VexOS_removeAutonomous(Command*);
-bool VexOS_hasAutonomous(Command*);
-unsigned int VexOS_getAutonomousCount();
-Command* VexOS_getAutonomousByNumber(unsigned int n);
-Command* VexOS_getSelectedAutonomous();
-void VexOS_setSelectedAutonomous(Command* cmd);
-void VexOS_setSelectedAutonomousByNumber(unsigned int n);
-
-/********************************************************************
- * Public API: Operating System Events                              *
- ********************************************************************/
-
 typedef enum {
     EventType_DisabledStart,
     EventType_DisabledPeriodic,
@@ -148,22 +103,49 @@ typedef enum {
     EventType_AutonomousStart,
     EventType_AutonomousPeriodic,
     EventType_OperatorStart,
-    EventType_OperatorPeriodic
+    EventType_OperatorPeriodic,
+    EventType_SystemError
 } EventType;
 
-typedef void (EventHandler)(EventType);
+typedef void (EventHandler)(EventType, void*);
 
-bool VexOS_addEventHandler(EventType, EventHandler*);
-bool VexOS_removeEventHandler(EventType, EventHandler*);
-bool VexOS_hasEventHandler(EventType, EventHandler*);
+RunMode       VexOS_getRunMode();
+unsigned long VexOS_getRunTime();
+double        VexOS_getLoopFrequency();
+String        VexOS_getProgramName();
+void          VexOS_setProgramName(String);
+bool          VexOS_addEventHandler(EventType, EventHandler*, void*);
+bool          VexOS_removeEventHandler(EventType, EventHandler*);
+bool          VexOS_hasEventHandler(EventType, EventHandler*);
+void          VexOS_setupStandardUI();
 
 /********************************************************************
- * Public API: Subsystem                                            *
+ * Public API: Autonomous                                           *
  ********************************************************************/
 
-String   Subsystem_getName(Subsystem*);
-bool     Subsystem_isInitialized(Subsystem*);
-Command* Subsystem_getCurrentCommand(Subsystem*);
+unsigned int Autonomous_addProgram(Command*);
+bool         Autonomous_removeProgram(Command*);
+bool         Autonomous_hasProgram(Command*);
+unsigned int Autononous_getProgramCount();
+Command*     Autonomous_getProgramByNumber(unsigned int n);
+Command*     Autonomous_getSelectedProgram();
+void         Autonomous_setSelectedProgram(Command* cmd);
+void         Autonomous_setSelectedProgramByNumber(unsigned int n);
+bool         Autonomous_restoreLastProgram();
+
+/********************************************************************
+ * Public API: Autonomous                                           *
+ ********************************************************************/
+
+#define BatteryThreshold_MAIN_G     7.5
+#define BatteryThreshold_MAIN_Y     7.0
+#define BatteryThreshold_BACKUP_G   7.0
+#define BatteryThreshold_BACKUP_Y   6.5
+
+void Battery_setMainThresholds(float  threshG, float  threshY);
+void Battery_getMainThresholds(float* threshG, float* threshY);
+void Battery_setBackupThresholds(float  threshG, float  threshY);
+void Battery_getBackupThresholds(float* threshG, float* threshY);
 
 /********************************************************************
  * Public API: CommandClass                                         *
@@ -235,52 +217,12 @@ Button* Button_delete(Button*);
 void InternalButton_set(Button*, bool value);
 
 /********************************************************************
- * Public API: Window                                               *
+ * Public API: Subsystem                                            *
  ********************************************************************/
 
-// colors used in display //
-typedef enum {
-    Color_Black       = 0x000000,
-    Color_Red         = 0x0000FF,
-    Color_Green       = 0x00FF00,
-    Color_Blue        = 0xFF0000,
-    Color_Yellow      = 0x00FFFF,
-    Color_Cyan        = 0xFFFF00,
-    Color_Magenta     = 0xFF00FF,
-    Color_White       = 0xFFFFFF,
-    Color_DarkRed     = 0x000080,
-    Color_DarkGreen   = 0x008000,
-    Color_DarkBlue    = 0x800000,
-    Color_DarkYellow  = 0x008080,
-    Color_DarkCyan    = 0x808000,
-    Color_DarkMagenta = 0x800080,
-    Color_Grey        = 0x808080
-} Color;
-
-typedef void (WindowDrawCallback)(Window*, bool);
-
-Window* Window_new(char, char, String, WindowDrawCallback*);
-char    Window_getWidth(Window*);
-char    Window_getHeight(Window*);
-String  Window_getTitle(Window*);
-bool    Window_move(Window*, char, char);
-Window* Window_delete(Window*);
-
-/********************************************************************
- * Public API: LCDScreen                                            *
- ********************************************************************/
-
-typedef enum {
-    LCDButtonType_Left   = 0x01,
-    LCDButtonType_Center = 0x02,
-    LCDButtonType_Right  = 0x04
-} LCDButtonType;
-
-typedef void (LCDDrawCallback)(LCDScreen*, LCDButtonType);
-typedef bool (LCDStatusCallback)(LCDScreen*);
-
-LCDScreen* LCDScreen_new(String name, LCDDrawCallback*, LCDStatusCallback*);
-LCDScreen* LCDScreen_delete(LCDScreen*);
+String   Subsystem_getName(Subsystem*);
+bool     Subsystem_isInitialized(Subsystem*);
+Command* Subsystem_getCurrentCommand(Subsystem*);
 
 /********************************************************************
  * Public API: PowerScaler                                          *
@@ -298,11 +240,11 @@ PowerScaler* PowerScaler_delete(PowerScaler*);
  ********************************************************************/
 
 typedef enum {
-    DebugValueType_Int    = 1,
-    DebugValueType_String = 2,
-    DebugValueType_Float  = 3,
-    DebugValueType_Bool   = 4,
-    DebugValueType_Format = 5
+    DebugValueType_Int = 1,
+    DebugValueType_String,
+    DebugValueType_Float,
+    DebugValueType_Bool,
+    DebugValueType_Format
 } DebugValueType;
 
 DebugValue* DebugValue_new(String, DebugValueType);
@@ -311,8 +253,6 @@ DebugValue* DebugValue_delete(DebugValue*);
 void        DebugValue_unregister(DebugValue*);
 void        DebugValue_set(DebugValue*, ...);
 DebugValue* DebugValue_delete(DebugValue*);
-Window*     DebugValue_getWindow();
-LCDScreen*  DebugValue_getLCDScreen();
 
 /********************************************************************
  * Public API: PIDController                                        *
@@ -343,42 +283,6 @@ void    PIDController_setOutputRange(PIDController*, double, double);
 void    PIDController_setPID(PIDController*, double, double, double);
 void    PIDController_setSetpoint(PIDController*, double);
 void    PIDController_setTolerance(PIDController*, double);
-
-/********************************************************************
- * Public API: Scheduler                                            *
- ********************************************************************/
-
-Window* Scheduler_getWindow();
-
-/********************************************************************
- * Public API: Dashboard                                            *
- ********************************************************************/
-
-bool Dashboard_isEnabled();
-void Dashboard_setEnabled(bool);
-void Dashboard_refresh();
-void Dashboard_addWindow(Window*, char, char);
-void Dashboard_removeWindow(Window*);
-
-/********************************************************************
- * Public API: LCD                                                  *
- ********************************************************************/
-
-typedef enum {
-    LCDTextOptions_None         = 0x00,
-    LCDTextOptions_Centered     = 0x01,
-    LCDTextOptions_LeftArrow    = 0x02,
-    LCDTextOptions_RightArrow   = 0x04
-} LCDTextOptions;
-
-void LCD_setPort(UARTPort);
-UARTPort LCD_getPort();
-bool LCD_isEnabled();
-void LCD_setBacklight(bool);
-bool LCD_getBacklight();
-void LCD_addScreen(LCDScreen*);
-void LCD_setText(unsigned char line, LCDTextOptions, String, ...);
-void LCD_removeScreen(LCDScreen*);
 
 /********************************************************************
  * Public API: Timer                                                  *
@@ -415,18 +319,17 @@ typedef struct ListNode_T {
     struct List_T*      list;
 } ListNode;
 
-List* List_new();
-ListNode* List_newNode(void* data);
-
-void List_insertAfter(ListNode* node, ListNode* newNode);
-void List_insertBefore(ListNode* node, ListNode* newNode);
-void List_insertFirst(List* list, ListNode* newNode);
-void List_insertLast(List* list, ListNode* newNode);
-ListNode* List_remove(ListNode* node);
-ListNode* List_findNode(List*, void*);
+List*        List_new();
+ListNode*    List_newNode(void* data);
+void         List_insertAfter(ListNode* node, ListNode* newNode);
+void         List_insertBefore(ListNode* node, ListNode* newNode);
+void         List_insertFirst(List* list, ListNode* newNode);
+void         List_insertLast(List* list, ListNode* newNode);
+ListNode*    List_remove(ListNode* node);
+ListNode*    List_findNode(List*, void*);
 unsigned int List_indexOfData(List*, void*);
 unsigned int List_indexOfNode(ListNode*);
-ListNode* List_getByIndex(List*, unsigned int n);
+ListNode*    List_getByIndex(List*, unsigned int n);
 
 /********************************************************************
  * Robot Configuration Macros                                       *
@@ -436,7 +339,7 @@ ListNode* List_getByIndex(List*, unsigned int n);
     Subsystem* const RobotSubsystems[] = { __VA_ARGS__, NULL };
 
 /********************************************************************
- * Built-in Command & Button Classes                                *
+ * Built-in Generic Command & Button Classes                        *
  ********************************************************************/
 
 // commands //

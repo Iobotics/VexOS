@@ -47,6 +47,7 @@ typedef enum {
     DeviceType_LED,
     // miscellaneous devices //,
     DeviceType_PowerExpander,
+    DeviceType_LCD,
     DeviceType_SerialPort,
     DeviceType_MotorGroup,
     // motors //
@@ -61,6 +62,29 @@ typedef enum {
     DigitalPortMode_Input
 } DigitalPortMode;
 
+/********************************************************************
+ * VEX Cortex Hardware                                              *
+ ********************************************************************/
+
+typedef enum DigitalPort {
+    DigitalPort_1 = 1, DigitalPort_2, DigitalPort_3, DigitalPort_4, DigitalPort_5,
+    DigitalPort_6,     DigitalPort_7, DigitalPort_8, DigitalPort_9, DigitalPort_10,
+    DigitalPort_11,    DigitalPort_12
+} DigitalPort;
+
+typedef enum AnalogPort {
+    AnalogPort_1 = 1, AnalogPort_2, AnalogPort_3, AnalogPort_4, AnalogPort_5,
+    AnalogPort_6,     AnalogPort_7, AnalogPort_8
+} AnalogPort;
+
+typedef enum PWMPort {
+    PWMPort_1 = 1, PWMPort_2, PWMPort_3, PWMPort_4, PWMPort_5,
+    PWMPort_6,     PWMPort_7, PWMPort_8, PWMPort_9, PWMPort_10
+} PWMPort;
+
+typedef enum UARTPort {
+    UARTPort_1 = 1, UARTPort_2
+} UARTPort;
 
 /********************************************************************
  * Public Object Definitions                                        *
@@ -78,6 +102,7 @@ typedef struct Accelerometer Accelerometer;
 typedef struct DigitalOut    DigitalOut;
 typedef struct Speaker       Speaker;
 typedef struct PowerExpander PowerExpander;
+typedef struct LCD           LCD;
 typedef struct SerialPort    SerialPort;
 typedef struct Motor         Motor;
 typedef struct MotorGroup    MotorGroup;
@@ -95,6 +120,7 @@ Device*         Device_getAnalogDevice(AnalogPort);
 Device*         Device_getPWMDevice(PWMPort);
 PowerExpander*  Device_getPWMExpander(PWMPort);
 Device*         Device_getUARTDevice(UARTPort);
+Device*         Device_getByType(DeviceType);
 
 /********************************************************************
  * Public API: DigitalIn                                            *
@@ -267,6 +293,19 @@ AnalogPort        PowerExpander_getStatusPort(PowerExpander*);
 void              PowerExpander_setPWMPorts(PowerExpander*, PWMPort, PWMPort, PWMPort, PWMPort);
 void              PowerExpander_getPWMPorts(PowerExpander*, PWMPort*, PWMPort*, PWMPort*, PWMPort*);
 float             PowerExpander_getBatteryVoltage(PowerExpander*);
+
+/********************************************************************
+ * Public API: LCD                                                  *
+ ********************************************************************/
+
+// note: there are more LCD methods in UserInterface.h //
+LCD*     LCD_new(String, UARTPort);
+LCD*     LCD_delete(LCD*);
+void     LCD_setEnabled(LCD*, bool);
+bool     LCD_isEnabled(LCD*);
+UARTPort LCD_getPort(LCD*);
+void     LCD_setBacklight(LCD*, bool);
+bool     LCD_getBacklight(LCD*);
 
 /********************************************************************
  * Public API: SerialPort                                           *

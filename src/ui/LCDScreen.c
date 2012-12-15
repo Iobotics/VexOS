@@ -23,8 +23,23 @@
 #include "Error.h"
 
 /********************************************************************
+ * Private API                                                      *
+ ********************************************************************/
+
+struct LCDScreen {
+    String             name;
+    LCD*               parent;
+    LCDStatusCallback* statusCallback;
+    LCDDrawCallback*   drawCallback;
+};
+
+/********************************************************************
  * Protected API                                                    *
  ********************************************************************/
+
+void LCDScreen_setLCD(LCDScreen* screen, LCD* lcd) {
+    screen->parent = lcd;
+}
 
 bool LCDScreen_isDisplayed(LCDScreen* screen) {
     if(!screen->drawCallback) return false;
@@ -54,3 +69,16 @@ LCDScreen* LCDScreen_delete(LCDScreen* screen) {
     free(screen);
     return NULL;
 }
+
+String LCDScreen_getName(LCDScreen* screen) {
+    ErrorIf(screen == NULL, VEXOS_ARGNULL);
+
+    return screen->name;
+}
+
+LCD* LCDScreen_getLCD(LCDScreen* screen) {
+    ErrorIf(screen == NULL, VEXOS_ARGNULL);
+
+    return screen->parent;
+}
+

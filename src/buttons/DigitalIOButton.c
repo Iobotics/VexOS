@@ -31,6 +31,7 @@
 //
 
 #include "ButtonClass.h"
+#include "Hardware.h"
 
 /********************************************************************
  * Class Definition                                                 *
