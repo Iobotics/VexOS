@@ -34,7 +34,7 @@
  * Protected API                                                    *
  ********************************************************************/
 
-void Motor_setParent(Motor* motor, MotorGroup* group) {
+void Motor_setGroup(Motor* motor, MotorGroup* group) {
     motor->parent = group;
 }
 
