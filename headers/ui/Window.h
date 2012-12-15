@@ -1,5 +1,5 @@
 //
-//  Dashboard.h
+//  Window.h
 //  VexOS for Vex Cortex
 //
 //  Created by Jeff Malins on 12/06/2012.
@@ -19,8 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#ifndef _Dashboard_h
-#define _Dashboard_h
+#ifndef _Window_h
+#define _Window_h
 
 #include "VexOS.h"
 
@@ -28,7 +28,7 @@
  * Protected API                                                    *
  ********************************************************************/
 
-void Dashboard_update();
-bool Dashboard_restoreEnabled();
+void Window_setDashboard(Window*, Dashboard*);
+void Window_draw(Window*, bool);
 
-#endif // _Dashboard_h
+#endif // _Window_h

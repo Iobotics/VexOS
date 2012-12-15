@@ -165,8 +165,9 @@ void Device_remove(Device* device) {
                 pwmPorts[i].device = NULL;
             }
             break;
-        // serial ports //
+        // serial devices //
         case DeviceType_SerialPort:
+        case DeviceType_LCD:
             for(i = 0; i < UART_PORT_COUNT; i++) {
                 if(uartPorts[i] != device) continue;
                 uartPorts[i] = NULL;
@@ -241,4 +242,27 @@ Device* Device_getUARTDevice(UARTPort port) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
 
     return uartPorts[port];
+}
+
+Device* Device_getByType(DeviceType type) {
+    static ListNode* lastNode = NULL;
+
+    ListNode* node = NULL;
+    if(type) { 
+        // first call //
+        node = devices.firstNode;
+    } else if(lastNode) {
+        // subsequent call //
+        node = lastNode->next;
+    }
+
+    while(node != NULL) {
+        Device* device = node->data;
+        if(device->type == type) {
+            lastNode = node;
+            return device;
+        }
+        node = node->next;
+    }
+    return NULL;
 }

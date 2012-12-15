@@ -32,23 +32,25 @@ TOOLSBIN := $(TOOLS)\arm-gcc\bin
 STEMDIR  := $(TOOLS)\STM32F103VD
 CC := $(TOOLSBIN)\arm-none-eabi-gcc.exe
 AR := $(TOOLSBIN)\arm-none-eabi-ar.exe
-INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)\hardware -I $(STEMDIR)\inc \
-			-I $(TOOLS)\API
+INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)\hardware -I $(INCINTDIR)\ui \
+			-I $(STEMDIR)\inc -I $(TOOLS)\API
 CFLAGS   := -mthumb -D DEBUG -O3 -Wall -c
 
 # objects #
-OS_OBJS  := Button.o Command.o CommandGroup.o  Dashboard.o DebugValue.o Error.o LCD.o \
-			LCDScreen.o List.o PIDController.o PowerScaler.o Scheduler.o Subsystem.o \
-			Timer.o VexOS.o Window.o
+OS_OBJS  := Autonomous.o Battery.o Button.o Command.o CommandGroup.o DebugValue.o Error.o \
+			List.o PIDController.o PowerScaler.o Scheduler.o Subsystem.o Timer.o VexOS.o
 CMD_OBJS := PrintCommand.o StartCommand.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
 BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
-HDW_OBJS := Device.o DigitalIn.o Encoder.o Sonar.o AnalogIn.o Gyro.o Accelerometer.o \
-			DigitalOut.o Motor.o MotorGroup.o Servo.o PowerExpander.o SerialPort.o
-ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS) $(HDW_OBJS)
+HDW_OBJS := Accelerometer.o AnalogIn.o Device.o DigitalIn.o DigitalOut.o Encoder.o Gyro.o \
+			Motor.o MotorGroup.o PowerExpander.o SerialPort.o Servo.o Sonar.o 
+UI_OBJS  := Dashboard.o LCD.o LCDScreen.o Status.o Window.o
+SYS_OBJS := UniDrive.o
+ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS) $(HDW_OBJS) $(UI_OBJS) $(SYS_OBJS)
 
 # make everything to the build directory #
-vpath %.h $(INCPUBDIR);$(INCINTDIR);$(INCINTDIR)/hardware
-vpath %.c $(SRCDIR);$(SRCDIR)/buttons;$(SRCDIR)/commands;$(SRCDIR)/hardware
+vpath %.h $(INCPUBDIR);$(INCINTDIR);$(INCINTDIR)/hardware;$(INCINTDIR)/ui
+vpath %.c $(SRCDIR);$(SRCDIR)/buttons;$(SRCDIR)/commands;$(SRCDIR)/hardware;$(SRCDIR)/ui
+vpath %.c $(SRCDIR)/subsystems
 OBJS := $(addprefix $(OBJDIR)/,$(ALL_OBJS))
 
 # everything is combined into VexOS.lib #
@@ -67,16 +69,16 @@ $(OBJDIR)/Button.o : ButtonClass.h Scheduler.h
 $(OBJDIR)/Command.o : CommandClass.h CommandGroup.h Scheduler.h 
 $(OBJDIR)/CommandGroup.o : Command.h CommandClass.h
 $(OBJDIR)/Dashboard.o : Window.h
-$(OBJDIR)/DebugValue.o : LCD.h LCDScreen.h Window.h
-$(OBJDIR)/Error.o : LCD.h
+$(OBJDIR)/DebugValue.o : LCDScreen.h
 $(OBJDIR)/LCD.o : LCDScreen.h
-$(OBJDIR)/Scheduler.o : Button.h Command.h Subsystem.h Window.h
-$(OBJDIR)/VexOS.o : Dashboard.h Error.h LCD.h Scheduler.h Window.h
+$(OBJDIR)/Scheduler.o : Button.h Command.h Subsystem.h
+$(OBJDIR)/VexOS.o : Error.h Scheduler.h
 $(OBJS) : VexOS.h Error.h
 
 # built-in objects depend on their class headers #
 $(addprefix $(OBJDIR)/,$(BTN_OBJS)) : ButtonClass.h
 $(addprefix $(OBJDIR)/,$(CMD_OBJS)) : CommandClass.h
+$(addprefix $(OBJDIR)/,$(UI_OBJS))  : UserInterface.h
 $(addprefix $(OBJDIR)/,$(HDW_OBJS)) : Device.h Hardware.h
 
 # install into external easyC project directory #

@@ -42,7 +42,8 @@ typedef enum {
     VEXOS_OPINVALID
 } ErrorCode;
 
-void VexOS_failWithError(ErrorCode);
+void   Error_setCode(ErrorCode);
+String Error_getMessage();
 
 #ifdef DEBUG
   /********************************************************************

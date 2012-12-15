@@ -1,5 +1,5 @@
 //
-//  Window.h
+//  LCDScreen.h
 //  VexOS for Vex Cortex
 //
 //  Created by Jeff Malins on 12/06/2012.
@@ -19,39 +19,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#ifndef _Window_h
-#define _Window_h
+#ifndef _LCDScreen_h
+#define _LCDScreen_h
 
-#include "VexOS.h"
-
-/********************************************************************
- * Window Structures                                                *
- ********************************************************************/
-
-typedef struct {
-    unsigned char left, top, right, bottom;
-} Rect;
-
-typedef struct {
-    unsigned char x, y;
-} Point;
-
-struct Window {
-    String              name;
-    char                width;
-    char                height;
-    WindowDrawCallback* drawCallback;
-    // internal state //
-    ListNode*           dashboardNode;
-    Rect                outerRect;
-    Rect                innerRect;
-    Point               position;
-};
+#include "UserInterface.h"
 
 /********************************************************************
  * Protected API                                                    *
  ********************************************************************/
 
-void Window_draw(Window*, bool);
+void LCDScreen_setLCD(LCDScreen*, LCD*);
+bool LCDScreen_isDisplayed(LCDScreen*);
+void LCDScreen_draw(LCDScreen*, LCDButtonType);
 
-#endif // _Window_h
+#endif // _LCDScreen_h

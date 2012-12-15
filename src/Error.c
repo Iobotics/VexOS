@@ -20,11 +20,13 @@
 //
 
 #include "Error.h"
-#include "LCD.h"
+#include "UserInterface.h"
 
 jmp_buf ErrorEvn;
 String  ErrorFunction;
 String  ErrorMessage;
+
+static String errorMsg;
 
 static String getMessage(ErrorCode error) {
     switch(error) {
@@ -37,8 +39,8 @@ static String getMessage(ErrorCode error) {
     }
 }
 
-void VexOS_failWithError(ErrorCode error) {
-    char* msg;
+void Error_setCode(ErrorCode error) {
+    char* msg = (char*) errorMsg;
     if(ErrorFunction) {
         asprintf(&msg, "%s: %s (%s)\n", ErrorFunction, getMessage(error), ErrorMessage);
     } else if(ErrorMessage) {
@@ -46,18 +48,8 @@ void VexOS_failWithError(ErrorCode error) {
     } else {
         asprintf(&msg, "ERROR: %s", getMessage(error));
     }
-    // print to terminal //
-    Info(msg);
-    // if LCD is enabled, display the error //
-    if(LCD_isEnabled()) {
-        LCD_setText(1, LCDTextOptions_Centered, "ERROR");
-        LCD_setText(2, LCDTextOptions_None, msg);
-    }
-    // if Dashboard is enabled, display the error //
-    if(Dashboard_isEnabled()) {
-        ResetGD();
-        PrintFrameToGD(1, 1, 29, 78, Color_DarkRed);
-        PrintTextToGD(2, 3, Color_DarkRed, msg);
-    }
-    while(true) Wait(1000);
+}
+
+String Error_getMessage() {
+    return errorMsg;
 }

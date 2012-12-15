@@ -19,9 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#include "LCD.h"
-#include "LCDScreen.h"
-#include "Window.h"
+#include "Hardware.h"
+#include "UserInterface.h"
 #include "Error.h"
 
 /********************************************************************
@@ -44,10 +43,7 @@ struct DebugValue {
 #define CHANGE_PERIOD 1000
 
 static ListNode* currentValue;
-extern List DebugValues;
-
-static Window* debugWindow;
-static LCDScreen* debugLCDScreen;
+static List debugValues;
 
 static void setCurrentValue(ListNode* node) {
     currentValue = node;
@@ -58,7 +54,7 @@ static void setCurrentValue(ListNode* node) {
 static bool restoreCurrentValue() {
     unsigned int n = (unsigned int) GlobalData(GLOBALDATA_DEBUG_VALUE);
     if(n > 0) {
-        setCurrentValue(List_getByIndex(&DebugValues, n - 1));
+        setCurrentValue(List_getByIndex(&debugValues, n - 1));
         return true;
     }
     return false;
@@ -67,18 +63,19 @@ static bool restoreCurrentValue() {
 static void updateWindow(Window* win, bool full) {
     static unsigned long lastTime;
     static unsigned int  lastCount;
-    unsigned char left = win->innerRect.left;
-    unsigned char top  = win->innerRect.top;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left = innerRect.left;
+    unsigned char top  = innerRect.top;
     
     // if a value was removed, we need to clear and repaint //
-    if(DebugValues.nodeCount < lastCount || full) {
-        ClearGD(top, left, win->innerRect.bottom, win->innerRect.right, false);
+    if(debugValues.nodeCount < lastCount || full) {
+        ClearGD(top, left, innerRect.bottom, innerRect.right, false);
         lastTime = 0; // repaint all //
     }
     
     // get the length of the title //
     size_t length = 0;
-    ListNode* node = DebugValues.firstNode;
+    ListNode* node = debugValues.firstNode;
     while(node != NULL) {
         DebugValue* value = (DebugValue*) node->data;
         size_t nlength = strlen(value->name);
@@ -90,7 +87,7 @@ static void updateWindow(Window* win, bool full) {
     // print the values //
     unsigned long time = GetMsClock();
     int line = top;
-    node = DebugValues.firstNode;
+    node = debugValues.firstNode;
     while(node != NULL) {
         DebugValue* value = node->data;
         // check if value has changed since last update //
@@ -104,11 +101,11 @@ static void updateWindow(Window* win, bool full) {
         node = node->next;
     }
     lastTime  = time;
-    lastCount = DebugValues.nodeCount;
+    lastCount = debugValues.nodeCount;
 }
 
 static bool getLCDStatus(LCDScreen* screen) {
-    return DebugValues.nodeCount > 0;
+    return debugValues.nodeCount > 0;
 }
 
 static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
@@ -121,7 +118,7 @@ static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
     
     // try to default first value //
     if(currentValue == NULL) {
-        setCurrentValue(DebugValues.firstNode);
+        setCurrentValue(debugValues.firstNode);
     }
     
     // move the selection //
@@ -136,19 +133,15 @@ static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
     }
     
     // print the value and name to the LCD //
+    LCD* lcd = LCDScreen_getLCD(screen);
+
     DebugValue* value = (DebugValue*) currentValue->data;
     LCDTextOptions opts  = LCDTextOptions_Centered;
-    LCD_setText(1, opts, value->name);
+    LCD_setText(lcd, 1, opts, value->name);
     if(currentValue->next != NULL) opts |= LCDTextOptions_RightArrow;
     if(currentValue->prev != NULL) opts |= LCDTextOptions_LeftArrow;
-    LCD_setText(2, opts, (value->valueString)? value->valueString: "(null)");
+    LCD_setText(lcd, 2, opts, (value->valueString)? value->valueString: "(null)");
 }
-
-/********************************************************************
- * Protected API                                                    *
- ********************************************************************/
-
-List DebugValues;
 
 /********************************************************************
  * Public API                                                       *
@@ -181,14 +174,14 @@ DebugValue* DebugValue_newWithFormat(String name, DebugValueType type, String fo
             break;
     }
     value->valueString = NULL;
-    List_insertLast(&DebugValues, List_newNode(value));
+    List_insertLast(&debugValues, List_newNode(value));
     return value;
 }
 
 DebugValue* DebugValue_delete(DebugValue* value) {
     ErrorIf(value == NULL, VEXOS_ARGNULL);
     
-    ListNode* node = List_findNode(&DebugValues, value);
+    ListNode* node = List_findNode(&debugValues, value);
     if(node == NULL) return value;
     if(currentValue == node) setCurrentValue(NULL);
     List_remove(node);
@@ -227,12 +220,21 @@ void DebugValue_set(DebugValue* value, ...) {
     }
 }
 
+/********************************************************************
+ * Public API (UI Hooks)                                            *
+ ********************************************************************/
+
 Window* DebugValue_getWindow() {
-    if(debugWindow) return debugWindow;
-    return (debugWindow = Window_new(27, 15, "Debug Values", &updateWindow));
+    static Window* window = NULL;
+    if(window) return window;
+    window = Window_new("Debug Values", &updateWindow);
+    Window_setSize(window, 27, 15);
+    return window;
 }
 
 LCDScreen* DebugValue_getLCDScreen() {
-    if(debugLCDScreen) return debugLCDScreen;
-    return (debugLCDScreen = LCDScreen_new("Debug Values", &drawLCDScreen, &getLCDStatus));
+    static LCDScreen* screen = NULL;
+    if(screen) return screen;
+    screen = LCDScreen_new("Debug Values", &drawLCDScreen, &getLCDStatus);
+    return screen;
 }
