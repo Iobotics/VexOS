@@ -23,7 +23,7 @@ double getTimeMs() {
 }
 
 int main(int argc, const char* argv[]) {
-    GlobalData(GLOBALDATA_AUTO_PROGRAM) = 0;
+    GlobalData(GLOBALDATA_AUTO_PROGRAM) = 2;
     GlobalData(GLOBALDATA_DASH_NUMBER)  = 1;
     
     printf("Hello, World!\n");
