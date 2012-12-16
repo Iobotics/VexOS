@@ -144,6 +144,8 @@
 		13D6F9BE167D2D7B0076213A /* sys_Intake.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sys_Intake.c; sourceTree = "<group>"; };
 		13D6F9BF167D2D7B0076213A /* sys_Lift.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sys_Lift.c; sourceTree = "<group>"; };
 		13D6F9C0167D2D7B0076213A /* sys_Pivot.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sys_Pivot.c; sourceTree = "<group>"; };
+		13D6F9CC167D831D0076213A /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
+		13D6F9CD167D831D0076213A /* UserInclude.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserInclude.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -342,6 +344,8 @@
 				13D6F9BE167D2D7B0076213A /* sys_Intake.c */,
 				13D6F9BF167D2D7B0076213A /* sys_Lift.c */,
 				13D6F9C0167D2D7B0076213A /* sys_Pivot.c */,
+				13D6F9CD167D831D0076213A /* UserInclude.h */,
+				13D6F9CC167D831D0076213A /* ReadMe.txt */,
 			);
 			path = example;
 			sourceTree = "<group>";
