@@ -132,9 +132,9 @@ typedef enum {
     InterruptMode_FallingEdge
 } InterruptMode;
 
-DigitalIn*    DigitalIn_createBump(String, DigitalPort);
-DigitalIn*    DigitalIn_createLimit(String, DigitalPort);
-DigitalIn*    DigitalIn_createJumper(String, DigitalPort);
+DigitalIn*    DigitalIn_newBump(String, DigitalPort);
+DigitalIn*    DigitalIn_newLimit(String, DigitalPort);
+DigitalIn*    DigitalIn_newJumper(String, DigitalPort);
 DigitalIn*    DigitalIn_delete(DigitalIn*);
 DigitalPort   DigitalIn_getPort(DigitalIn*);
 bool          DigitalIn_get(DigitalIn*);
@@ -150,12 +150,12 @@ Button*       DigitalIn_getButton(DigitalIn*);
 #define TicksPerRev_QUAD_ENCODER    360.0
 #define TicksPerRev_OLD_ENCODER     100.0
 
-Encoder*    Encoder_createQuadrature(String, DigitalPort, DigitalPort, bool);
-Encoder*    Encoder_create(String, DigitalPort);
+Encoder*    Encoder_newQuadrature(String, DigitalPort, DigitalPort, bool);
+Encoder*    Encoder_new(String, DigitalPort);
 Encoder*    Encoder_delete(Encoder*);
 DigitalPort Encoder_getPort(Encoder*);
 DigitalPort Encoder_getPort2(Encoder*);
-bool        Encoder_getEnabled(Encoder*);
+bool        Encoder_isEnabled(Encoder*);
 void        Encoder_setEnabled(Encoder*, bool);
 long        Encoder_get(Encoder*);
 void        Encoder_set(Encoder*, long);
@@ -168,7 +168,7 @@ Sonar* Sonar_new(String, DigitalPort, DigitalPort);
 Sonar* Sonar_delete(Sonar*);
 DigitalPort Sonar_getInputPort(Sonar*);
 DigitalPort Sonar_getOutputPort(Sonar*);
-bool   Sonar_getEnabled(Sonar*);
+bool   Sonar_isEnabled(Sonar*);
 void   Sonar_setEnabled(Sonar*, bool);
 int    Sonar_getDistanceInches(Sonar*);
 float  Sonar_getDistanceCentimeters(Sonar*);
@@ -177,9 +177,9 @@ float  Sonar_getDistanceCentimeters(Sonar*);
  * Public API: AnalogIn                                             *
  ********************************************************************/
 
-AnalogIn*  AnalogIn_createPotentiometer(String, AnalogPort);
-AnalogIn*  AnalogIn_createLineFollower(String, AnalogPort);
-AnalogIn*  AnalogIn_createLightSensor(String, AnalogPort);
+AnalogIn*  AnalogIn_newPotentiometer(String, AnalogPort);
+AnalogIn*  AnalogIn_newLineFollower(String, AnalogPort);
+AnalogIn*  AnalogIn_newLightSensor(String, AnalogPort);
 AnalogIn*  AnalogIn_delete(AnalogIn*);
 AnalogPort AnalogIn_getPort(AnalogIn*);
 int        AnalogIn_get(AnalogIn*);
@@ -194,7 +194,7 @@ Gyro*      Gyro_new(String, AnalogPort);
 Gyro*      Gyro_delete(Gyro*);
 AnalogPort Gyro_getPort(Gyro*);
 void       Gyro_init(Gyro*);
-bool       Gyro_getEnabled(Gyro*);
+bool       Gyro_isEnabled(Gyro*);
 void       Gyro_setEnabled(Gyro*, bool);
 int        Gyro_getDeadband(Gyro*);
 void       Gyro_setDeadband(Gyro*, int);
@@ -208,7 +208,7 @@ Accelerometer* Accelerometer_new(String, AnalogPort);
 Accelerometer* Accelerometer_delete(Accelerometer*);
 AnalogPort     Accelerometer_getPort(Accelerometer*);
 void           Accelerometer_init(Accelerometer*);
-bool           Accelerometer_getEnabled(Accelerometer*);
+bool           Accelerometer_isEnabled(Accelerometer*);
 void           Accelerometer_setEnabled(Accelerometer*, bool);
 float          Accelerometer_getAccelerationG(Accelerometer*);
 
@@ -216,8 +216,8 @@ float          Accelerometer_getAccelerationG(Accelerometer*);
  * Public API: DigitalOut                                           *
  ********************************************************************/
 
-DigitalOut* DigitalOut_createPneumaticValve(String, DigitalPort);
-DigitalOut* DigitalOut_createLED(String, DigitalPort);
+DigitalOut* DigitalOut_newPneumaticValve(String, DigitalPort);
+DigitalOut* DigitalOut_newLED(String, DigitalPort);
 DigitalOut* DigitalOut_delete(DigitalOut*);
 DigitalPort DigitalOut_getPort(DigitalOut*);
 bool        DigitalOut_get(DigitalOut*);
@@ -272,10 +272,11 @@ void        MotorGroup_set(MotorGroup*, Power);
 
 #define SERVO_TRAVEL_DEGREES 100
 
-Servo* Servo_new(String, PWMPort);
-Servo* Servo_delete(Servo*);
-float  Servo_getAngleDegrees(Servo*);
-void   Servo_setAngleDegrees(Servo*, float);
+Servo*  Servo_new(String, PWMPort);
+Servo*  Servo_delete(Servo*);
+PWMPort Servo_getPort(Servo*);
+float   Servo_getAngleDegrees(Servo*);
+void    Servo_setAngleDegrees(Servo*, float);
 
 /********************************************************************
  * Public API: PowerExpander                                        *
@@ -301,8 +302,6 @@ float             PowerExpander_getBatteryVoltage(PowerExpander*);
 // note: there are more LCD methods in UserInterface.h //
 LCD*     LCD_new(String, UARTPort);
 LCD*     LCD_delete(LCD*);
-void     LCD_setEnabled(LCD*, bool);
-bool     LCD_isEnabled(LCD*);
 UARTPort LCD_getPort(LCD*);
 void     LCD_setBacklight(LCD*, bool);
 bool     LCD_getBacklight(LCD*);
@@ -357,11 +356,11 @@ typedef struct {
     SerialMode        mode;
 } SerialOptions;
 
-SerialPort*   SerialPort_create(String, UARTPort);
+SerialPort*   SerialPort_new(String, UARTPort);
 void          SerialPort_open(SerialPort*, BaudRate);
 void          SerialPort_openWithOptions(SerialPort*, BaudRate, SerialOptions);
 BaudRate      SerialPort_getBaudRate(SerialPort*);
-const SerialOptions* SerialPort_getOptions(SerialPort*);
+SerialOptions SerialPort_getOptions(SerialPort*);
 unsigned char SerialPort_getByteCount(SerialPort*);
 unsigned char SerialPort_readByte(SerialPort*);
 void          SerialPort_writeByte(SerialPort*, unsigned char byte);

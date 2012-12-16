@@ -1,8 +1,8 @@
 //
-//  CommandGroup.h
+//  ButtonClass.c
 //  VexOS for Vex Cortex
 //
-//  Created by Jeff Malins on 12/08/2012.
+//  Created by Jeff Malins on 12/16/2012.
 //  Copyright (c) 2012 Jeff Malins. All rights reserved.
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -19,32 +19,22 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#ifndef _CommandGroup_h
-#define _CommandGroup_h
-
-#include "VexOS.h"
+#include "ButtonClass.h"
+#include "Error.h"
 
 /********************************************************************
- * Protected API                                                    *
+ * Public API                                                       *
  ********************************************************************/
 
-// group entry type code //
-typedef enum {
-    GroupEntryState_InSequence,
-    GroupEntryState_BranchPeer,
-    GroupEntryState_BranchChild
-} GroupEntryState;
+String ButtonClass_getName(ButtonClass* class) {
+    ErrorIf(class == NULL, VEXOS_ARGNULL);
+    
+    return class->name;
+}
 
-// group entry structure //
-typedef struct GroupEntry GroupEntry;
-struct GroupEntry {
-    Command*        command;
-    GroupEntryState state;
-    unsigned long   timeout;
-};
+bool ButtonClass_isInitialized(ButtonClass* class) {
+    ErrorIf(class == NULL, VEXOS_ARGNULL);
 
-bool        CommandGroup_isInterruptible(Command*);
-Command*    CommandGroup_getCurrentCommand(Command*);
-const List* CommandGroup_getChildList(Command*);
+    return class->initialized;
+}
 
-#endif

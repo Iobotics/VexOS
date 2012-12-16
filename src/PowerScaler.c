@@ -44,13 +44,35 @@ PowerScaler* PowerScaler_new(const char* name) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
     
     PowerScaler* scale = malloc(sizeof(PowerScaler));
-    scale->name             = name;
-    scale->points.nodeCount = 0;
-    scale->points.firstNode = NULL;
-    scale->points.lastNode  = NULL;
+    scale->name = name;
+    memset(&scale->points, 0, sizeof(List));
+
+    // add the terminal points //
     PowerScaler_addPoint(scale, 0.0, 0.0);
     PowerScaler_addPoint(scale, 1.0, 1.0);
     return scale;
+}
+
+PowerScaler* PowerScaler_delete(PowerScaler* scale) {
+    if(scale) {
+        ListNode* node = scale->points.firstNode;
+        ListNode* temp = NULL;
+        while(node != NULL) {
+            temp = node->next;
+            ScalePoint* point = node->data;
+            free(point);
+            free(node);
+            node = temp;
+        }
+        free(scale);
+    }
+    return NULL;
+}
+
+String PowerScaler_getName(PowerScaler* scale) {
+    ErrorIf(scale == NULL, VEXOS_ARGNULL);
+
+    return scale->name;
 }
 
 void PowerScaler_addPoint(PowerScaler* scale, Power input, Power output) {

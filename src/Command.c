@@ -247,6 +247,12 @@ String Command_getName(Command* cmd) {
     return cmd->name;
 }
 
+CommandClass* Command_getClass(Command* cmd) {
+    ErrorIf(cmd == NULL, VEXOS_ARGNULL);
+    
+    return (CommandClass*) cmd->class;
+}
+
 Command* Command_getParent(Command* cmd) {
     ErrorIf(cmd == NULL, VEXOS_ARGNULL);
     
@@ -269,7 +275,7 @@ bool Command_isInterruptible(Command* cmd) {
     return cmd->interruptible;
 }
 
-bool Command_getRunWhenDisabled(Command* cmd) {
+bool Command_runWhenDisabled(Command* cmd) {
     ErrorIf(cmd == NULL, VEXOS_ARGNULL);
     
     return cmd->runWhenDisabled;

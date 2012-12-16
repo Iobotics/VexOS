@@ -52,7 +52,12 @@ Timer* Timer_new(String name, TimerId timerId) {
 }
 
 Timer* Timer_delete(Timer* timer) {
-    free(timer);
+    if(timer) {
+        if(timer->enabled) {
+            StopTimer(timer->id);
+        }
+        free(timer);
+    }
     return NULL;
 }
 
@@ -62,7 +67,7 @@ String Timer_getName(Timer* timer) {
     return timer->name;
 }
 
-bool Timer_getEnabled(Timer* timer) {
+bool Timer_isEnabled(Timer* timer) {
     ErrorIf(timer == NULL, VEXOS_ARGNULL);
 
     return timer->enabled;
@@ -81,10 +86,12 @@ void Timer_setEnabled(Timer* timer, bool value) {
 
 void Timer_preset(Timer* timer, unsigned long value) {
     ErrorIf(timer == NULL, VEXOS_ARGNULL);
+    
     PresetTimer(timer->id, value);
 }
 
 unsigned long Timer_get(Timer* timer) {
     ErrorIf(timer == NULL, VEXOS_ARGNULL);
+
     return GetTimer(timer->id);
 }

@@ -62,8 +62,7 @@ typedef struct {
     List* list;
 } ToggleGroup;
 
-static int lastObjectId = 0;
-
+static int  lastObjectId = 0;
 static List toggleGroups;
 
 static ToggleGroup* findToggleGroup(Button* button) {
@@ -276,6 +275,12 @@ String Button_getName(Button* button) {
         asprintf((char**) &button->name, "%s[%d]", button->class->name, button->instanceId);
     }
     return button->name;
+}
+
+ButtonClass* Button_getClass(Button* button) {
+    ErrorIf(button == NULL, VEXOS_ARGNULL);
+    
+    return (ButtonClass*) button->class;
 }
 
 bool Button_get(Button* button) {

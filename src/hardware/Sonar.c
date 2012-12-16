@@ -42,7 +42,7 @@ struct Sonar {
  * Public API                                                       *
  ********************************************************************/
 
-Sonar* Sonar_create(String name, DigitalPort inputPort, DigitalPort outputPort) {
+Sonar* Sonar_new(String name, DigitalPort inputPort, DigitalPort outputPort) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Sonar* ret = malloc(sizeof(Sonar));
@@ -76,7 +76,7 @@ DigitalPort Sonar_getOutputPort(Sonar* sonar) {
     return sonar->outputPort;
 }
 
-bool Sonar_getEnabled(Sonar* sonar) {
+bool Sonar_isEnabled(Sonar* sonar) {
     ErrorIf(sonar == NULL, VEXOS_ARGNULL);
 
     return sonar->enabled;

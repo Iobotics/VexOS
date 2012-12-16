@@ -51,21 +51,21 @@ static AnalogIn* new(String name, DeviceType type, AnalogPort port) {
  * Public API                                                       *
  ********************************************************************/
 
-AnalogIn* AnalogIn_createPotentiometer(String name, AnalogPort port) {
+AnalogIn* AnalogIn_newPotentiometer(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_Potentiometer, port);
     ErrorEntryClear();
     return in;
 }
 
-AnalogIn* AnalogIn_createLineFollower(String name, AnalogPort port) {
+AnalogIn* AnalogIn_newLineFollower(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_LineFollower, port);
     ErrorEntryClear();
     return in;
 }
 
-AnalogIn* AnalogIn_createLightSensor(String name, AnalogPort port) {
+AnalogIn* AnalogIn_newLightSensor(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_LightSensor, port);
     ErrorEntryClear();

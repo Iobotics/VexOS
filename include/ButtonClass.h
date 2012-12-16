@@ -67,7 +67,7 @@ struct Button {
         .constructor = &constructor, \
         .get         = &get \
     }; \
-    void Button_setvName(Button*, String, ...); \
+    void Button_setvName(Button*, String, va_list); \
     static void setName(String fmt, ...) { \
         va_list argp; \
         va_start(argp, fmt); \

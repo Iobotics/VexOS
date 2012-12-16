@@ -80,16 +80,20 @@ typedef enum {
  * Public Object Definitions                                        *
  ********************************************************************/
 
+// main objects //
 typedef struct Subsystem     Subsystem;
 typedef struct CommandClass  CommandClass;
 typedef struct Command       Command;
 typedef struct ButtonClass   ButtonClass;
 typedef struct Button        Button;
+
+// utility objects //
 typedef struct PowerScaler   PowerScaler;
 typedef struct DebugValue    DebugValue;
 typedef struct PIDController PIDController;
 typedef struct Timer         Timer;
 
+// scalar types //
 typedef const char* String;
 typedef float       Power;
 
@@ -104,6 +108,8 @@ typedef enum {
     RunMode_Operator
 } RunMode;
 
+#define EVENT_COUNT     8
+
 typedef enum {
     EventType_DisabledStart,
     EventType_DisabledPeriodic,
@@ -117,15 +123,20 @@ typedef enum {
 
 typedef void (EventHandler)(EventType, void*);
 
+// main system functions //
 RunMode       VexOS_getRunMode();
 unsigned long VexOS_getRunTime();
 double        VexOS_getLoopFrequency();
 String        VexOS_getProgramName();
 void          VexOS_setProgramName(String);
-bool          VexOS_addEventHandler(EventType, EventHandler*, void*);
-bool          VexOS_removeEventHandler(EventType, EventHandler*);
-bool          VexOS_hasEventHandler(EventType, EventHandler*);
-void          VexOS_setupStandardUI();
+
+// event handling //
+bool VexOS_addEventHandler(EventType, EventHandler*, void*);
+bool VexOS_removeEventHandler(EventType, EventHandler*);
+bool VexOS_hasEventHandler(EventType, EventHandler*);
+
+// standard user interface setup //
+void VexOS_setupStandardUI();
 
 /********************************************************************
  * Public API: Autonomous                                           *
@@ -142,7 +153,7 @@ void         Autonomous_setSelectedProgramByNumber(unsigned int n);
 bool         Autonomous_restoreLastProgram();
 
 /********************************************************************
- * Public API: Autonomous                                           *
+ * Public API: Battery                                              *
  ********************************************************************/
 
 #define BatteryThreshold_MAIN_G     7.5
@@ -182,7 +193,7 @@ CommandClass* Command_getClass(Command*);
 Command*      Command_getParent(Command*);
 CommandStatus Command_getStatus(Command*);
 bool          Command_isInterruptible(Command*);
-bool          Command_getRunWhenDisabled(Command*);
+bool          Command_runWhenDisabled(Command*);
 void          Command_setRunWhenDisabled(Command*, bool);
 bool          Command_doesRequireSubsystem(Command*, Subsystem*);
 unsigned long Command_timeSinceInitialized(Command*);
@@ -207,22 +218,23 @@ bool   ButtonClass_isInitialized(ButtonClass*);
  * Public API: Button                                               *
  ********************************************************************/
 
-Button* Button_new(ButtonClass*, ...);
-Button* Button_delete(Button*);
-String  Button_getName(Button*);
-bool    Button_get(Button*);
-void    Button_whenPressed(Button*, Command*);
-void    Button_whileHeld(Button*, Command*);
-void    Button_whenReleased(Button*, Command*);
-void    Button_whileToggled(Button*, Command*);
-int     Button_getToggleGroup(Button*);
-void    Button_setToggleGroup(Button*, int);
+Button*      Button_new(ButtonClass*, ...);
+Button*      Button_delete(Button*);
+String       Button_getName(Button*);
+ButtonClass* Button_getClass(Button*);
+bool         Button_get(Button*);
+void         Button_whenPressed(Button*, Command*);
+void         Button_whileHeld(Button*, Command*);
+void         Button_whenReleased(Button*, Command*);
+void         Button_whileToggled(Button*, Command*);
+int          Button_getToggleGroup(Button*);
+void         Button_setToggleGroup(Button*, int);
 
 /********************************************************************
  * Public API: InternalButton                                       *
  ********************************************************************/
 
-void InternalButton_set(Button*, bool value);
+void InternalButton_set(Button*, bool);
 
 /********************************************************************
  * Public API: Subsystem                                            *
@@ -256,10 +268,8 @@ typedef enum {
 } DebugValueType;
 
 DebugValue* DebugValue_new(String, DebugValueType);
-DebugValue* DebugValue_delete(DebugValue*);
 DebugValue* DebugValue_newWithFormat(String, DebugValueType, String);
 DebugValue* DebugValue_delete(DebugValue*);
-void        DebugValue_unregister(DebugValue*);
 void        DebugValue_set(DebugValue*, ...);
 
 /********************************************************************
@@ -304,7 +314,7 @@ typedef enum {
 Timer*        Timer_new(String, TimerId);
 Timer*        Timer_delete(Timer*);
 String        Timer_getName(Timer*);
-bool          Timer_getEnabled(Timer*);
+bool          Timer_isEnabled(Timer*);
 void          Timer_setEnabled(Timer*, bool);
 void          Timer_preset(Timer*, unsigned long);
 unsigned long Timer_get(Timer*);
@@ -336,8 +346,8 @@ void         List_insertFirst(List* list, ListNode* newNode);
 void         List_insertLast(List* list, ListNode* newNode);
 ListNode*    List_remove(ListNode* node);
 ListNode*    List_findNode(List*, void*);
-unsigned int List_indexOfData(List*, void*);
 unsigned int List_indexOfNode(ListNode*);
+unsigned int List_indexOfData(List*, void*);
 ListNode*    List_getNodeByIndex(List*, unsigned int n);
 void*        List_getDataByIndex(List*, unsigned int n);
 

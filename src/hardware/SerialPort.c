@@ -43,7 +43,7 @@ struct SerialPort {
  * Public API                                                       *
  ********************************************************************/
 
-SerialPort* SerialPort_create(String name, UARTPort port) {
+SerialPort* SerialPort_new(String name, UARTPort port) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     SerialPort* ret = malloc(sizeof(SerialPort));
@@ -96,12 +96,12 @@ BaudRate SerialPort_getBaudRate(SerialPort* serial) {
     return serial->baudRate;
 }
 
-const SerialOptions* SerialPort_getOptions(SerialPort* serial) {
+SerialOptions SerialPort_getOptions(SerialPort* serial) {
     ErrorIf(serial == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(!serial->hasOptions, VEXOS_OPINVALID, 
                "Serial port not opened with options: %s", serial->name); 
 
-    return &serial->options;
+    return serial->options;
 }
 
 unsigned char SerialPort_getByteCount(SerialPort* serial) {

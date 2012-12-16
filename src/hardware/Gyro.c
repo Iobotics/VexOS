@@ -44,7 +44,7 @@ struct Gyro {
  * Public API                                                       *
  ********************************************************************/
 
-Gyro* Gyro_create(String name, AnalogPort port) {
+Gyro* Gyro_new(String name, AnalogPort port) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Gyro* ret = malloc(sizeof(Gyro));
@@ -78,7 +78,7 @@ void Gyro_init(Gyro* gyro) {
     InitGyro(gyro->port);
 }
 
-bool Gyro_getEnabled(Gyro* gyro) {
+bool Gyro_isEnabled(Gyro* gyro) {
     ErrorIf(gyro == NULL, VEXOS_ARGNULL);
 
     return gyro->enabled;

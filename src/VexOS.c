@@ -28,10 +28,9 @@
  ********************************************************************/
 
 // internal headers //
-void Subsystem_initialize();
+extern void Subsystem_initialize();
 
 // event handling //
-#define EVENT_COUNT     8
 static List* events[EVENT_COUNT];
 
 typedef struct {
@@ -47,7 +46,7 @@ static unsigned long loopTime;
 static unsigned int  loopCount;
 
 // program name //
-static const char* programName;
+static String programName;
 
 /********************************************************************
  * Private API: Run Loops                                           *
@@ -119,6 +118,7 @@ static void executeLoop(RunMode mode) {
             fireEvent(periodic);
         }
     } else {
+        // error handling trap //
         Error_setCode(err);
         Info(Error_getMessage());
         fireEvent(EventType_SystemError);
@@ -142,12 +142,12 @@ double VexOS_getLoopFrequency() {
     return (1000.0 * LOOP_SAMPLE / loopTime);
 }
 
-void VexOS_setProgramName(const char* name) {
-    programName = name;
+String VexOS_getProgramName() {
+    return programName;
 }
 
-const char* VexOS_getProgramName() {
-    return programName;
+void VexOS_setProgramName(String name) {
+    programName = name;
 }
 
 bool VexOS_addEventHandler(EventType type, EventHandler* handler, void* state) {

@@ -116,4 +116,5 @@ void MotorGroup_set(MotorGroup* group, Power power) {
         Motor_set(node->data, power); 
         node = node->next;
     }
+    group->power = power;
 }

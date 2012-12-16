@@ -262,7 +262,7 @@ Command* CommandGroup_getCurrentCommand(Command* group) {
     return (node)? ((GroupEntry*) node->data)->command: NULL;
 }
 
-List* CommandGroup_getChildList(Command* group) {
+const List* CommandGroup_getChildList(Command* group) {
     return &group->fields->children;
 }
 

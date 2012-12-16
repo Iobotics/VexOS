@@ -43,7 +43,7 @@ struct Encoder {
  * Public API                                                       *
  ********************************************************************/
 
-Encoder* Encoder_createQuadrature(String name, DigitalPort portA, DigitalPort portB, bool reverse) {
+Encoder* Encoder_newQuadrature(String name, DigitalPort portA, DigitalPort portB, bool reverse) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
     
     Encoder* ret = malloc(sizeof(Encoder));
@@ -58,7 +58,7 @@ Encoder* Encoder_createQuadrature(String name, DigitalPort portA, DigitalPort po
     return ret;
 }
 
-Encoder* Encoder_create(String name, DigitalPort port) {
+Encoder* Encoder_new(String name, DigitalPort port) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Encoder* ret = malloc(sizeof(Encoder));
@@ -91,7 +91,7 @@ DigitalPort Encoder_getPort2(Encoder* encoder) {
     return encoder->portB;
 }
 
-bool Encoder_getEnabled(Encoder* encoder) {
+bool Encoder_isEnabled(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
 
     return encoder->enabled;

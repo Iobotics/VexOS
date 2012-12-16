@@ -164,19 +164,6 @@ ListNode* List_findNode(List* list, void* data) {
     return NULL;
 }
 
-unsigned int List_indexOfData(List* list, void* data) {
-    ErrorIf(list == NULL, VEXOS_ARGNULL);
-    
-    ListNode* node = list->firstNode;
-    unsigned int i = 0;
-    while(node != NULL) {
-        if(node->data == data) return i;
-        i++;
-        node = node->next;
-    }
-    return -1;
-}
-
 unsigned int List_indexOfNode(ListNode* node) {
     ErrorIf(node == NULL, VEXOS_ARGNULL);
     
@@ -187,6 +174,19 @@ unsigned int List_indexOfNode(ListNode* node) {
         if(xnode == node) return i;
         i++;
         xnode = xnode->next;
+    }
+    return -1;
+}
+
+unsigned int List_indexOfData(List* list, void* data) {
+    ErrorIf(list == NULL, VEXOS_ARGNULL);
+    
+    ListNode* node = list->firstNode;
+    unsigned int i = 0;
+    while(node != NULL) {
+        if(node->data == data) return i;
+        i++;
+        node = node->next;
     }
     return -1;
 }

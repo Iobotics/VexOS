@@ -52,14 +52,14 @@ static DigitalOut* new(String name, DeviceType type, DigitalPort port) {
  * Public API                                                       *
  ********************************************************************/
 
-DigitalOut* DigitalOut_createPneumaticValve(String name, DigitalPort port) {
+DigitalOut* DigitalOut_newPneumaticValve(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalOut* out = new(name, DeviceType_PneumaticValve, port);
     ErrorEntryClear();
     return out;
 }
 
-DigitalOut* DigitalOut_createLED(String name, DigitalPort port) {
+DigitalOut* DigitalOut_newLED(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalOut* out = new(name, DeviceType_LED, port);
     ErrorEntryClear();

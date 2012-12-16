@@ -68,16 +68,16 @@ PowerExpander* PowerExpander_delete(PowerExpander* expand) {
     return NULL;
 }
 
-AnalogPort PowerExpander_getStatusPort(PowerExpander* expand) {
-    ErrorIf(expand == NULL, VEXOS_ARGNULL);
-
-    return expand->statusPort;
-}
-
 PowerExpanderType PowerExpander_getType(PowerExpander* expand) {
     ErrorIf(expand == NULL, VEXOS_ARGNULL);
     
     return expand->expandType;
+}
+
+AnalogPort PowerExpander_getStatusPort(PowerExpander* expand) {
+    ErrorIf(expand == NULL, VEXOS_ARGNULL);
+
+    return expand->statusPort;
 }
 
 void PowerExpander_setPWMPorts(PowerExpander* expand, PWMPort port1, PWMPort port2, 

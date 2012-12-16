@@ -41,7 +41,7 @@ struct Accelerometer {
  * Public API                                                       *
  ********************************************************************/
 
-Accelerometer* Accelerometer_create(String name, AnalogPort port) {
+Accelerometer* Accelerometer_new(String name, AnalogPort port) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Accelerometer* ret = malloc(sizeof(Accelerometer));
@@ -73,7 +73,7 @@ void Accelerometer_init(Accelerometer* accel) {
     InitAccelerometer(accel->port);
 }
 
-bool Accelerometer_getEnabled(Accelerometer* accel) {
+bool Accelerometer_isEnabled(Accelerometer* accel) {
     ErrorIf(accel == NULL, VEXOS_ARGNULL);
 
     return accel->enabled;

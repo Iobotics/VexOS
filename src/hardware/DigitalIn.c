@@ -55,21 +55,21 @@ static DigitalIn* new(String name, DeviceType type, DigitalPort port) {
  * Public API                                                       *
  ********************************************************************/
 
-DigitalIn* DigitalIn_createBump(String name, DigitalPort port) {
+DigitalIn* DigitalIn_newBump(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_BumpSwitch, port);
     ErrorEntryClear();
     return in;
 }
 
-DigitalIn* DigitalIn_createLimit(String name, DigitalPort port) {
+DigitalIn* DigitalIn_newLimit(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_LimitSwitch, port);
     ErrorEntryClear();
     return in;
 }
 
-DigitalIn* DigitalIn_createJumper(String name, DigitalPort port) {
+DigitalIn* DigitalIn_newJumper(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_Jumper, port);
     ErrorEntryClear();
@@ -94,13 +94,6 @@ bool DigitalIn_get(DigitalIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
 
     return GetDigitalInput(in->port);
-}
-
-Button* DigitalIn_getButton(DigitalIn* in) {
-    ErrorIf(in == NULL, VEXOS_ARGNULL);
-
-    if(in->button) return in->button;
-    return (in->button = Button_new(&DigitalIOButton, in->port));
 }
 
 InterruptMode DigitalIn_getInterruptMode(DigitalIn* in) {
@@ -130,4 +123,11 @@ bool DigitalIn_getInterrupted(DigitalIn* in) {
 
     if(!in->interruptMode == InterruptMode_Disabled) return false;
     return GetInterruptWatcher(in->port);
+}
+
+Button* DigitalIn_getButton(DigitalIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    if(in->button) return in->button;
+    return (in->button = Button_new(&DigitalIOButton, in->port));
 }

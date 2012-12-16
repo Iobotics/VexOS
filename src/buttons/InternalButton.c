@@ -31,6 +31,7 @@
 //
 
 #include "ButtonClass.h"
+#include "Error.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -53,6 +54,10 @@ static bool get() {
  ********************************************************************/
 
 void InternalButton_set(Button* button, bool value) {
-    if(button->class != &InternalButton) return;
+    ErrorIf(button == NULL, VEXOS_ARGNULL);
+    ErrorMsgIf(button->class != &InternalButton, VEXOS_OPINVALID,
+               "Invalid Button class, not an InternalButton: %s", 
+               ButtonClass_getName(Button_getClass(button)));
+
     button->fields->state = value;
 }
