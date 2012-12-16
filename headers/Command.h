@@ -56,7 +56,7 @@ void Command_removed(Command*);
 void Command_setCancelled(Command*);
 
 void Command_require(Command*, Subsystem*);
-void Command_setTimeout(Command*, unsigned long time);
+void Command_setTimeout(Command*, unsigned long);
 bool Command_isTimedOut(Command*);
 void Command_setInterruptible(Command*, bool);
 
