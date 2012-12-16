@@ -34,6 +34,20 @@ List* List_new() {
     return list;
 }
 
+List* List_delete(List* list) {
+    if(list) {
+        ListNode* node = list->firstNode;
+        ListNode* temp;
+        while(node != NULL) {
+            temp = node->next;
+            free(node);
+            node = temp;
+        }
+        free(list);
+    }
+    return NULL;
+}
+
 ListNode* List_newNode(void* data) {
     ListNode* node = malloc(sizeof(ListNode));
     node->data = data;

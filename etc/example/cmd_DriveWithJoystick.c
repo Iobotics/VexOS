@@ -17,7 +17,6 @@ DeclareCommandClass(DriveWithJoystick, { });
 
 static void constructor(va_list argp) {
     require(&Drive);
-    setTimeout(2000);
 }
 
 static void initialize() { }
@@ -36,4 +35,5 @@ static void end() {
 }
 
 static void interrupted() { }
+
 

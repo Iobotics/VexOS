@@ -8,3 +8,5 @@ VexOS.h
 
 # easyC output #
 VexOS_Robot.HEX
+VexOS_Robot.LOG
+VexOS_Robot.LST

@@ -31,6 +31,14 @@
 #include "API.h"
 
 /********************************************************************
+ * Operating System Constants                                       *
+ ********************************************************************/
+
+#define VEXOS_MAJOR_VERSION     0
+#define VEXOS_MINOR_VERSION     9
+#define VEXOS_BUILD_VERSION     0
+
+/********************************************************************
  * Operating System Hooks (you must implement)                      *
  ********************************************************************/
 
@@ -166,6 +174,7 @@ typedef enum {
 } CommandStatus;
 
 Command*      Command_new(CommandClass*, ...);
+Command*      Command_delete(Command*);
 void          Command_start(Command*);
 void          Command_cancel(Command*);
 String        Command_getName(Command*);
@@ -177,7 +186,6 @@ bool          Command_getRunWhenDisabled(Command*);
 void          Command_setRunWhenDisabled(Command*, bool);
 bool          Command_doesRequireSubsystem(Command*, Subsystem*);
 unsigned long Command_timeSinceInitialized(Command*);
-Command*      Command_delete(Command*);
 
 /********************************************************************
  * Public API: CommandGroup                                         *
@@ -200,6 +208,7 @@ bool   ButtonClass_isInitialized(ButtonClass*);
  ********************************************************************/
 
 Button* Button_new(ButtonClass*, ...);
+Button* Button_delete(Button*);
 String  Button_getName(Button*);
 bool    Button_get(Button*);
 void    Button_whenPressed(Button*, Command*);
@@ -208,7 +217,6 @@ void    Button_whenReleased(Button*, Command*);
 void    Button_whileToggled(Button*, Command*);
 int     Button_getToggleGroup(Button*);
 void    Button_setToggleGroup(Button*, int);
-Button* Button_delete(Button*);
 
 /********************************************************************
  * Public API: InternalButton                                       *
@@ -229,11 +237,11 @@ Command* Subsystem_getCurrentCommand(Subsystem*);
  ********************************************************************/
 
 PowerScaler* PowerScaler_new(String);
+PowerScaler* PowerScaler_delete(PowerScaler*);
 String       PowerScaler_getName(PowerScaler*);
 void         PowerScaler_addPoint(PowerScaler*, Power, Power);
 Power        PowerScaler_get(PowerScaler*, Power);
 String       PowerScaler_toString(PowerScaler*);
-PowerScaler* PowerScaler_delete(PowerScaler*);
 
 /********************************************************************
  * Public API: DebugValue                                           *
@@ -248,11 +256,11 @@ typedef enum {
 } DebugValueType;
 
 DebugValue* DebugValue_new(String, DebugValueType);
+DebugValue* DebugValue_delete(DebugValue*);
 DebugValue* DebugValue_newWithFormat(String, DebugValueType, String);
 DebugValue* DebugValue_delete(DebugValue*);
 void        DebugValue_unregister(DebugValue*);
 void        DebugValue_set(DebugValue*, ...);
-DebugValue* DebugValue_delete(DebugValue*);
 
 /********************************************************************
  * Public API: PIDController                                        *
@@ -320,6 +328,7 @@ typedef struct ListNode_T {
 } ListNode;
 
 List*        List_new();
+List*        List_delete(List*);
 ListNode*    List_newNode(void* data);
 void         List_insertAfter(ListNode* node, ListNode* newNode);
 void         List_insertBefore(ListNode* node, ListNode* newNode);

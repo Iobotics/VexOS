@@ -61,7 +61,7 @@ static void updateWindow(Window* win, bool full) {
     int selLine = 0;
     
     // print the (none) choice //
-    PrintTextToGD(top, left + 1, Color_Black, "(none)\n");
+    PrintTextToGD(top, left + 2, Color_Black, "(none)\n");
     if(selected == NULL) selLine = top;
     top++;
     
@@ -69,14 +69,14 @@ static void updateWindow(Window* win, bool full) {
     ListNode* node = autonomousPrograms.firstNode;
     while(node != NULL) {
         Command* cmd = node->data;
-        PrintTextToGD(top, left + 1, Color_Black, "%.*s\n", width, Command_getName(cmd));
+        PrintTextToGD(top, left + 2, Color_Black, "%.*s\n", width - 2, Command_getName(cmd));
         if(selected == cmd) selLine = top;
         top++;
         node = node->next;
     }
     
     // print the selection mark //
-    PrintTextToGD(selLine, left, Color_Black, ">\n");
+    PrintTextToGD(selLine, left, Color_Grey, ">\n");
     autoChanged = false;
 }
 
@@ -95,12 +95,10 @@ static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
         } else if(activeProgram->next != NULL) {
             setActiveProgram(activeProgram->next);
         }
-        PrintToScreen("right\n");
     } else if(pressed == LCDButtonType_Left) {
         if(activeProgram != NULL) {
             setActiveProgram(activeProgram->prev);
         }
-        PrintToScreen("left\n");
     }
     
     // print the program choice to LCD //

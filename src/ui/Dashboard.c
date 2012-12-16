@@ -76,7 +76,8 @@ static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
 
 static void drawBackground() {
     // paint "background" //
-    PrintTextToGD(28, 0, 0x888888, "<VexOS>   v0.9.0\n");
+    PrintTextToGD(28, 0, 0x888888, "<VexOS>   v%d.%d.%d\n", 
+                  VEXOS_MAJOR_VERSION, VEXOS_MINOR_VERSION, VEXOS_BUILD_VERSION);
     const char* name = VexOS_getProgramName();
     if(name != NULL) {
         PrintTextToGD(28, 40, 0x888888, "%39.39s\n", name);
