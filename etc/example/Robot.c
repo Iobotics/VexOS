@@ -11,7 +11,7 @@
 
 RobotSubsystems(&Drive, &Lift, &Intake, &Pivot);
 
-void autoPeriodic() {
+void autoPeriodic(EventType type) {
     Wait(100);
     PrintToScreen("  time: %d\n", GetMsClock());
 }
@@ -73,3 +73,5 @@ void InitializeRobot() {
     VexOS_setSelectedAutonomousByNumber(2);
     VexOS_addEventHandler(EventType_AutonomousPeriodic, autoPeriodic);
 }
+
+

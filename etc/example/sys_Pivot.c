@@ -7,7 +7,7 @@
 //
 
 #include "Subsystem.h"
-#include "robot.h"
+#include "Robot.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -44,3 +44,4 @@ void Pivot_setPosition(PivotPosition pos) {
 PivotPosition Pivot_getPosition() {
     return currentPos;
 }
+

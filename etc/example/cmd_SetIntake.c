@@ -7,7 +7,7 @@
 //
 
 #include "CommandClass.h"
-#include "robot.h"
+#include "Robot.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -18,7 +18,7 @@ DeclareCommandClass(SetIntake, {
 });
 
 static void constructor(va_list argp) {
-    self->fields->dir = va_arg(argp, IntakeDirection);
+    self->fields->dir = (IntakeDirection) va_arg(argp, int);
     setArgs("%s", (self->fields->dir == IntakeDirection_Stop)? "Stop":
                   (self->fields->dir == IntakeDirection_Suck)? "Suck":
                   "Blow");
@@ -38,3 +38,5 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
+

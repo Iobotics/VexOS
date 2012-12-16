@@ -7,7 +7,7 @@
 //
 
 #include "Subsystem.h"
-#include "robot.h"
+#include "Robot.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -56,3 +56,4 @@ void Intake_setDirection(IntakeDirection dir) {
     }
     currentDir = dir;
 }
+

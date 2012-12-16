@@ -7,7 +7,7 @@
 //
 
 #include "CommandClass.h"
-#include "robot.h"
+#include "Robot.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -18,7 +18,7 @@ DeclareCommandClass(LiftJog, {
 });
 
 static void constructor(va_list argp) {
-    self->fields->dir = va_arg(argp, LiftJogDirection);
+    self->fields->dir = (LiftJogDirection) va_arg(argp, int);
     setArgs("%s", (self->fields->dir == LiftJogDirection_Down)? "Down": "Up");
     require(&Lift);
 }
@@ -58,3 +58,5 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
+

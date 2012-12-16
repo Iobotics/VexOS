@@ -7,7 +7,7 @@
 //
 
 #include "CommandClass.h"
-#include "robot.h"
+#include "Robot.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -18,7 +18,7 @@ DeclareCommandClass(PivotSet, {
 });
 
 static void constructor(va_list argp) {
-    self->fields->pos = va_arg(argp, PivotPosition);
+    self->fields->pos = (PivotPosition) va_arg(argp, int);
     setArgs("%s", (self->fields->pos == PivotPosition_Down)? "Down": "Up");
     require(&Pivot);
 }
@@ -36,3 +36,5 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
+
