@@ -7,7 +7,7 @@
 //
 
 #include "Subsystem.h"
-#include "robot.h"
+#include "Robot.h"
 
 // gear ratio conversion factor //
 #define DEGREES_PER_TICK    ((360.0 * 12)/(TicksPerRev_IME_393HT * 84))
@@ -106,3 +106,4 @@ bool Lift_getOnTarget() {
 bool Lift_getResetSwitch() {
     return !GetDigitalInput(DIGITAL_LIFT_RESET);
 }
+

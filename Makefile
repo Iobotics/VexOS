@@ -79,7 +79,7 @@ $(addprefix $(OBJDIR)/,$(BTN_OBJS)) : ButtonClass.h
 $(addprefix $(OBJDIR)/,$(CMD_OBJS)) : CommandClass.h
 $(addprefix $(OBJDIR)/,$(HDW_OBJS)) : Device.h Hardware.h
 
-# install into easyC project directory #
+# install into external easyC project directory #
 .PHONY : project-install
 project-install: $(OBJDIR)/VexOS.lib
 ifdef ROBOTPROJECT
@@ -89,7 +89,23 @@ else
 	$(error ROBOTPROJECT environment variable is not defined)
 endif
 
-# install into the easy global tools directories #
+# install into easyC example directory #
+.PHONY : example
+example: $(OBJDIR)/VexOS.lib
+	cp $(INCPUBDIR)/*.h $(ETCDIR)/example
+	cp $(OBJDIR)/VexOS.lib $(ETCDIR)/example
+
+.PHONY : example-clean
+example-clean: 
+	rm -f $(ETCDIR)/example/VexOS.lib
+	rm -f $(ETCDIR)/example/ButtonClass.h
+	rm -f $(ETCDIR)/example/CommandClass.h
+	rm -f $(ETCDIR)/example/Hardware.h
+	rm -f $(ETCDIR)/example/Subsystem.h
+	rm -f $(ETCDIR)/example/VexOS.h
+	rm -f $(ETCDIR)/example/VexOS_Robot.HEX
+
+# install into the easyC global tools directories #
 .PHONY : global-install
 global-install: $(OBJDIR)/VexOS.lib
 	cp $(INCPUBDIR)\*.h $(STEMDIR)\inc
