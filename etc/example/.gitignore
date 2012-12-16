@@ -3,6 +3,7 @@ ButtonClass.h
 CommandClass.h
 Hardware.h
 Subsystem.h
+UserInterface.h
 VexOS.h
 
 # easyC output #

@@ -11,13 +11,16 @@
 
 RobotSubsystems(&Drive, &Lift, &Intake, &Pivot);
 
-void autoPeriodic(EventType type) {
+void autoPeriodic(EventType type, void* state) {
     Wait(100);
     PrintToScreen("  time: %d\n", GetMsClock());
 }
 
+PowerExpander* expander = NULL;
+LCD* lcd = NULL;
+
 Command* getAutonomousKW() {
-    Command* group = Command_new(&CommandGroup, "Will Kailua");
+    Command* group = Command_new(&CommandGroup, "Will Kaialua");
     CommandGroup_addSequentialWithTimeout(group, Command_new(&WaitCommand, 550), 280);
     CommandGroup_addParallel(group, Command_new(&WaitCommand, 500));
     CommandGroup_addParallel(group, Command_new(&WaitCommand, 300));
@@ -32,13 +35,7 @@ Command* getAutonomousKW() {
 void InitializeRobot() {
     VexOS_setProgramName("My test program of DOOM!");
     InitIntegratedMotorEncoders();
-    
-    //Subsystem_register(&Drive);
-    //Subsystem_register(&Lift);
-    //Subsystem_register(&Intake);
-    //Subsystem_register(&Pivot);
-    //Subsystem_register(NULL);
-    
+        
     Button* b = Button_new(&JoystickButton, 1, 7, 2);
     Button_whileHeld(b, Command_new(&AutoDrive));
     
@@ -57,21 +54,23 @@ void InitializeRobot() {
     Button_whileToggled(b7, Command_new(&LiftJog, LiftJogDirection_Down));
     Button_setToggleGroup(b7, 2);
     
-    //SetPowerExpander(AnalogPort_1, PowerExpanderType_Rev_A1);
-    LCD_setPort(UARTPort_1);
+    expander = PowerExpander_new("Power Expander", PowerExpanderType_Rev_A1, AnalogPort_1);
+    lcd      = LCD_new("Main LCD", UARTPort_1);
+    VexOS_setupStandardUI();
     
     PowerScaler* ps = PowerScaler_new("Sarah Scale");
     PowerScaler_addPoint(ps, 0.6, 0.3);
     PowerScaler_addPoint(ps, 0.4, 0.1);
     PrintToScreen(PowerScaler_toString(ps));
     
-    VexOS_addAutonomous(Command_new(&WaitCommand, 3000));
-    VexOS_addAutonomous(getAutonomousKW());
-    VexOS_addAutonomous(Command_new(&CommandGroup, "Self Destruct"));
-    Dashboard_setEnabled(true);
+    Autonomous_addProgram(Command_new(&WaitCommand, 3000));
+    Autonomous_addProgram(getAutonomousKW());
+    Autonomous_addProgram(Command_new(&CommandGroup, "Self Destruct"));
+    //Dashboard_setEnabled(true);
     
-    VexOS_setSelectedAutonomousByNumber(2);
-    VexOS_addEventHandler(EventType_AutonomousPeriodic, autoPeriodic);
+    Autonomous_setSelectedProgramByNumber(2);
+    VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
 }
+
 
 
