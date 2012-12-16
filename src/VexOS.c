@@ -96,7 +96,7 @@ static void executeLoop(RunMode mode) {
                 start    = EventType_DisabledStart;
                 periodic = EventType_DisabledPeriodic;
                 enabled  = false;
-                break;;
+                break;
             case RunMode_Autonomous:
                 runMode  = RunMode_Autonomous;
                 start    = EventType_AutonomousStart;
@@ -120,6 +120,7 @@ static void executeLoop(RunMode mode) {
         }
     } else {
         Error_setCode(err);
+        Info(Error_getMessage());
         fireEvent(EventType_SystemError);
         while(true) Wait(1000);
     }
@@ -150,7 +151,7 @@ const char* VexOS_getProgramName() {
 }
 
 bool VexOS_addEventHandler(EventType type, EventHandler* handler, void* state) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_OperatorPeriodic, 
+    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
 
@@ -169,7 +170,7 @@ bool VexOS_addEventHandler(EventType type, EventHandler* handler, void* state) {
 }
 
 bool VexOS_removeEventHandler(EventType type, EventHandler* handler) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_OperatorPeriodic, 
+    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
     
@@ -188,7 +189,7 @@ bool VexOS_removeEventHandler(EventType type, EventHandler* handler) {
 }
 
 bool VexOS_hasEventHandler(EventType type, EventHandler* handler) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_OperatorPeriodic, 
+    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
     
@@ -209,6 +210,7 @@ void VexOS_setupStandardUI() {
     Dashboard_addWindowWithPosition(mainDash, Autonomous_getWindow(), 48, 0);
     Dashboard_addWindowWithPosition(mainDash, Scheduler_getWindow(),   0, 7);
     Dashboard_addWindowWithPosition(mainDash, DebugValue_getWindow(), 48, 9);
+    Dashboard_restoreLast();
     
     LCD* lcd = (LCD*) Device_getByType(DeviceType_LCD);
     if(lcd) {
@@ -217,7 +219,7 @@ void VexOS_setupStandardUI() {
         LCD_addScreen(lcd, Autonomous_getLCDScreen());
         LCD_addScreen(lcd, Dashboard_getLCDScreen());
         LCD_addScreen(lcd, DebugValue_getLCDScreen());
-        LCD_restoreMainScreen();
+        LCD_restoreLastScreen(lcd);
     }
 }
 

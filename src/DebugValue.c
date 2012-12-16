@@ -54,7 +54,7 @@ static void setCurrentValue(ListNode* node) {
 static bool restoreCurrentValue() {
     unsigned int n = (unsigned int) GlobalData(GLOBALDATA_DEBUG_VALUE);
     if(n > 0) {
-        setCurrentValue(List_getByIndex(&debugValues, n - 1));
+        setCurrentValue(List_getNodeByIndex(&debugValues, n - 1));
         return true;
     }
     return false;

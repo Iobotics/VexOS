@@ -127,7 +127,6 @@ static void eventCallback(EventType type, void* state) {
     }
 }
 
-
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/
@@ -255,12 +254,17 @@ void LCD_setText(LCD* lcd, unsigned char line, LCDTextOptions opts, String text,
     free(ntext);
 }
 
-bool LCD_restoreMainScreen() {
+bool LCD_restoreLastScreen(LCD* lcd) {
+    // get the first LCD defined //
+    ListNode* node = lcds.firstNode;
+    LCD* firstLCD  = (node)? (LCD*) node->data: NULL;
+    ErrorMsgIf(lcd != firstLCD, VEXOS_OPINVALID, "Restore is only allowed on the primary LCD");
+    
     unsigned int stored = (unsigned int) GlobalData(GLOBALDATA_LCD_SCREEN);
-    if(stored > 0 && lcds.firstNode) {
-        LCD* mainLCD = lcds.firstNode->data;
-        mainLCD->currentScreen = List_getByIndex(&mainLCD->screens, stored - 1);
+    if(stored > 0) {
+        lcd->currentScreen = List_getNodeByIndex(&lcd->screens, stored - 1);
         return true;
     }
+    lcd->currentScreen = 0;
     return false;
 }

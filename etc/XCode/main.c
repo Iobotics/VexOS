@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include "API.h"
+#include "VexOS.h"
 
 void VexOS_Initialize();
 void VexOS_OperatorControl();
@@ -21,6 +23,9 @@ double getTimeMs() {
 }
 
 int main(int argc, const char* argv[]) {
+    GlobalData(GLOBALDATA_AUTO_PROGRAM) = 0;
+    GlobalData(GLOBALDATA_DASH_NUMBER)  = 1;
+    
     printf("Hello, World!\n");
     StartTime = getTimeMs();
     VexOS_Initialize();

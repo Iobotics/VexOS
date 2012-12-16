@@ -49,6 +49,7 @@ void        Dashboard_removeWindow(Dashboard*, Window*);
 const List* Dashboard_getList();
 void        Dashboard_refresh();
 LCDScreen*  Dashboard_getLCDScreen();
+bool        Dashboard_restoreLast();
 
 /********************************************************************
  * Public API: Window                                               *
@@ -113,7 +114,7 @@ typedef enum {
 void LCD_addScreen(LCD*, LCDScreen*);
 void LCD_removeScreen(LCD*, LCDScreen*);
 void LCD_setText(LCD*, unsigned char, LCDTextOptions, String, ...);
-bool LCD_restoreMainScreen();
+bool LCD_restoreLastScreen(LCD*);
 
 /********************************************************************
  * Public API: LCDScreen                                            *

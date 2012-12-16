@@ -40,13 +40,13 @@ static String getMessage(ErrorCode error) {
 }
 
 void Error_setCode(ErrorCode error) {
-    char* msg = (char*) errorMsg;
+    char** msg = (char**) &errorMsg;
     if(ErrorFunction) {
-        asprintf(&msg, "%s: %s (%s)\n", ErrorFunction, getMessage(error), ErrorMessage);
+        asprintf(msg, "%s: %s (%s)\n", ErrorFunction, getMessage(error), ErrorMessage);
     } else if(ErrorMessage) {
-        asprintf(&msg, "ERROR: %s (%s)", getMessage(error), ErrorMessage);
+        asprintf(msg, "ERROR: %s (%s)", getMessage(error), ErrorMessage);
     } else {
-        asprintf(&msg, "ERROR: %s", getMessage(error));
+        asprintf(msg, "ERROR: %s", getMessage(error));
     }
 }
 

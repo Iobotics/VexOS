@@ -30,8 +30,6 @@
 
 #include "API.h"
 
-#define DEEP_DEBUG
-
 /********************************************************************
  * Operating System Hooks (you must implement)                      *
  ********************************************************************/
@@ -331,7 +329,8 @@ ListNode*    List_remove(ListNode* node);
 ListNode*    List_findNode(List*, void*);
 unsigned int List_indexOfData(List*, void*);
 unsigned int List_indexOfNode(ListNode*);
-ListNode*    List_getByIndex(List*, unsigned int n);
+ListNode*    List_getNodeByIndex(List*, unsigned int n);
+void*        List_getDataByIndex(List*, unsigned int n);
 
 /********************************************************************
  * Robot Configuration Macros                                       *

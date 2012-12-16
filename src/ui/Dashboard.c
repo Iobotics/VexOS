@@ -40,7 +40,7 @@ static unsigned int dashNumber = 0;
 static void setDashNumber(unsigned int n) {
     // refresh the newly set dashboard //
     if(n > 0 && dashNumber != n) {
-        Dashboard* dash = (Dashboard*) List_getByIndex(&dashboards, n - 1);
+        Dashboard* dash = List_getDataByIndex(&dashboards, n - 1);
         dash->refresh = true;
     }
     dashNumber = n;
@@ -69,8 +69,8 @@ static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
     if(dashNumber == 0) {
         LCD_setText(lcd, 2, opts, "(none)");
     } else {
-        ListNode* node = List_getByIndex(&dashboards, dashNumber - 1);
-        LCD_setText(lcd, 2, opts, ((Dashboard*) node->data)->name);
+        Dashboard* dash = List_getDataByIndex(&dashboards, dashNumber - 1);
+        LCD_setText(lcd, 2, opts, dash->name);
     }
 }
 
@@ -88,9 +88,9 @@ static void eventCallback(EventType type, void* state) {
     unsigned long time = GetMsClock();
     
     // make sure we display the dashboard //
-    if(dashNumber == 0 || time < nextTime);
+    if(dashNumber == 0 || time < nextTime) return;
 
-    Dashboard* dash = (Dashboard*) List_getByIndex(&dashboards, dashNumber - 1);
+    Dashboard* dash = List_getDataByIndex(&dashboards, dashNumber - 1);
     if(!dash->windowNode) {
         dash->windowNode = dash->windowList.firstNode;
         // at start of list, clear GD //
@@ -125,6 +125,16 @@ Dashboard* Dashboard_new(String name) {
     ret->name       = name;
     memset(&ret->windowList, 0, sizeof(List));
     ret->windowNode = NULL;
+    List_insertLast(&dashboards, List_newNode(ret));
+    
+    // check for first LCD and install handler //
+    if(dashboards.nodeCount == 1) {
+        VexOS_addEventHandler(EventType_DisabledPeriodic,   &eventCallback, NULL);
+        VexOS_addEventHandler(EventType_AutonomousPeriodic, &eventCallback, NULL);
+        VexOS_addEventHandler(EventType_OperatorPeriodic,   &eventCallback, NULL);
+        VexOS_addEventHandler(EventType_SystemError,        &errorCallback, NULL);
+    }
+    
     return ret;
 }
 
@@ -134,14 +144,20 @@ Dashboard* Dashboard_delete(Dashboard* dash) {
         if(node) List_remove(node);
         free(node);
     }
+    // check for last LCD and remove handler //
+    if(dashboards.nodeCount == 0) {
+        VexOS_removeEventHandler(EventType_DisabledPeriodic,   &eventCallback);
+        VexOS_removeEventHandler(EventType_AutonomousPeriodic, &eventCallback);
+        VexOS_removeEventHandler(EventType_OperatorPeriodic,   &eventCallback);
+        VexOS_removeEventHandler(EventType_SystemError,        &eventCallback);
+    }
     return NULL;
 }
 
 void Dashboard_refresh() {
     if(dashNumber > 0) {
-        ListNode* node = List_getByIndex(&dashboards, dashNumber - 1);
-        if(!node) return;
-        Dashboard* dash = node->data;
+        Dashboard* dash = List_getDataByIndex(&dashboards, dashNumber - 1);
+        if(!dash) return;
         dash->refresh    = true;
         dash->windowNode = NULL;
     }
@@ -150,7 +166,7 @@ void Dashboard_refresh() {
 void Dashboard_addWindow(Dashboard* dash, Window* win) {
     ErrorIf(dash == NULL, VEXOS_ARGNULL);
     ErrorIf(win == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(Window_getDashboard(win) != dash, VEXOS_OPINVALID, 
+    ErrorMsgIf(Window_getDashboard(win), VEXOS_OPINVALID, 
                "Window is already on a Dashboard: %s", Window_getName(win));
 
     List_insertLast(&dash->windowList, List_newNode(win));
@@ -181,11 +197,12 @@ const List* Dashboard_getList() {
 }
 
 bool Dashboard_restoreLast() {
-    unsigned int n = GlobalData(GLOBALDATA_DASH_NUMBER);
+    unsigned int n = (unsigned int) GlobalData(GLOBALDATA_DASH_NUMBER);
     if(n > 0 && n <= dashboards.nodeCount) {
         setDashNumber(n);
         return true;
     }
+    setDashNumber(0);
     return false;
 }
 

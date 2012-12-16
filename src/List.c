@@ -177,7 +177,7 @@ unsigned int List_indexOfNode(ListNode* node) {
     return -1;
 }
 
-ListNode* List_getByIndex(List* list, unsigned int n) {
+ListNode* List_getNodeByIndex(List* list, unsigned int n) {
     ErrorIf(list == NULL, VEXOS_ARGNULL);
     ErrorIf(n < 0, VEXOS_ARGRANGE);
     
@@ -188,4 +188,17 @@ ListNode* List_getByIndex(List* list, unsigned int n) {
         node = node->next;
     }
     return node;
+}
+
+void* List_getDataByIndex(List* list, unsigned int n) {
+    ErrorIf(list == NULL, VEXOS_ARGNULL);
+    ErrorIf(n < 0, VEXOS_ARGRANGE);
+    
+    ListNode* node = list->firstNode;
+    unsigned int i = 0;
+    while(node != NULL) {
+        if(i++ == n) break;
+        node = node->next;
+    }
+    return (node)? node->data: NULL;
 }

@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1366D5B4167D936900FD47E7 /* Dashboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5AF167D936900FD47E7 /* Dashboard.c */; };
+		1366D5B5167D936900FD47E7 /* LCD.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B0167D936900FD47E7 /* LCD.c */; };
+		1366D5B6167D936900FD47E7 /* LCDScreen.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B1167D936900FD47E7 /* LCDScreen.c */; };
+		1366D5B7167D936900FD47E7 /* Status.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B2167D936900FD47E7 /* Status.c */; };
+		1366D5B8167D936900FD47E7 /* Window.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B3167D936900FD47E7 /* Window.c */; };
+		1366D5BC167D93B400FD47E7 /* Autonomous.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5BA167D93B400FD47E7 /* Autonomous.c */; };
+		1366D5BD167D93B400FD47E7 /* Battery.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5BB167D93B400FD47E7 /* Battery.c */; };
+		1366D5C0167D93E400FD47E7 /* UniDrive.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5BF167D93E400FD47E7 /* UniDrive.c */; };
 		13D6F966167D282C0076213A /* Button.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F93E167D282C0076213A /* Button.c */; };
 		13D6F967167D282C0076213A /* DigitalIOButton.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F940167D282C0076213A /* DigitalIOButton.c */; };
 		13D6F968167D282C0076213A /* InternalButton.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F941167D282C0076213A /* InternalButton.c */; };
@@ -18,7 +26,6 @@
 		13D6F96E167D282C0076213A /* WaitCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F948167D282C0076213A /* WaitCommand.c */; };
 		13D6F96F167D282C0076213A /* WaitForChildren.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F949167D282C0076213A /* WaitForChildren.c */; };
 		13D6F970167D282C0076213A /* WaitUntilCommand.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F94A167D282C0076213A /* WaitUntilCommand.c */; };
-		13D6F971167D282C0076213A /* Dashboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F94B167D282C0076213A /* Dashboard.c */; };
 		13D6F972167D282C0076213A /* DebugValue.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F94C167D282C0076213A /* DebugValue.c */; };
 		13D6F973167D282C0076213A /* Error.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F94D167D282C0076213A /* Error.c */; };
 		13D6F974167D282C0076213A /* Accelerometer.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F94F167D282C0076213A /* Accelerometer.c */; };
@@ -34,8 +41,6 @@
 		13D6F97E167D282C0076213A /* SerialPort.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F959167D282C0076213A /* SerialPort.c */; };
 		13D6F97F167D282C0076213A /* Servo.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95A167D282C0076213A /* Servo.c */; };
 		13D6F980167D282C0076213A /* Sonar.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95B167D282C0076213A /* Sonar.c */; };
-		13D6F981167D282C0076213A /* LCD.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95C167D282C0076213A /* LCD.c */; };
-		13D6F982167D282C0076213A /* LCDScreen.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95D167D282C0076213A /* LCDScreen.c */; };
 		13D6F983167D282C0076213A /* List.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95E167D282C0076213A /* List.c */; };
 		13D6F984167D282C0076213A /* PIDController.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F95F167D282C0076213A /* PIDController.c */; };
 		13D6F985167D282C0076213A /* PowerScaler.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F960167D282C0076213A /* PowerScaler.c */; };
@@ -43,7 +48,6 @@
 		13D6F987167D282C0076213A /* Subsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F962167D282C0076213A /* Subsystem.c */; };
 		13D6F988167D282C0076213A /* Timer.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F963167D282C0076213A /* Timer.c */; };
 		13D6F989167D282C0076213A /* VexOS.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F964167D282C0076213A /* VexOS.c */; };
-		13D6F98A167D282C0076213A /* Window.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F965167D282C0076213A /* Window.c */; };
 		13D6F9AD167D29160076213A /* easyC.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F9AC167D29160076213A /* easyC.c */; };
 		13D6F9AF167D29540076213A /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F9AE167D29540076213A /* main.c */; };
 		13D6F9C2167D2F260076213A /* sys_Intake.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F9BE167D2D7B0076213A /* sys_Intake.c */; };
@@ -71,6 +75,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1366D5A0167D92F300FD47E7 /* LCDScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCDScreen.h; sourceTree = "<group>"; };
+		1366D5A1167D92F300FD47E7 /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
+		1366D5AF167D936900FD47E7 /* Dashboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Dashboard.c; sourceTree = "<group>"; };
+		1366D5B0167D936900FD47E7 /* LCD.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LCD.c; sourceTree = "<group>"; };
+		1366D5B1167D936900FD47E7 /* LCDScreen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = LCDScreen.c; sourceTree = "<group>"; };
+		1366D5B2167D936900FD47E7 /* Status.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Status.c; sourceTree = "<group>"; };
+		1366D5B3167D936900FD47E7 /* Window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Window.c; sourceTree = "<group>"; };
+		1366D5B9167D938B00FD47E7 /* UserInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserInterface.h; sourceTree = "<group>"; };
+		1366D5BA167D93B400FD47E7 /* Autonomous.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Autonomous.c; path = ../../../../src/Autonomous.c; sourceTree = "<group>"; };
+		1366D5BB167D93B400FD47E7 /* Battery.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Battery.c; path = ../../../../src/Battery.c; sourceTree = "<group>"; };
+		1366D5BF167D93E400FD47E7 /* UniDrive.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UniDrive.c; sourceTree = "<group>"; };
 		13D6F930167D27980076213A /* VexOS_Debug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VexOS_Debug; sourceTree = BUILT_PRODUCTS_DIR; };
 		13D6F93E167D282C0076213A /* Button.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Button.c; path = ../../../../src/Button.c; sourceTree = "<group>"; };
 		13D6F940167D282C0076213A /* DigitalIOButton.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DigitalIOButton.c; sourceTree = "<group>"; };
@@ -83,7 +98,6 @@
 		13D6F948167D282C0076213A /* WaitCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = WaitCommand.c; sourceTree = "<group>"; };
 		13D6F949167D282C0076213A /* WaitForChildren.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = WaitForChildren.c; sourceTree = "<group>"; };
 		13D6F94A167D282C0076213A /* WaitUntilCommand.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = WaitUntilCommand.c; sourceTree = "<group>"; };
-		13D6F94B167D282C0076213A /* Dashboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Dashboard.c; path = ../../../../src/Dashboard.c; sourceTree = "<group>"; };
 		13D6F94C167D282C0076213A /* DebugValue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DebugValue.c; path = ../../../../src/DebugValue.c; sourceTree = "<group>"; };
 		13D6F94D167D282C0076213A /* Error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Error.c; path = ../../../../src/Error.c; sourceTree = "<group>"; };
 		13D6F94F167D282C0076213A /* Accelerometer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Accelerometer.c; sourceTree = "<group>"; };
@@ -99,8 +113,6 @@
 		13D6F959167D282C0076213A /* SerialPort.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SerialPort.c; sourceTree = "<group>"; };
 		13D6F95A167D282C0076213A /* Servo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Servo.c; sourceTree = "<group>"; };
 		13D6F95B167D282C0076213A /* Sonar.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Sonar.c; sourceTree = "<group>"; };
-		13D6F95C167D282C0076213A /* LCD.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LCD.c; path = ../../../../src/LCD.c; sourceTree = "<group>"; };
-		13D6F95D167D282C0076213A /* LCDScreen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LCDScreen.c; path = ../../../../src/LCDScreen.c; sourceTree = "<group>"; };
 		13D6F95E167D282C0076213A /* List.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = List.c; path = ../../../../src/List.c; sourceTree = "<group>"; };
 		13D6F95F167D282C0076213A /* PIDController.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PIDController.c; path = ../../../../src/PIDController.c; sourceTree = "<group>"; };
 		13D6F960167D282C0076213A /* PowerScaler.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PowerScaler.c; path = ../../../../src/PowerScaler.c; sourceTree = "<group>"; };
@@ -108,7 +120,6 @@
 		13D6F962167D282C0076213A /* Subsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Subsystem.c; path = ../../../../src/Subsystem.c; sourceTree = "<group>"; };
 		13D6F963167D282C0076213A /* Timer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Timer.c; path = ../../../../src/Timer.c; sourceTree = "<group>"; };
 		13D6F964167D282C0076213A /* VexOS.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = VexOS.c; path = ../../../../src/VexOS.c; sourceTree = "<group>"; };
-		13D6F965167D282C0076213A /* Window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Window.c; path = ../../../../src/Window.c; sourceTree = "<group>"; };
 		13D6F98C167D28440076213A /* ButtonClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ButtonClass.h; sourceTree = "<group>"; };
 		13D6F98D167D28440076213A /* CommandClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandClass.h; sourceTree = "<group>"; };
 		13D6F98E167D28440076213A /* Hardware.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hardware.h; sourceTree = "<group>"; };
@@ -117,14 +128,10 @@
 		13D6F992167D28520076213A /* Button.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Button.h; sourceTree = "<group>"; };
 		13D6F993167D28520076213A /* Command.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Command.h; sourceTree = "<group>"; };
 		13D6F994167D28520076213A /* CommandGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandGroup.h; sourceTree = "<group>"; };
-		13D6F995167D28520076213A /* Dashboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Dashboard.h; sourceTree = "<group>"; };
 		13D6F996167D28520076213A /* Error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Error.h; sourceTree = "<group>"; };
 		13D6F998167D28520076213A /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
 		13D6F999167D28520076213A /* Motor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Motor.h; sourceTree = "<group>"; };
-		13D6F99A167D28520076213A /* LCD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCD.h; sourceTree = "<group>"; };
-		13D6F99B167D28520076213A /* LCDScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCDScreen.h; sourceTree = "<group>"; };
 		13D6F99C167D28520076213A /* Scheduler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scheduler.h; sourceTree = "<group>"; };
-		13D6F99D167D28520076213A /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
 		13D6F99F167D289B0076213A /* BSD_License_for_WPILib_code.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BSD_License_for_WPILib_code.txt; sourceTree = "<group>"; };
 		13D6F9A0167D289B0076213A /* COPYING */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
 		13D6F9A1167D289B0076213A /* COPYING.LESSER */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING.LESSER; sourceTree = "<group>"; };
@@ -159,6 +166,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1366D59F167D92F300FD47E7 /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				1366D5A0167D92F300FD47E7 /* LCDScreen.h */,
+				1366D5A1167D92F300FD47E7 /* Window.h */,
+			);
+			path = ui;
+			sourceTree = "<group>";
+		};
+		1366D5AE167D936900FD47E7 /* ui */ = {
+			isa = PBXGroup;
+			children = (
+				1366D5AF167D936900FD47E7 /* Dashboard.c */,
+				1366D5B0167D936900FD47E7 /* LCD.c */,
+				1366D5B1167D936900FD47E7 /* LCDScreen.c */,
+				1366D5B2167D936900FD47E7 /* Status.c */,
+				1366D5B3167D936900FD47E7 /* Window.c */,
+			);
+			name = ui;
+			path = ../../../../src/ui;
+			sourceTree = "<group>";
+		};
+		1366D5BE167D93E400FD47E7 /* subsystems */ = {
+			isa = PBXGroup;
+			children = (
+				1366D5BF167D93E400FD47E7 /* UniDrive.c */,
+			);
+			name = subsystems;
+			path = ../../../../src/subsystems;
+			sourceTree = "<group>";
+		};
 		13D6F925167D27980076213A = {
 			isa = PBXGroup;
 			children = (
@@ -192,14 +230,15 @@
 				13D6F93F167D282C0076213A /* buttons */,
 				13D6F945167D282C0076213A /* commands */,
 				13D6F94E167D282C0076213A /* hardware */,
+				1366D5BE167D93E400FD47E7 /* subsystems */,
+				1366D5AE167D936900FD47E7 /* ui */,
+				1366D5BA167D93B400FD47E7 /* Autonomous.c */,
+				1366D5BB167D93B400FD47E7 /* Battery.c */,
 				13D6F93E167D282C0076213A /* Button.c */,
 				13D6F943167D282C0076213A /* Command.c */,
 				13D6F944167D282C0076213A /* CommandGroup.c */,
-				13D6F94B167D282C0076213A /* Dashboard.c */,
 				13D6F94C167D282C0076213A /* DebugValue.c */,
 				13D6F94D167D282C0076213A /* Error.c */,
-				13D6F95C167D282C0076213A /* LCD.c */,
-				13D6F95D167D282C0076213A /* LCDScreen.c */,
 				13D6F95E167D282C0076213A /* List.c */,
 				13D6F95F167D282C0076213A /* PIDController.c */,
 				13D6F960167D282C0076213A /* PowerScaler.c */,
@@ -207,7 +246,6 @@
 				13D6F962167D282C0076213A /* Subsystem.c */,
 				13D6F963167D282C0076213A /* Timer.c */,
 				13D6F964167D282C0076213A /* VexOS.c */,
-				13D6F965167D282C0076213A /* Window.c */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -264,6 +302,7 @@
 				13D6F98D167D28440076213A /* CommandClass.h */,
 				13D6F98E167D28440076213A /* Hardware.h */,
 				13D6F98F167D28440076213A /* Subsystem.h */,
+				1366D5B9167D938B00FD47E7 /* UserInterface.h */,
 				13D6F990167D28440076213A /* VexOS.h */,
 			);
 			name = include;
@@ -274,15 +313,12 @@
 			isa = PBXGroup;
 			children = (
 				13D6F997167D28520076213A /* hardware */,
+				1366D59F167D92F300FD47E7 /* ui */,
 				13D6F992167D28520076213A /* Button.h */,
 				13D6F993167D28520076213A /* Command.h */,
 				13D6F994167D28520076213A /* CommandGroup.h */,
-				13D6F995167D28520076213A /* Dashboard.h */,
 				13D6F996167D28520076213A /* Error.h */,
-				13D6F99A167D28520076213A /* LCD.h */,
-				13D6F99B167D28520076213A /* LCDScreen.h */,
 				13D6F99C167D28520076213A /* Scheduler.h */,
-				13D6F99D167D28520076213A /* Window.h */,
 			);
 			name = headers;
 			path = ../../../../headers;
@@ -412,7 +448,6 @@
 				13D6F96E167D282C0076213A /* WaitCommand.c in Sources */,
 				13D6F96F167D282C0076213A /* WaitForChildren.c in Sources */,
 				13D6F970167D282C0076213A /* WaitUntilCommand.c in Sources */,
-				13D6F971167D282C0076213A /* Dashboard.c in Sources */,
 				13D6F972167D282C0076213A /* DebugValue.c in Sources */,
 				13D6F973167D282C0076213A /* Error.c in Sources */,
 				13D6F974167D282C0076213A /* Accelerometer.c in Sources */,
@@ -428,8 +463,6 @@
 				13D6F97E167D282C0076213A /* SerialPort.c in Sources */,
 				13D6F97F167D282C0076213A /* Servo.c in Sources */,
 				13D6F980167D282C0076213A /* Sonar.c in Sources */,
-				13D6F981167D282C0076213A /* LCD.c in Sources */,
-				13D6F982167D282C0076213A /* LCDScreen.c in Sources */,
 				13D6F983167D282C0076213A /* List.c in Sources */,
 				13D6F984167D282C0076213A /* PIDController.c in Sources */,
 				13D6F985167D282C0076213A /* PowerScaler.c in Sources */,
@@ -437,7 +470,6 @@
 				13D6F987167D282C0076213A /* Subsystem.c in Sources */,
 				13D6F988167D282C0076213A /* Timer.c in Sources */,
 				13D6F989167D282C0076213A /* VexOS.c in Sources */,
-				13D6F98A167D282C0076213A /* Window.c in Sources */,
 				13D6F9AD167D29160076213A /* easyC.c in Sources */,
 				13D6F9AF167D29540076213A /* main.c in Sources */,
 				13D6F9C2167D2F260076213A /* sys_Intake.c in Sources */,
@@ -450,6 +482,14 @@
 				13D6F9C9167D2F2F0076213A /* cmd_SetIntake.c in Sources */,
 				13D6F9CA167D2F2F0076213A /* cmd_PivotSet.c in Sources */,
 				13D6F9CB167D2F2F0076213A /* cmd_LiftJog.c in Sources */,
+				1366D5B4167D936900FD47E7 /* Dashboard.c in Sources */,
+				1366D5B5167D936900FD47E7 /* LCD.c in Sources */,
+				1366D5B6167D936900FD47E7 /* LCDScreen.c in Sources */,
+				1366D5B7167D936900FD47E7 /* Status.c in Sources */,
+				1366D5B8167D936900FD47E7 /* Window.c in Sources */,
+				1366D5BC167D93B400FD47E7 /* Autonomous.c in Sources */,
+				1366D5BD167D93B400FD47E7 /* Battery.c in Sources */,
+				1366D5C0167D93E400FD47E7 /* UniDrive.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,11 +506,13 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEEP_DEBUG=1",
 					"DEBUG=1",
 					"$(inherited)",
 				);
@@ -495,6 +537,7 @@
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -540,6 +583,7 @@
 				13D6F93C167D27980076213A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

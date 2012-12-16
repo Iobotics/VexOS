@@ -68,7 +68,8 @@ void InitializeRobot() {
     Autonomous_addProgram(Command_new(&CommandGroup, "Self Destruct"));
     //Dashboard_setEnabled(true);
     
-    Autonomous_setSelectedProgramByNumber(2);
+    //Autonomous_setSelectedProgramByNumber(2);
+    Autonomous_restoreLastProgram();
     VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
 }
 

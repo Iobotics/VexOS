@@ -159,7 +159,7 @@ unsigned int Autonomous_getProgramCount() {
 Command* Autonomous_getProgramByNumber(unsigned int n) {
     ErrorIf(n < 1 || n > Autonomous_getProgramCount(), VEXOS_ARGRANGE);
     
-    ListNode* node = List_getByIndex(&autonomousPrograms, n - 1);
+    ListNode* node = List_getNodeByIndex(&autonomousPrograms, n - 1);
     return (node != NULL)? node->data: NULL;
 }
 
@@ -169,7 +169,10 @@ Command* Autonomous_getSelectedProgram() {
 }
 
 void Autonomous_setSelectedProgram(Command* cmd) {
-    if(cmd == NULL) activeProgram = NULL;
+    if(cmd == NULL) {
+        activeProgram = NULL;
+        return;
+    }
     ListNode* active = List_findNode(&autonomousPrograms, cmd);
     if(active == NULL) {
         Autonomous_addProgram(cmd);
@@ -181,8 +184,8 @@ void Autonomous_setSelectedProgram(Command* cmd) {
 
 void Autonomous_setSelectedProgramByNumber(unsigned int n) {
     ErrorIf(n > Autonomous_getProgramCount(), VEXOS_ARGRANGE);
-    
-    Autonomous_setSelectedProgram(Autonomous_getProgramByNumber(n));
+
+    Autonomous_setSelectedProgram((n > 0)? Autonomous_getProgramByNumber(n): NULL);
 }
 
 bool Autonomous_restoreLastProgram() {
@@ -191,6 +194,7 @@ bool Autonomous_restoreLastProgram() {
         Autonomous_setSelectedProgramByNumber(value);
         return true;
     }
+    Autonomous_setSelectedProgramByNumber(0);
     return false;
 }
 

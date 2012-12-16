@@ -1,7 +1,7 @@
 
 #include "Subsystem.h"
 
-void UniDrive_configure(Subsystem*);
+extern void UniDrive_configure(Subsystem*);
 
 /********************************************************************
  * Class Definition                                                 *
