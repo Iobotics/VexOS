@@ -334,7 +334,7 @@ Window* Device_getWindow(DeviceWindowType type) {
     // initialize the cache if needed //
     if(!windows) {
         windows = malloc(DEVICE_WINDOW_COUNT * sizeof(Window*));
-        memset(&windows, 0, DEVICE_WINDOW_COUNT * sizeof(Window*));
+        memset(windows, 0, DEVICE_WINDOW_COUNT * sizeof(Window*));
     }
     // check for existing //
     if(windows[type]) return windows[type];
