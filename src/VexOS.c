@@ -212,10 +212,10 @@ void VexOS_setupStandardUI() {
     Dashboard_addWindowWithPosition(mainDash, DebugValue_getWindow(), 48, 9);
     Dashboard* hdwDash = Dashboard_new("Hardware");
     Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_Digital),  0,  0);
-    /*Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_Analog),   0, 14);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_PWM),     24,  0);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_UART),    24, 14);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_I2C),     48,  0);*/
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_Analog),   0, 16);
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_PWM),     26,  0);
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_UART),    26, 14);
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_I2C),     52,  0);
     Dashboard_restoreLast();
     
     LCD* lcd = (LCD*) Device_getByType(DeviceType_LCD);

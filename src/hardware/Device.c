@@ -54,7 +54,7 @@ static void updateDigitalWindow(Window* win, bool full) {
 
     for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
         DigitalPortConfig dpc = digitalPorts[i];
-        PrintTextToGD(top + i, left, Color_Black, "%.2d %s %.*s\n", i + 1, 
+        PrintTextToGD(top + i, left, Color_Black, "%2d %s %.*s\n", i + 1, 
                 (dpc.mode == DigitalPortMode_Input)?  "->":
                 (dpc.mode == DigitalPortMode_Output)? "<-": "",
                 width - 6, (dpc.device)? dpc.device->name: "");
@@ -69,7 +69,7 @@ static void updateAnalogWindow(Window* win, bool full) {
     unsigned char width = Window_getWidth(win);
 
     for(int i = 0; i < ANALOG_PORT_COUNT; i++) {
-        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
                 width - 3, (analogPorts[i])? analogPorts[i]->name: "");
     }
 }
@@ -83,7 +83,7 @@ static void updatePWMWindow(Window* win, bool full) {
 
     for(int i = 0; i < PWM_PORT_COUNT; i++) {
         PWMPortConfig ppc = pwmPorts[i];
-        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
                 width - 3, (ppc.device)? ppc.device->name: "");
     }
 }
@@ -96,14 +96,22 @@ static void updateUARTWindow(Window* win, bool full) {
     unsigned char width = Window_getWidth(win);
 
     for(int i = 0; i < UART_PORT_COUNT; i++) {
-        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
                 width - 3, (uartPorts[i])? uartPorts[i]->name: "");
     }
 }
 
 static void updateI2CWindow(Window* win, bool full) {
     if(!full) return;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left  = innerRect.left;
+    unsigned char top   = innerRect.top;
+    unsigned char width = Window_getWidth(win);
 
+    for(int i = 0; i < 10; i++) {
+        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
+                width - 3, "");
+    }
 }
 
 /********************************************************************
@@ -112,11 +120,11 @@ static void updateI2CWindow(Window* win, bool full) {
 
 void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
-    ErrorMsgIf(digitalPorts[port].device, VEXOS_OPINVALID, 
+    ErrorMsgIf(digitalPorts[port - 1].device, VEXOS_OPINVALID, 
                "Digital port is already allocated: %d", port);
 
-    digitalPorts[port].device = device;
-    digitalPorts[port].mode   = mode;
+    digitalPorts[port - 1].device = device;
+    digitalPorts[port - 1].mode   = mode;
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
@@ -125,10 +133,10 @@ void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
 
 void Device_addAnalog(AnalogPort port, Device* device) {
     ErrorIf(port < AnalogPort_1 || port > AnalogPort_8, VEXOS_ARGRANGE);
-    ErrorMsgIf(analogPorts[port], VEXOS_OPINVALID, 
+    ErrorMsgIf(analogPorts[port - 1], VEXOS_OPINVALID, 
                "Analog port is already allocated: %d", port);
 
-    analogPorts[port] = device;
+    analogPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
@@ -137,11 +145,11 @@ void Device_addAnalog(AnalogPort port, Device* device) {
 
 void Device_addPWM(PWMPort port, Device* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
-    ErrorMsgIf(pwmPorts[port].device, VEXOS_OPINVALID, 
+    ErrorMsgIf(pwmPorts[port - 1].device, VEXOS_OPINVALID, 
                "PWM port is already allocated: %d", port);
 
-    pwmPorts[port].device   = device;
-    pwmPorts[port].expander = NULL;
+    pwmPorts[port - 1].device   = device;
+    pwmPorts[port - 1].expander = NULL;
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
@@ -151,15 +159,15 @@ void Device_addPWM(PWMPort port, Device* device) {
 void Device_setPWMExpander(PWMPort port, PowerExpander* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
     
-    pwmPorts[port].expander = (PowerExpander*) device;
+    pwmPorts[port - 1].expander = (PowerExpander*) device;
 }
 
 void Device_addUART(UARTPort port, Device* device) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
-    ErrorMsgIf(uartPorts[port], VEXOS_OPINVALID, 
+    ErrorMsgIf(uartPorts[port - 1], VEXOS_OPINVALID, 
                "UART port is already allocated: %d", port);
 
-    uartPorts[port] = device;
+    uartPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
@@ -178,7 +186,6 @@ void Device_remove(Device* device) {
     ErrorMsgIf(node == NULL, VEXOS_OPINVALID, "Device does not exist: %s", device->name);
 
     // remove ports by type //
-    int i;
     switch(device->type) {
         // digital sensors //
         case DeviceType_BumpSwitch:
@@ -187,7 +194,7 @@ void Device_remove(Device* device) {
         case DeviceType_QuadratureEncoder:
         case DeviceType_Encoder:
         case DeviceType_Sonar:
-            for(i = 0; i < DIGITAL_PORT_COUNT; i++) {
+            for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
                 if(digitalPorts[i].device != device) continue;
                 digitalPorts[i].device = NULL;
                 digitalPorts[i].mode   = DigitalPortMode_Unassigned;
@@ -199,7 +206,7 @@ void Device_remove(Device* device) {
         case DeviceType_LightSensor:
         case DeviceType_Gyro:
         case DeviceType_Accelerometer:
-            for(i = 0; i < ANALOG_PORT_COUNT; i++) {
+            for(int i = 0; i < ANALOG_PORT_COUNT; i++) {
                 if(analogPorts[i] != device) continue;
                 analogPorts[i] = NULL;
             }
@@ -207,7 +214,7 @@ void Device_remove(Device* device) {
         // digital outputs //
         case DeviceType_PneumaticValve:
         case DeviceType_LED:
-            for(i = 0; i < DIGITAL_PORT_COUNT; i++) {
+            for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
                 if(digitalPorts[i].device != device) continue;
                 digitalPorts[i].device = NULL;
                 digitalPorts[i].mode   = DigitalPortMode_Unassigned;
@@ -217,7 +224,7 @@ void Device_remove(Device* device) {
         case DeviceType_Motor:
         case DeviceType_Servo:
         case DeviceType_Speaker:
-            for(i = 0; i < PWM_PORT_COUNT; i++) {
+            for(int i = 0; i < PWM_PORT_COUNT; i++) {
                 if(pwmPorts[i].device != device) continue;
                 pwmPorts[i].device = NULL;
             }
@@ -225,18 +232,18 @@ void Device_remove(Device* device) {
         // serial devices //
         case DeviceType_SerialPort:
         case DeviceType_LCD:
-            for(i = 0; i < UART_PORT_COUNT; i++) {
+            for(int i = 0; i < UART_PORT_COUNT; i++) {
                 if(uartPorts[i] != device) continue;
                 uartPorts[i] = NULL;
             }
             break;
         // power expander //
         case DeviceType_PowerExpander:
-            for(i = 0; i < ANALOG_PORT_COUNT; i++) {
+            for(int i = 0; i < ANALOG_PORT_COUNT; i++) {
                 if(analogPorts[i] != device) continue;
                 analogPorts[i] = NULL;
             }
-            for(i = 0; i < PWM_PORT_COUNT; i++) {
+            for(int i = 0; i < PWM_PORT_COUNT; i++) {
                 if(pwmPorts[i].expander != (PowerExpander*) device) continue;
                 pwmPorts[i].expander = NULL;
             }
@@ -268,37 +275,37 @@ DeviceType Device_getType(Device* device) {
 Device* Device_getDigitalDevice(DigitalPort port) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
 
-    return digitalPorts[port].device;
+    return digitalPorts[port - 1].device;
 }
 
 DigitalPortMode Device_getDigitalPortMode(DigitalPort port) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
 
-    return digitalPorts[port].mode;
+    return digitalPorts[port - 1].mode;
 }
 
 Device* Device_getAnalogDevice(AnalogPort port) {
     ErrorIf(port < AnalogPort_1 || port > AnalogPort_8, VEXOS_ARGRANGE);
 
-    return analogPorts[port];
+    return analogPorts[port - 1];
 }
 
 Device* Device_getPWMDevice(PWMPort port) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
 
-    return pwmPorts[port].device;
+    return pwmPorts[port - 1].device;
 }
 
 PowerExpander* Device_getPWMExpander(PWMPort port) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
 
-    return pwmPorts[port].expander;
+    return pwmPorts[port - 1].expander;
 }
 
 Device* Device_getUARTDevice(UARTPort port) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
 
-    return uartPorts[port];
+    return uartPorts[port - 1];
 }
 
 Device* Device_getByType(DeviceType type) {
