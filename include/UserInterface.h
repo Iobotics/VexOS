@@ -168,3 +168,19 @@ LCDScreen*  Status_getLCDScreen();
 Window*     DebugValue_getWindow();
 LCDScreen*  DebugValue_getLCDScreen();
 
+/********************************************************************
+ * Public API: Device (UI Hook)                                     *
+ ********************************************************************/
+
+#define DEVICE_WINDOW_COUNT     5
+
+typedef enum {
+    DeviceWindowType_Digital,
+    DeviceWindowType_Analog,
+    DeviceWindowType_PWM,
+    DeviceWindowType_UART,
+    DeviceWindowType_I2C
+} DeviceWindowType;
+
+Window* Device_getWindow(DeviceWindowType);
+

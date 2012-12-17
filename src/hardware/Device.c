@@ -21,16 +21,12 @@
 
 #include "Hardware.h"
 #include "Device.h"
+#include "UserInterface.h"
 #include "Error.h"
 
 /********************************************************************
  * Private API                                                      *
  ********************************************************************/
-
-#define DIGITAL_PORT_COUNT  12
-#define ANALOG_PORT_COUNT   8
-#define PWM_PORT_COUNT      10
-#define UART_PORT_COUNT     2
 
 typedef struct {
     Device*         device;
@@ -48,6 +44,67 @@ static DigitalPortConfig digitalPorts[DIGITAL_PORT_COUNT];
 static Device*           analogPorts[ANALOG_PORT_COUNT];
 static PWMPortConfig     pwmPorts[PWM_PORT_COUNT];
 static Device*           uartPorts[UART_PORT_COUNT];
+
+static void updateDigitalWindow(Window* win, bool full) {
+    if(!full) return;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left  = innerRect.left;
+    unsigned char top   = innerRect.top;
+    unsigned char width = Window_getWidth(win);
+
+    for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
+        DigitalPortConfig dpc = digitalPorts[i];
+        PrintTextToGD(top + i, left, Color_Black, "%.2d %s %.*s\n", i + 1, 
+                (dpc.mode == DigitalPortMode_Input)?  "->":
+                (dpc.mode == DigitalPortMode_Output)? "<-": "",
+                width - 6, (dpc.device)? dpc.device->name: "");
+    }
+}
+
+static void updateAnalogWindow(Window* win, bool full) {
+    if(!full) return;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left  = innerRect.left;
+    unsigned char top   = innerRect.top;
+    unsigned char width = Window_getWidth(win);
+
+    for(int i = 0; i < ANALOG_PORT_COUNT; i++) {
+        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+                width - 3, (analogPorts[i])? analogPorts[i]->name: "");
+    }
+}
+
+static void updatePWMWindow(Window* win, bool full) {
+    if(!full) return;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left  = innerRect.left;
+    unsigned char top   = innerRect.top;
+    unsigned char width = Window_getWidth(win);
+
+    for(int i = 0; i < PWM_PORT_COUNT; i++) {
+        PWMPortConfig ppc = pwmPorts[i];
+        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+                width - 3, (ppc.device)? ppc.device->name: "");
+    }
+}
+
+static void updateUARTWindow(Window* win, bool full) {
+    if(!full) return;
+    Rect innerRect = Window_getInnerRect(win);
+    unsigned char left  = innerRect.left;
+    unsigned char top   = innerRect.top;
+    unsigned char width = Window_getWidth(win);
+
+    for(int i = 0; i < UART_PORT_COUNT; i++) {
+        PrintTextToGD(top + i, left, Color_Black, "%.2d %.*s\n", i + 1, 
+                width - 3, (uartPorts[i])? uartPorts[i]->name: "");
+    }
+}
+
+static void updateI2CWindow(Window* win, bool full) {
+    if(!full) return;
+
+}
 
 /********************************************************************
  * Protected API                                                    *
@@ -266,3 +323,46 @@ Device* Device_getByType(DeviceType type) {
     }
     return NULL;
 }
+
+/********************************************************************
+ * Public API (UI Hook)                                             *
+ ********************************************************************/
+
+Window* Device_getWindow(DeviceWindowType type) {
+    static Window** windows = NULL;
+    
+    // initialize the cache if needed //
+    if(!windows) {
+        windows = malloc(DEVICE_WINDOW_COUNT * sizeof(Window*));
+        memset(&windows, 0, DEVICE_WINDOW_COUNT * sizeof(Window*));
+    }
+    // check for existing //
+    if(windows[type]) return windows[type];
+
+    // get windows by type //
+    Window* win = NULL;
+    switch(type) {
+        case DeviceWindowType_Digital:
+            win = Window_new("Digital Ports", &updateDigitalWindow);
+            Window_setSize(win, 20, 12);
+            break;
+        case DeviceWindowType_Analog:
+            win = Window_new("Analog Inputs", &updateAnalogWindow);
+            Window_setSize(win, 20, 8);
+            break;
+        case DeviceWindowType_PWM:
+            win = Window_new("PWM Outputs", &updatePWMWindow);
+            Window_setSize(win, 20, 10);
+            break;
+        case DeviceWindowType_UART:
+            win = Window_new("UART Ports", &updateUARTWindow);
+            Window_setSize(win, 20, 2);
+            break;
+        case DeviceWindowType_I2C:
+            win = Window_new("I2C Devices", &updateI2CWindow);
+            Window_setSize(win, 20, 10);
+            break;
+    }
+    return (windows[type] = win);
+}
+

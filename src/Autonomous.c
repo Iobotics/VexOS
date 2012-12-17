@@ -28,7 +28,8 @@
 
 static List      autonomousPrograms;
 static ListNode* activeProgram;
-static bool      autoChanged;
+static bool      programsChanged;
+static bool      selectedChanged;
 
 static void autoStartHandler(EventType type, void* state) {
     Command* autop = Autonomous_getSelectedProgram();
@@ -38,8 +39,8 @@ static void autoStartHandler(EventType type, void* state) {
 }
 
 static void setActiveProgram(ListNode* node) {
-    activeProgram = node;
-    autoChanged   = true;
+    activeProgram   = node;
+    selectedChanged = true;
     // store in global data //
     GlobalData(GLOBALDATA_AUTO_PROGRAM) = (node)? (List_indexOfNode(node) + 1): 0;
     // if there is a program, register the event to run it //
@@ -54,14 +55,17 @@ static void updateWindow(Window* win, bool full) {
     unsigned char top   = innerRect.top;
     unsigned char width = Window_getWidth(win);
     
-    if(!full && !autoChanged) return;
-    ClearGD(top, left, innerRect.bottom, innerRect.right, false);
+    if(!full && !programsChanged && !selectedChanged) return;
     
     Command* selected = Autonomous_getSelectedProgram();
     int selLine = 0;
     
-    // print the (none) choice //
-    PrintTextToGD(top, left + 2, Color_Black, "(none)\n");
+    if(full || programsChanged) {
+        ClearGD(top, left, innerRect.bottom, innerRect.right, false);   
+        // print the (none) choice //
+        PrintTextToGD(top, left + 2, Color_Black, "(none)\n");
+    }
+
     if(selected == NULL) selLine = top;
     top++;
     
@@ -69,15 +73,22 @@ static void updateWindow(Window* win, bool full) {
     ListNode* node = autonomousPrograms.firstNode;
     while(node != NULL) {
         Command* cmd = node->data;
-        PrintTextToGD(top, left + 2, Color_Black, "%.*s\n", width - 2, Command_getName(cmd));
+        if(full || programsChanged) {
+            PrintTextToGD(top, left + 2, Color_Black, "%.*s\n", width - 2, Command_getName(cmd));
+        }
         if(selected == cmd) selLine = top;
         top++;
         node = node->next;
     }
-    
     // print the selection mark //
-    PrintTextToGD(selLine, left, Color_Grey, ">\n");
-    autoChanged = false;
+    if(full || selectedChanged) {
+        if(!full && !programsChanged) {
+            ClearGD(innerRect.top, left, innerRect.bottom, left + 1, false);
+        }
+        PrintTextToGD(selLine, left, Color_Grey, ">\n");
+    }
+    programsChanged = false;
+    selectedChanged = false;
 }
 
 static bool getLCDStatus(LCDScreen* screen) {
@@ -123,7 +134,7 @@ unsigned int Autonomous_addProgram(Command* cmd) {
     
     if(Autonomous_hasProgram(cmd)) return 0;
     List_insertLast(&autonomousPrograms, List_newNode(cmd));
-    autoChanged = true;
+    programsChanged = true;
     return autonomousPrograms.nodeCount;
 }
 
@@ -137,6 +148,7 @@ bool Autonomous_removeProgram(Command* cmd) {
             setActiveProgram(NULL);
         }
         List_remove(node);
+        programsChanged = true;
         free(node);
         return true;
     }
@@ -205,7 +217,6 @@ Window* Autonomous_getWindow() {
     if(window) return window;
     window = Window_new("Autonomous Program", &updateWindow);
     Window_setSize(window, 27, 5);
-    Window_setPosition(window, 48, 0);
     return window;
 }
 

@@ -40,8 +40,9 @@ static unsigned int dashNumber = 0;
 static void setDashNumber(unsigned int n) {
     // refresh the newly set dashboard //
     if(n > 0 && dashNumber != n) {
-        Dashboard* dash = List_getDataByIndex(&dashboards, n - 1);
-        dash->refresh = true;
+        Dashboard* dash  = List_getDataByIndex(&dashboards, n - 1);
+        dash->windowNode = NULL;
+        dash->refresh    = true;
     }
     dashNumber = n;
     GlobalData(GLOBALDATA_DASH_NUMBER) = n;

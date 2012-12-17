@@ -34,7 +34,7 @@ CC := $(TOOLSBIN)\arm-none-eabi-gcc.exe
 AR := $(TOOLSBIN)\arm-none-eabi-ar.exe
 INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)\hardware -I $(INCINTDIR)\ui \
 			-I $(STEMDIR)\inc -I $(TOOLS)\API
-CFLAGS   := -mthumb -D DEBUG -O3 -Wall -c
+CFLAGS   := -mthumb -D DEBUG -O3 -Wall -std=gnu99 -c
 
 # objects #
 OS_OBJS  := Autonomous.o Battery.o Button.o ButtonClass.o Command.o CommandClass.o \
