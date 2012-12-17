@@ -96,7 +96,10 @@ static void eventCallback(EventType type, void* state) {
     if(!dash->windowNode) {
         dash->windowNode = dash->windowList.firstNode;
         // at start of list, clear GD //
-        if(dash->refresh) ResetGD();
+        if(dash->refresh) {
+            ResetGD();
+            if(!dash->windowNode) dash->refresh = false;
+        }
     } else {
         dash->windowNode = dash->windowNode->next;
         // at end of list, clear refresh //
