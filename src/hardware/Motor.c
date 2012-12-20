@@ -42,14 +42,14 @@ void Motor_setGroup(Motor* motor, MotorGroup* group) {
  * Public API                                                       *
  ********************************************************************/
 
-Motor* Motor_new(String name, PWMPort port, MotorType type) {
+Motor* Motor_new(String name, PWMPort port, MotorType type, bool reversed) {
     ErrorEntryPoint();
-    Motor* motor = Motor_newWithIME(name, port, type, 0);
+    Motor* motor = Motor_newWithIME(name, port, type, reversed, 0);
     ErrorEntryClear();
     return motor;
 }
 
-Motor* Motor_newWithIME(String name, PWMPort port, MotorType type, I2c i2c) {
+Motor* Motor_newWithIME(String name, PWMPort port, MotorType type, bool reversed, I2c i2c) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Motor* ret = malloc(sizeof(Motor));
@@ -57,9 +57,13 @@ Motor* Motor_newWithIME(String name, PWMPort port, MotorType type, I2c i2c) {
     ret->name       = name;
     ret->port       = port;
     ret->motorType  = type;
+    ret->reversed   = reversed;
     ret->i2c        = i2c;
     ret->power      = 0.0;
     Device_addPWM(port, (Device*) ret);
+    if(i2c) {
+        Device_addI2c(i2c, (Device*) ret);
+    }
     return ret;
 }
 
@@ -107,6 +111,7 @@ void Motor_set(Motor* motor, Power power) {
     ErrorIf(power < -1.0 || power > 1.0, VEXOS_ARGRANGE);
     if(power == motor->power) return;
 
+    if(motor->reversed) power *= -1.0;
     SetMotor(motor->port, (int) (power * MAX_MOTOR_POWER));
     motor->power = power;
 }

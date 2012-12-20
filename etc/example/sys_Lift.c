@@ -32,11 +32,11 @@ static DigitalIn*   resetSwitch;
 
 static void constructor() {
     motorLeft  = MotorGroup_new("lift left");
-    MotorGroup_addMotor(motorLeft, Motor_newWithIME("lift left", MOTOR_LIFT_L, MotorType_393_HS, I2c_1));
+    MotorGroup_addMotor(motorLeft, Motor_newWithIME("lift left", MOTOR_LIFT_L, MotorType_393_HS, false, I2c_1));
     //MotorGroup_setPIDParameters(motorLeft, Kp, Ki, Kd);
 
     motorRight = MotorGroup_new("lift right");
-    MotorGroup_addMotor(motorRight, Motor_newWithIME("lift right", MOTOR_LIFT_R, MotorType_393_HS, I2c_2));
+    MotorGroup_addMotor(motorRight, Motor_newWithIME("lift right", MOTOR_LIFT_R, MotorType_393_HS, true, I2c_2));
     //MotorGroup_setPIDParameters(motorRight, Kp, Ki, Kd);
 
     resetSwitch = DigitalIn_newLimit("reset switch", DIGITAL_LIFT_RESET);
@@ -129,5 +129,6 @@ bool Lift_getOnTarget() {
 bool Lift_getResetSwitch() {
     return DigitalIn_get(resetSwitch);
 }
+
 
 

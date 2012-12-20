@@ -20,12 +20,12 @@ static MotorGroup* motors;
 
 static void constructor() { 
     motors = MotorGroup_new("intake");
-    MotorGroup_addMotor(motors, Motor_new("intake left", MOTOR_INTAKE_L, MotorType_393_HT));
-    MotorGroup_addMotor(motors, Motor_new("intake right", MOTOR_INTAKE_R, MotorType_393_HT));
+    MotorGroup_addMotor(motors, Motor_new("intake left", MOTOR_INTAKE_L, MotorType_393_HT, true));
+    MotorGroup_addMotor(motors, Motor_new("intake right", MOTOR_INTAKE_R, MotorType_393_HT, false));
 }
 
 static void initDefaultCommand() {
-    //setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
+    setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
 }
 
 /********************************************************************

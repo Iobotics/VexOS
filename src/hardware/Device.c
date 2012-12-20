@@ -43,6 +43,7 @@ static List              devices;
 static DigitalPortConfig digitalPorts[DIGITAL_PORT_COUNT];
 static Device*           analogPorts[ANALOG_PORT_COUNT];
 static PWMPortConfig     pwmPorts[PWM_PORT_COUNT];
+static Device*           i2cDevices[I2C_DEVICE_COUNT];
 static Device*           uartPorts[UART_PORT_COUNT];
 
 static void updateDigitalWindow(Window* win, bool full) {
@@ -156,6 +157,14 @@ void Device_addPWM(PWMPort port, Device* device) {
     device->deviceId = ++lastDeviceId;
 }
 
+void Device_addI2c(I2c i2c, Device* device) {
+    ErrorIf(i2c < I2c_1 || i2c > I2c_10, VEXOS_ARGRANGE);
+    ErrorMsgIf(i2cDevices[i2c - 1], VEXOS_OPINVALID, 
+               "I2C device is already allocated: %d", i2c);
+
+    i2cDevices[i2c - 1] = device;
+}
+
 void Device_setPWMExpander(PWMPort port, PowerExpander* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
     
@@ -222,6 +231,11 @@ void Device_remove(Device* device) {
             break;
         // motors //
         case DeviceType_Motor:
+            // check for I2C //
+            for(int i = 0; i < I2C_DEVICE_COUNT; i++) {
+                if(i2cDevices[i] != device) continue;
+                i2cDevices[i] = NULL;
+            }
         case DeviceType_Servo:
         case DeviceType_Speaker:
             for(int i = 0; i < PWM_PORT_COUNT; i++) {

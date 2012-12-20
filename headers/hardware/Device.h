@@ -35,6 +35,7 @@ struct Device {
 void Device_addDigital(DigitalPort, DigitalPortMode, Device*);
 void Device_addAnalog(AnalogPort, Device*);
 void Device_addPWM(PWMPort, Device*);
+void Device_addI2c(I2c, Device*);
 void Device_setPWMExpander(PWMPort, PowerExpander*);
 void Device_addUART(UARTPort, Device*);
 void Device_addVirtualDevice(Device*);

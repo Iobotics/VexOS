@@ -34,6 +34,7 @@ struct Motor {
     // device item fields //
     PWMPort       port;
     MotorType     motorType;
+    bool          reversed;
     I2c           i2c;
     MotorGroup*   parent;
     Power         power;

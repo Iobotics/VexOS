@@ -238,6 +238,7 @@ typedef enum {
     MotorType_393_HS = 394
 } MotorType;
 
+#define I2C_DEVICE_COUNT    10
 typedef enum {
     I2c_1 = 1, I2c_2, I2c_3, I2c_4, I2c_5,
     I2c_6,     I2c_7, I2c_8, I2c_9, I2c_10
@@ -248,8 +249,8 @@ typedef enum {
 #define TicksPerRev_IME_393HS       392.0
 #define TicksPerRev_IME_293         240.448
 
-Motor*      Motor_new(String, PWMPort, MotorType);
-Motor*      Motor_newWithIME(String, PWMPort, MotorType, I2c);
+Motor*      Motor_new(String, PWMPort, MotorType, bool);
+Motor*      Motor_newWithIME(String, PWMPort, MotorType, bool, I2c);
 Motor*      Motor_delete(Motor*);
 PWMPort     Motor_getPort(Motor*);
 MotorType   Motor_getMotorType(Motor*);

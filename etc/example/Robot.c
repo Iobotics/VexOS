@@ -19,8 +19,6 @@ static void constructor() {
     lcd      = LCD_new("Main LCD", UARTPort_1);
 }
 
-void autoPeriodic(EventType type, void* state);
-
 static void initialize() {
     VexOS_setProgramName("My test program of DOOM!");
     InitIntegratedMotorEncoders();
@@ -65,7 +63,6 @@ static void initialize() {
 #endif
 }
 
-void autoPeriodic(EventType type, void* state) {
-    Wait(100);
-    PrintToScreen("  time: %d\n", GetMsClock());
-}
+
+
+
