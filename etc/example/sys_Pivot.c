@@ -23,7 +23,7 @@ static void constructor() {
 }
 
 static void initDefaultCommand() {
-    setDefaultCommand(Command_new(&PivotSet, PivotPosition_Down));
+    //setDefaultCommand(Command_new(&PivotSet, PivotPosition_Down));
 }
 
 /********************************************************************

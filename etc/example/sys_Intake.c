@@ -25,7 +25,7 @@ static void constructor() {
 }
 
 static void initDefaultCommand() {
-    setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
+    //setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
 }
 
 /********************************************************************

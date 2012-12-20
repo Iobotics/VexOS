@@ -38,7 +38,7 @@ static void constructor(va_list argp) {
 }
 
 static void initDefaultCommand() {
-    setDefaultCommand(Command_new(&DriveWithJoystick));
+    //setDefaultCommand(Command_new(&DriveWithJoystick));
 }
 
 /********************************************************************

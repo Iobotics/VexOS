@@ -17,6 +17,7 @@
 		1366D5C0167D93E400FD47E7 /* UniDrive.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5BF167D93E400FD47E7 /* UniDrive.c */; };
 		13CC686B167EF6A80024F282 /* ButtonClass.c in Sources */ = {isa = PBXBuildFile; fileRef = 13CC6869167EF6A80024F282 /* ButtonClass.c */; };
 		13CC686C167EF6A80024F282 /* CommandClass.c in Sources */ = {isa = PBXBuildFile; fileRef = 13CC686A167EF6A80024F282 /* CommandClass.c */; };
+		13D197F91682AD0E00BFE1DD /* cmd_GroupTest.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D197F81682AD0E00BFE1DD /* cmd_GroupTest.c */; };
 		13D6F966167D282C0076213A /* Button.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F93E167D282C0076213A /* Button.c */; };
 		13D6F967167D282C0076213A /* DigitalIOButton.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F940167D282C0076213A /* DigitalIOButton.c */; };
 		13D6F968167D282C0076213A /* InternalButton.c in Sources */ = {isa = PBXBuildFile; fileRef = 13D6F941167D282C0076213A /* InternalButton.c */; };
@@ -90,6 +91,7 @@
 		1366D5BF167D93E400FD47E7 /* UniDrive.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = UniDrive.c; sourceTree = "<group>"; };
 		13CC6869167EF6A80024F282 /* ButtonClass.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ButtonClass.c; path = ../../../../src/ButtonClass.c; sourceTree = "<group>"; };
 		13CC686A167EF6A80024F282 /* CommandClass.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = CommandClass.c; path = ../../../../src/CommandClass.c; sourceTree = "<group>"; };
+		13D197F81682AD0E00BFE1DD /* cmd_GroupTest.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cmd_GroupTest.c; sourceTree = "<group>"; };
 		13D6F930167D27980076213A /* VexOS_Debug */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = VexOS_Debug; sourceTree = BUILT_PRODUCTS_DIR; };
 		13D6F93E167D282C0076213A /* Button.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Button.c; path = ../../../../src/Button.c; sourceTree = "<group>"; };
 		13D6F940167D282C0076213A /* DigitalIOButton.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DigitalIOButton.c; sourceTree = "<group>"; };
@@ -377,6 +379,7 @@
 			children = (
 				13D6F9B6167D2D7B0076213A /* cmd_AutoDrive.c */,
 				13D6F9B7167D2D7B0076213A /* cmd_DriveWithJoystick.c */,
+				13D197F81682AD0E00BFE1DD /* cmd_GroupTest.c */,
 				13D6F9B8167D2D7B0076213A /* cmd_SetIntake.c */,
 				13D6F9B9167D2D7B0076213A /* cmd_PivotSet.c */,
 				13D6F9BA167D2D7B0076213A /* cmd_LiftJog.c */,
@@ -498,6 +501,7 @@
 				1366D5C0167D93E400FD47E7 /* UniDrive.c in Sources */,
 				13CC686B167EF6A80024F282 /* ButtonClass.c in Sources */,
 				13CC686C167EF6A80024F282 /* CommandClass.c in Sources */,
+				13D197F91682AD0E00BFE1DD /* cmd_GroupTest.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
