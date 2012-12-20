@@ -37,13 +37,13 @@
  * Protected API                                                    *
  ********************************************************************/
 
-extern Subsystem* const RobotSubsystems[];
+extern struct Robot Robot;
 List Subsystems;
 
 void Subsystem_initialize() {
     int i = 0;
     Subsystem* sys;
-    while((sys = RobotSubsystems[i++])) {
+    while((sys = Robot.subsystems[i++])) {
         if(sys->initialized) continue;
         sys->initialized = true;
         *(sys->selfPtr)  = sys;

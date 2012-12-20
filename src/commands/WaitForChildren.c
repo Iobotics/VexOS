@@ -47,7 +47,7 @@ static void execute() { }
 
 static bool isFinished() {
     Command* parent = Command_getParent(self);
-    if(!parent || parent->class != &CommandGroup) return true;
+    if(!parent || !CommandGroup_isGroup(parent)) return true;
     const List* children = CommandGroup_getChildList(parent);
     return (children->nodeCount == 0);
 }

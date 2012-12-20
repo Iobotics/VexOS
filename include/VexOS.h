@@ -355,24 +355,47 @@ void*        List_getDataByIndex(List*, unsigned int n);
  * Robot Configuration Macros                                       *
  ********************************************************************/
 
-#define RobotSubsystems(...) \
-    Subsystem* const RobotSubsystems[] = { __VA_ARGS__, NULL };
+struct Robot {
+    Subsystem** subsystems;
+    void (*constructor)();
+    void (*initialize)();
+};
+
+#define DeclareRobot(...) \
+    static Subsystem* subsystems[] = { __VA_ARGS__, NULL }; \
+    static void constructor(); \
+    static void initialize(); \
+    const struct Robot Robot = { \
+        .subsystems  = subsystems, \
+        .constructor = &constructor, \
+        .initialize  = &initialize \
+    };
+
+#define SubsystemHeader(class) \
+    extern Subsystem class;
+
+#define CommandHeader(class) \
+    extern CommandClass class;
+
+#define ButtonHeader(class) \
+    extern ButtonClass class;
+
 
 /********************************************************************
  * Built-in Generic Command & Button Classes                        *
  ********************************************************************/
 
 // commands //
-extern CommandClass CommandGroup;
-extern CommandClass PrintCommand;
-extern CommandClass StartCommand;
-extern CommandClass WaitCommand;
-extern CommandClass WaitForChildren;
-extern CommandClass WaitUntilCommand;
+CommandHeader(CommandGroup);
+CommandHeader(PrintCommand);
+CommandHeader(StartCommand);
+CommandHeader(WaitCommand);
+CommandHeader(WaitForChildren);
+CommandHeader(WaitUntilCommand);
 
 // buttons //
-extern ButtonClass DigitalIOButton;
-extern ButtonClass InternalButton;
-extern ButtonClass JoystickButton;
+ButtonHeader(DigitalIOButton);
+ButtonHeader(InternalButton);
+ButtonHeader(JoystickButton);
 
 #endif // _VexOS_H

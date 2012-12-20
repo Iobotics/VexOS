@@ -42,6 +42,9 @@ struct CommandClass {
     bool (*isFinished)();
     void (*end)();
     void (*interrupted)();
+    // CommandGroup extension members //
+    void (*groupConstructor)(va_list);
+    Command** groupSelfPtr;
 };
 
 /********************************************************************
@@ -104,6 +107,33 @@ struct Command {
     bool Command_isTimedOut(Command*); \
     static bool isTimedOut() { \
         return Command_isTimedOut(self); \
+    } \
+    void Command_setInterruptible(Command*, bool); \
+    static void setInterruptible(bool value) { \
+        Command_setInterruptible(self, value); \
+    }
+
+#define DeclareCommandGroup(class) \
+    static void constructor(va_list); \
+    static Command* self; \
+    CommandClass class = { \
+        .name             = #class, \
+        .groupConstructor = &constructor, \
+        .groupSelfPtr     = &self \
+    }; \
+    void Command_setvName(Command*, String, va_list); \
+    static void setName(String fmt, ...) { \
+        va_list argp; \
+        va_start(argp, fmt); \
+        Command_setvName(self, fmt, argp); \
+        va_end(argp); \
+    } \
+    void Command_setvArgs(Command*, String, va_list); \
+    static void setArgs(String fmt, ...) { \
+        va_list argp; \
+        va_start(argp, fmt); \
+        Command_setvArgs(self, fmt, argp); \
+        va_end(argp); \
     } \
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \

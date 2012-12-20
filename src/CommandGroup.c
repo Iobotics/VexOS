@@ -62,7 +62,7 @@ static ListNode* freeNode(ListNode* node) {
 
 static void addEntryNode(Command* group, Command* cmd, GroupEntryState state, unsigned long timeout) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(group->class != &CommandGroup, VEXOS_ARGINVALID,
+    ErrorMsgIf(!CommandGroup_isGroup(group), VEXOS_ARGINVALID,
                "Command is not a CommandGroup: %s", Command_getName(group));
     ErrorMsgIf(group->status & CommandStatus_Locked, VEXOS_OPINVALID,
                "Cannot add Command, CommandGroup is locked: %s", Command_getName(cmd));
@@ -121,12 +121,18 @@ static void cancelConflicts(Command* command) {
  ********************************************************************/
 
 static void constructor(va_list argp) {
-    self->fields->name = va_arg(argp, String);
+    if(self->class == &CommandGroup) {
+        // prototype CommandGroup //
+        self->fields->name = va_arg(argp, String);
+        setName("%s", self->fields->name);
+    } else {
+        // subclass of CommandGroup, don't want redundant name argument //
+        self->fields->name = self->class->name;
+    }
     memset(&self->fields->commands, 0, sizeof(List));
     memset(&self->fields->children, 0, sizeof(List));
     self->fields->currentNode = NULL;
     self->fields->done        = false;
-    setName("%s", self->fields->name);
 }
 
 static void initialize() {
@@ -235,6 +241,11 @@ static void interrupted() {
 /********************************************************************
  * Protected API                                                    *
  ********************************************************************/
+
+bool CommandGroup_isGroup(Command* cmd) {
+    if(!cmd) return false;
+    return (cmd->class == &CommandGroup) || (cmd->class->groupConstructor);
+}
 
 bool CommandGroup_isInterruptible(Command* group) {
     // is the group interruptible (not sure how this is set if we don't allow subclassing) //

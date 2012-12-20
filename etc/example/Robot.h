@@ -34,22 +34,23 @@
 #define LCD_PORT            UARTPort_1
 
 // command class declarations //
-extern CommandClass DriveWithJoystick;
-extern CommandClass AutoDrive;
-extern CommandClass SetIntake;
-extern CommandClass PivotSet;
+CommandHeader(DriveWithJoystick);
+CommandHeader(AutoDrive);
+CommandHeader(SetIntake);
+CommandHeader(PivotSet);
 typedef enum {
     LiftJogDirection_Up,
     LiftJogDirection_Down
 } LiftJogDirection;
-extern CommandClass LiftJog;
+CommandHeader(LiftJog);
+CommandHeader(GroupTest);
 
 // drive subsystem //
-extern Subsystem Drive;
+SubsystemHeader(Drive);
 void Drive_setPower(Power left, Power right);
 
 // intake subsystem //
-extern Subsystem Intake;
+SubsystemHeader(Intake);
 typedef enum {
     IntakeDirection_Stop,
     IntakeDirection_Suck,
@@ -58,7 +59,7 @@ typedef enum {
 IntakeDirection Intake_getDirection();
 void Intake_setDirection(IntakeDirection dir);
 
-extern Subsystem Lift;
+SubsystemHeader(Lift);
 typedef enum {
     LiftPosition_Ground   = 0,
     LiftPosition_Descore  = 60,
@@ -72,7 +73,7 @@ void Lift_resetEncoders();
 bool Lift_getResetSwitch();
 bool Lift_getOnTarget();
 
-extern Subsystem Pivot;
+SubsystemHeader(Pivot);
 typedef enum {
     PivotPosition_Down = 5,
     PivotPosition_Up
@@ -81,3 +82,4 @@ void Pivot_setPosition(PivotPosition pos);
 PivotPosition Pivot_getPosition();
 
 #endif
+

@@ -16,11 +16,14 @@
 DeclareSubsystem(Pivot);
 
 static PivotPosition currentPos = PivotPosition_Down;
+static DigitalOut* valve;
 
-static void constructor() { }
+static void constructor() { 
+    valve = DigitalOut_newPneumaticValve("pivot valve", DIGITAL_PIVOT_VALVE);
+}
 
 static void initDefaultCommand() {
-    //setDefaultCommand(Command_new(&PivotSet, PivotPosition_Down));
+    setDefaultCommand(Command_new(&PivotSet, PivotPosition_Down));
 }
 
 /********************************************************************
@@ -31,11 +34,11 @@ void Pivot_setPosition(PivotPosition pos) {
     if(currentPos == pos) return;
     switch(pos) {
         case PivotPosition_Down:
-            SetDigitalOutput(DIGITAL_PIVOT_VALVE, true);
+            DigitalOut_set(valve, true);
             break;
         case PivotPosition_Up:
         default:
-            SetDigitalOutput(DIGITAL_PIVOT_VALVE, false);
+            DigitalOut_set(valve, false);
             break;
     }
     currentPos = pos;
@@ -44,4 +47,6 @@ void Pivot_setPosition(PivotPosition pos) {
 PivotPosition Pivot_getPosition() {
     return currentPos;
 }
+
+
 

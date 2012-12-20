@@ -50,6 +50,17 @@ static void callConstructorMethod(Command* cmd, void (method)(va_list), va_list 
     *(cmd->class->selfPtr) = old;
 }
 
+static void callGroupConstructorMethod(Command* cmd, void (method)(va_list), va_list argp) {
+    if(!method) return;
+    Command* old  = *(cmd->class->selfPtr);
+    Command* old2 = *(cmd->class->groupSelfPtr);
+    *(cmd->class->selfPtr)      = cmd;
+    *(cmd->class->groupSelfPtr) = cmd;
+    method(argp);
+    *(cmd->class->selfPtr)      = old;
+    *(cmd->class->groupSelfPtr) = old2;
+}
+
 static void callVoidMethod(Command* cmd, void (method)()) {
     if(!method) return;
     Command* old = *(cmd->class->selfPtr);
@@ -68,6 +79,20 @@ static bool callBoolMethod(Command* cmd, bool (method)()) {
 }
 
 static void initializeCommandClass(CommandClass* class) {
+    // if a group subclass, clone things from the prototype CommandGroup //
+    if(class->groupConstructor) {
+        class->selfPtr     = CommandGroup.selfPtr;
+        class->fieldSize   = CommandGroup.fieldSize;
+        class->constructor = CommandGroup.constructor;
+        class->destructor  = CommandGroup.destructor;
+        class->initialize  = CommandGroup.initialize;
+        class->execute     = CommandGroup.execute;
+        class->isFinished  = CommandGroup.isFinished;
+        class->end         = CommandGroup.end;
+        class->interrupted = CommandGroup.interrupted;
+        *(class->groupSelfPtr) = NULL;
+    }
+    // normal initialization //
     class->initialized = true;
     *(class->selfPtr)  = NULL;
     class->lastInstanceId = 0;
@@ -208,6 +233,10 @@ Command* Command_new(CommandClass* class, ...) {
     va_list argp;
     va_start(argp, class);
     callConstructorMethod(cmd, class->constructor, argp);
+    // if a group subsclass, call the secondary constructor //
+    if(class->groupConstructor) {
+        callGroupConstructorMethod(cmd, class->groupConstructor, argp);
+    }
     va_end(argp);
     return cmd;
 }
@@ -269,7 +298,7 @@ bool Command_isInterruptible(Command* cmd) {
     ErrorIf(cmd == NULL, VEXOS_ARGNULL);
     
     // special handling for CommandGroup //
-    if(cmd->class == &CommandGroup) {
+    if(CommandGroup_isGroup(cmd)) {
         CommandGroup_isInterruptible(cmd);
     }
     return cmd->interruptible;

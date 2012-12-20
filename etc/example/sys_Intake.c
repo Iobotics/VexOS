@@ -16,11 +16,16 @@
 DeclareSubsystem(Intake);
 
 static IntakeDirection currentDir = IntakeDirection_Stop;
+static MotorGroup* motors;
 
-static void constructor() { }
+static void constructor() { 
+    motors = MotorGroup_new("intake");
+    MotorGroup_addMotor(motors, Motor_new("intake left", MOTOR_INTAKE_L, MotorType_393_HT));
+    MotorGroup_addMotor(motors, Motor_new("intake right", MOTOR_INTAKE_R, MotorType_393_HT));
+}
 
 static void initDefaultCommand() {
-    //setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
+    setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
 }
 
 /********************************************************************
@@ -28,8 +33,7 @@ static void initDefaultCommand() {
  ********************************************************************/
 
 static void setIntakePower(Power power) {
-    SetMotor(MOTOR_INTAKE_L,  power);
-    SetMotor(MOTOR_INTAKE_R, -power);
+    MotorGroup_set(motors, power);
 }
 
 /********************************************************************
@@ -56,4 +60,6 @@ void Intake_setDirection(IntakeDirection dir) {
     }
     currentDir = dir;
 }
+
+
 

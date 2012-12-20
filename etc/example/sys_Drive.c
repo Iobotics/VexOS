@@ -7,6 +7,7 @@
 //
 
 #include "Subsystem.h"
+#include "Hardware.h"
 #include "Robot.h"
 
 /********************************************************************
@@ -15,12 +16,25 @@
 
 DeclareSubsystem(Drive);
 
-static DebugValue* lDrive;
-static DebugValue* rDrive;
+static MotorGroup* leftDrive;
+static MotorGroup* rightDrive;
+
+static DebugValue* lDebug;
+static DebugValue* rDebug;
 
 static void constructor(va_list argp) {
-    lDrive = DebugValue_new("lDrive", DebugValueType_Float);
-    rDrive = DebugValue_new("rDrive", DebugValueType_Float);
+    leftDrive  = MotorGroup_new("left drive");
+    MotorGroup_addMotor(leftDrive, Motor_new("left top", MOTOR_DRIVE_L_IME, MotorType_393_HS));
+    MotorGroup_addMotor(leftDrive, Motor_new("left middle", MOTOR_DRIVE_L_1, MotorType_393_HS));
+    MotorGroup_addMotor(leftDrive, Motor_new("left bottom", MOTOR_DRIVE_L_2, MotorType_393_HS));
+
+    rightDrive = MotorGroup_new("right drive");
+    MotorGroup_addMotor(rightDrive, Motor_new("right top", MOTOR_DRIVE_R_IME, MotorType_393_HS));
+    MotorGroup_addMotor(rightDrive, Motor_new("right middle", MOTOR_DRIVE_R_1, MotorType_393_HS));
+    MotorGroup_addMotor(rightDrive, Motor_new("right bottom", MOTOR_DRIVE_R_2, MotorType_393_HS));
+
+    lDebug = DebugValue_new("lDrive", DebugValueType_Float);
+    rDebug = DebugValue_new("rDrive", DebugValueType_Float);
 }
 
 static void initDefaultCommand() {
@@ -32,17 +46,11 @@ static void initDefaultCommand() {
  ********************************************************************/
 
 void Drive_setPower(Power left, Power right) {
-    // left motors //
-    SetMotor(MOTOR_DRIVE_L_IME, left);
-    SetMotor(MOTOR_DRIVE_L_1,   -left);
-    SetMotor(MOTOR_DRIVE_L_2,   left);
-    // right motors //
-    SetMotor(MOTOR_DRIVE_R_IME, -right);
-    SetMotor(MOTOR_DRIVE_R_1,   right);
-    SetMotor(MOTOR_DRIVE_R_2,   -right);
+    MotorGroup_set(leftDrive,  left);
+    MotorGroup_set(rightDrive, right);
     
-    DebugValue_set(lDrive, left);
-    DebugValue_set(rDrive, right);
+    DebugValue_set(lDebug, left);
+    DebugValue_set(rDebug, right);
 }
 
 void Drive_move(int inches) {
@@ -52,5 +60,7 @@ void Drive_move(int inches) {
 void Drive_turn(int degrees) {
     // FIXME //
 }
+
+
 
 

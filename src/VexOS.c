@@ -28,6 +28,7 @@
  ********************************************************************/
 
 // internal headers //
+extern const struct Robot Robot;
 extern void Subsystem_initialize();
 
 // event handling //
@@ -89,8 +90,9 @@ static void executeLoop(RunMode mode) {
                 // setup Subsystems //
                 runMode = RunMode_VexOS_Setup;
                 Subsystem_initialize();
+                Robot.constructor();
                 runMode = RunMode_Initialize;
-                InitializeRobot();
+                Robot.initialize();
                 // set loop parameters //
                 start    = EventType_DisabledStart;
                 periodic = EventType_DisabledPeriodic;

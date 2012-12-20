@@ -191,7 +191,7 @@ static void printCommands(Command* cmd, DisplayLine* cache, unsigned char* line,
     }
     (*line)++;
     // test for CommandGroup //
-    if(cmd->class == &CommandGroup) {
+    if(CommandGroup_isGroup(cmd)) {
         // print children //
         ListNode* node = CommandGroup_getChildList(cmd)->firstNode;
         while(node != NULL) {

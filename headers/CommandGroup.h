@@ -43,6 +43,7 @@ struct GroupEntry {
     unsigned long   timeout;
 };
 
+bool        CommandGroup_isGroup(Command*);
 bool        CommandGroup_isInterruptible(Command*);
 Command*    CommandGroup_getCurrentCommand(Command*);
 const List* CommandGroup_getChildList(Command*);
