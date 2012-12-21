@@ -30,6 +30,8 @@
 //  present in this distribution.
 //
 
+#include "API.h"
+
 #include "ButtonClass.h"
 
 /********************************************************************
@@ -37,9 +39,9 @@
  ********************************************************************/
 
 DeclareButtonClass(JoystickButton, {
-    unsigned char       joystick;
-    JoystickChannelType channel;
-    JoystickButtonType  button;
+    unsigned char joystick;
+    unsigned char channel;
+    unsigned char button;
 });
 
 static void constructor(va_list argp) {

@@ -8,6 +8,7 @@
 
 #include "CommandClass.h"
 #include "Robot.h"
+#include "API.h"
 
 /********************************************************************
  * Class Definition                                                 *
@@ -34,6 +35,7 @@ static void end() {
 }
 
 static void interrupted() { }
+
 
 
 

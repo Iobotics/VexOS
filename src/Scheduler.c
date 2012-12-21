@@ -30,6 +30,8 @@
 //  present in this distribution.
 //
 
+#include "API.h"
+
 #include "Scheduler.h"
 #include "Button.h"
 #include "Command.h"

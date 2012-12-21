@@ -19,42 +19,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "Hardware.h"
 #include "Device.h"
 #include "Motor.h"
 #include "Error.h"
 
 /********************************************************************
- * Private API                                                      *
+ * Protected API                                                    *
  ********************************************************************/
 
 #define MAX_MOTOR_POWER     127
 
-/********************************************************************
- * Protected API                                                    *
- ********************************************************************/
-
-void Motor_setGroup(Motor* motor, MotorGroup* group) {
-    motor->parent = group;
-}
-
-/********************************************************************
- * Public API                                                       *
- ********************************************************************/
-
-Motor* Motor_new(String name, PWMPort port, MotorType type, bool reversed) {
-    ErrorEntryPoint();
-    Motor* motor = Motor_newWithIME(name, port, type, reversed, 0);
-    ErrorEntryClear();
-    return motor;
-}
-
-Motor* Motor_newWithIME(String name, PWMPort port, MotorType type, bool reversed, I2c i2c) {
+Motor* Motor_new(MotorGroup* group, String name, PWMPort port, MotorType type, bool reversed, 
+    I2c i2c) 
+{
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     Motor* ret = malloc(sizeof(Motor));
     ret->type       = DeviceType_Motor;
     ret->name       = name;
+    ret->parent     = group;
     ret->port       = port;
     ret->motorType  = type;
     ret->reversed   = reversed;
@@ -75,6 +61,23 @@ Motor* Motor_delete(Motor* motor) {
     }
     return NULL;
 }
+
+Power Motor_getPower(Motor* motor) {
+    return motor->power;
+}
+
+void Motor_setPower(Motor* motor, Power power) {
+    if(power == motor->power) return;
+
+    PrintToScreen("%d %f\n", motor->port, power);
+    if(motor->reversed) power *= -1.0;
+    SetMotor(motor->port, (int) (power * MAX_MOTOR_POWER));
+    motor->power = power;
+}
+
+/********************************************************************
+ * Public API                                                       *
+ ********************************************************************/
 
 PWMPort Motor_getPort(Motor* motor) {
     ErrorIf(motor == NULL, VEXOS_ARGNULL);
@@ -100,18 +103,8 @@ MotorGroup* Motor_getGroup(Motor* motor) {
     return motor->parent;
 }
 
-Power Motor_get(Motor* motor) {
+bool Motor_isReversed(Motor* motor) {
     ErrorIf(motor == NULL, VEXOS_ARGNULL);
 
-    return motor->power;
-}
-
-void Motor_set(Motor* motor, Power power) {
-    ErrorIf(motor == NULL, VEXOS_ARGNULL);
-    ErrorIf(power < -1.0 || power > 1.0, VEXOS_ARGRANGE);
-    if(power == motor->power) return;
-
-    if(motor->reversed) power *= -1.0;
-    SetMotor(motor->port, (int) (power * MAX_MOTOR_POWER));
-    motor->power = power;
+    return motor->reversed;
 }

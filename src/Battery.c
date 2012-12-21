@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "UserInterface.h"
 #include "Hardware.h"
 #include "Device.h"
@@ -51,6 +53,7 @@ static PowerExpander* getMainPowerExpander() {
     static bool           checked = false;
     if(!checked) {
         expand = (PowerExpander*) Device_getByType(DeviceType_PowerExpander);
+        //PrintToScreen("type: %d\n", PowerExpander_getType(expand));
         checked = true;
     }
     return expand;
@@ -68,6 +71,7 @@ static void updateWindow(Window* win, bool full) {
     PowerExpander* expand = getMainPowerExpander();
     if(expand) {
         volts = PowerExpander_getBatteryVoltage(expand);
+        //PrintToScreen("type2: %d\n", PowerExpander_getType(expand));
         PrintTextToGD(top,   left, Color_Black, "Expander:\n");
         PrintTextToGD(top++, left + 10, getBatteryColor(volts, false), "%1.2f V\n", volts);
     }

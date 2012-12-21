@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "UserInterface.h"
 #include "Scheduler.h"
 #include "Error.h"
@@ -215,9 +217,8 @@ void VexOS_setupStandardUI() {
     Dashboard* hdwDash = Dashboard_new("Hardware");
     Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_Digital),  0,  0);
     Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_Analog),   0, 16);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_PWM),     26,  0);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_UART),    26, 14);
-    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_I2C),     52,  0);
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_PWM),     34,  0);
+    Dashboard_addWindowWithPosition(hdwDash, Device_getWindow(DeviceWindowType_UART),    34, 14);
     Dashboard_restoreLast();
     
     LCD* lcd = (LCD*) Device_getByType(DeviceType_LCD);

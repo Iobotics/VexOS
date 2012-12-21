@@ -24,14 +24,14 @@ static DebugValue* rDebug;
 
 static void constructor(va_list argp) {
     leftDrive  = MotorGroup_new("left drive");
-    MotorGroup_addMotor(leftDrive, Motor_new("left top", MOTOR_DRIVE_L_IME, MotorType_393_HS, false));
-    MotorGroup_addMotor(leftDrive, Motor_new("left middle", MOTOR_DRIVE_L_1, MotorType_393_HS, true));
-    MotorGroup_addMotor(leftDrive, Motor_new("left bottom", MOTOR_DRIVE_L_2, MotorType_393_HS, false));
+    MotorGroup_add(leftDrive, "left top", MOTOR_DRIVE_L_IME, MotorType_393_HS, false);
+    MotorGroup_add(leftDrive, "left middle", MOTOR_DRIVE_L_1, MotorType_393_HS, true);
+    MotorGroup_add(leftDrive, "left bottom", MOTOR_DRIVE_L_2, MotorType_393_HS, false);
 
     rightDrive = MotorGroup_new("right drive");
-    MotorGroup_addMotor(rightDrive, Motor_new("right top", MOTOR_DRIVE_R_IME, MotorType_393_HS, true));
-    MotorGroup_addMotor(rightDrive, Motor_new("right middle", MOTOR_DRIVE_R_1, MotorType_393_HS, false));
-    MotorGroup_addMotor(rightDrive, Motor_new("right bottom", MOTOR_DRIVE_R_2, MotorType_393_HS, true));
+    MotorGroup_add(rightDrive, "right top", MOTOR_DRIVE_R_IME, MotorType_393_HS, true);
+    MotorGroup_add(rightDrive, "right middle", MOTOR_DRIVE_R_1, MotorType_393_HS, false);
+    MotorGroup_add(rightDrive, "right bottom", MOTOR_DRIVE_R_2, MotorType_393_HS, true);
 
     lDebug = DebugValue_new("lDrive", DebugValueType_Float);
     rDebug = DebugValue_new("rDrive", DebugValueType_Float);
@@ -46,8 +46,8 @@ static void initDefaultCommand() {
  ********************************************************************/
 
 void Drive_setPower(Power left, Power right) {
-    MotorGroup_set(leftDrive,  left);
-    MotorGroup_set(rightDrive, right);
+    MotorGroup_setPower(leftDrive,  left);
+    MotorGroup_setPower(rightDrive, right);
     
     DebugValue_set(lDebug, left);
     DebugValue_set(rDebug, right);

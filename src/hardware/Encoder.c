@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "Hardware.h"
 #include "Device.h"
 #include "Error.h"
@@ -122,28 +124,32 @@ void Encoder_setEnabled(Encoder* encoder, bool value) {
     encoder->enabled = value;
 }
 
-long Encoder_get(Encoder* encoder) {
+double Encoder_get(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
 
     switch(encoder->type) {
         case DeviceType_QuadratureEncoder:
-            return GetQuadEncoder(encoder->portA, encoder->portB);
+            return (TicksPerRev_QUAD_ENCODER / 360.0) * GetQuadEncoder(encoder->portA, encoder->portB);
         case DeviceType_Encoder:
-            return GetEncoder(encoder->portA);
+            return (TicksPerRev_OLD_ENCODER / 360.0) * GetEncoder(encoder->portA);
         default: 
             // will not occur //
             return 0;
     }
 }
 
-void Encoder_set(Encoder* encoder, long value) {
+void Encoder_set(Encoder* encoder, double value) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
-
+    
+    long ivalue;
     switch(encoder->type) {
         case DeviceType_QuadratureEncoder:
-            PresetQuadEncoder(encoder->portA, encoder->portB, value);
+            ivalue = (long) value * (TicksPerRev_QUAD_ENCODER / 360.0);
+            PresetQuadEncoder(encoder->portA, encoder->portB, ivalue);
+            break;
         case DeviceType_Encoder:
-            PresetEncoder(encoder->portA, value);
+            ivalue = (long) value * (TicksPerRev_OLD_ENCODER / 360.0);
+            PresetEncoder(encoder->portA, ivalue);
             break;
         default: 
             // will not occur //

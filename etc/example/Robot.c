@@ -8,6 +8,7 @@
 
 #include "Hardware.h"
 #include "Robot.h"
+#include "API.h"
 
 DeclareRobot(&Drive, &Lift, &Intake, &Pivot);
 
@@ -62,6 +63,7 @@ static void initialize() {
     VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
 #endif
 }
+
 
 
 

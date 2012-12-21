@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "Hardware.h"
 #include "Device.h"
 #include "Error.h"
@@ -115,5 +117,6 @@ float PowerExpander_getBatteryVoltage(PowerExpander* expand) {
     ErrorMsgIf(expand->statusPort == 0, VEXOS_OPINVALID, 
                "Expander has no status port set: %s", expand->name);
 
-    return ((GetAnalogInput(expand->statusPort) * 10.0f) / expand->expandType);
+    float volts = ((GetAnalogInput(expand->statusPort) * 10.0f) / expand->expandType);
+    return volts;
 }

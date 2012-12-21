@@ -45,15 +45,16 @@ typedef enum {
     // digital outputs //
     DeviceType_PneumaticValve,
     DeviceType_LED,
-    // miscellaneous devices //,
-    DeviceType_PowerExpander,
+    // serial devices //
     DeviceType_LCD,
     DeviceType_SerialPort,
+    // miscellaneous devices //,
+    DeviceType_PowerExpander,
     DeviceType_MotorGroup,
+    DeviceType_Speaker,
     // motors //
     DeviceType_Motor,
-    DeviceType_Servo,
-    DeviceType_Speaker
+    DeviceType_Servo
 } DeviceType;
 
 typedef enum {
@@ -90,6 +91,12 @@ typedef enum UARTPort {
     UARTPort_1 = 1, UARTPort_2
 } UARTPort;
 
+#define I2C_DEVICE_COUNT    10
+typedef enum {
+    I2c_1 = 1, I2c_2, I2c_3, I2c_4, I2c_5,
+    I2c_6,     I2c_7, I2c_8, I2c_9, I2c_10
+} I2c;
+
 /********************************************************************
  * Public Object Definitions                                        *
  ********************************************************************/
@@ -118,12 +125,15 @@ typedef struct Servo         Servo;
 
 String          Device_getName(Device*);
 DeviceType      Device_getType(Device*);
+String          Device_getTypeName(Device*);
 Device*         Device_getDigitalDevice(DigitalPort);
 DigitalPortMode Device_getDigitalPortMode(DigitalPort);
 Device*         Device_getAnalogDevice(AnalogPort);
 Device*         Device_getPWMDevice(PWMPort);
 PowerExpander*  Device_getPWMExpander(PWMPort);
 Device*         Device_getUARTDevice(UARTPort);
+Device*         Device_getI2cDevice(I2c);
+const List*     Device_getDeviceList();
 Device*         Device_getByType(DeviceType);
 
 /********************************************************************
@@ -161,8 +171,8 @@ DigitalPort Encoder_getPort(Encoder*);
 DigitalPort Encoder_getPort2(Encoder*);
 bool        Encoder_isEnabled(Encoder*);
 void        Encoder_setEnabled(Encoder*, bool);
-long        Encoder_get(Encoder*);
-void        Encoder_set(Encoder*, long);
+double      Encoder_get(Encoder*);
+void        Encoder_set(Encoder*, double);
 
 /********************************************************************
  * Public API: Sonar                                                *
@@ -238,38 +248,67 @@ typedef enum {
     MotorType_393_HS = 394
 } MotorType;
 
-#define I2C_DEVICE_COUNT    10
-typedef enum {
-    I2c_1 = 1, I2c_2, I2c_3, I2c_4, I2c_5,
-    I2c_6,     I2c_7, I2c_8, I2c_9, I2c_10
-} I2c;
-
 // encoder ticks per revolution //
 #define TicksPerRev_IME_393HT       627.2
 #define TicksPerRev_IME_393HS       392.0
 #define TicksPerRev_IME_293         240.448
 
-Motor*      Motor_new(String, PWMPort, MotorType, bool);
-Motor*      Motor_newWithIME(String, PWMPort, MotorType, bool, I2c);
-Motor*      Motor_delete(Motor*);
 PWMPort     Motor_getPort(Motor*);
 MotorType   Motor_getMotorType(Motor*);
 I2c         Motor_getI2c(Motor*);
 MotorGroup* Motor_getGroup(Motor*);
-Power       Motor_get(Motor*);
-void        Motor_set(Motor*, Power);
+bool        Motor_isReversed(Motor*);
 
 /********************************************************************
  * Public API: MotorGroup                                           *
  ********************************************************************/
 
+typedef enum {
+    FeedbackType_None,
+    FeedbackType_IME,
+    FeedbackType_Encoder,
+    FeedbackType_Potentiometer
+} FeedbackType;
+
 MotorGroup* MotorGroup_new(String);
 MotorGroup* MotorGroup_delete(MotorGroup*);
-void        MotorGroup_addMotor(MotorGroup*, Motor*);
-void        MotorGroup_removeMotor(MotorGroup*, Motor*);
+void        MotorGroup_add(MotorGroup*, String, PWMPort, MotorType, bool);
+void        MotorGroup_addWithIME(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
+void        MotorGroup_remove(MotorGroup*, Motor*);
 const List* MotorGroup_getMotorList(MotorGroup*);
-Power       MotorGroup_get(MotorGroup*);
-void        MotorGroup_set(MotorGroup*, Power);
+
+// open loop control //
+Power MotorGroup_getPower(MotorGroup*);
+void  MotorGroup_setPower(MotorGroup*, Power);
+
+// feedback monitoring //
+void         MotorGroup_addEncoder(MotorGroup*, Encoder*);
+void         MotorGroup_addPotentiometer(MotorGroup*, AnalogIn*);
+Device*      MotorGroup_getSensor(MotorGroup*);
+FeedbackType MotorGroup_getFeedbackType(MotorGroup*);
+bool         MotorGroup_isFeedbackEnabled(MotorGroup*);
+void         MotorGroup_setFeedbackEnabled(MotorGroup*, bool);
+double       MotorGroup_getOutputRatio(MotorGroup*);
+void         MotorGroup_setOutputRatio(MotorGroup*, double);
+double       MotorGroup_getFeedbackRatio(MotorGroup*);
+void         MotorGroup_setFeedbackRatio(MotorGroup*, double);
+double       MotorGroup_getPosition(MotorGroup*);
+void         MotorGroup_presetPosition(MotorGroup*, double);
+double       MotorGroup_getSpeed(MotorGroup*);
+
+// closed loop control //
+bool    MotorGroup_isPIDEnabled(MotorGroup*);
+void    MotorGroup_setPIDEnabled(MotorGroup*, bool);
+void    MotorGroup_setPID(MotorGroup*, double, double, double);
+double  MotorGroup_getP(MotorGroup*);
+double  MotorGroup_getI(MotorGroup*);
+double  MotorGroup_getD(MotorGroup*);
+double  MotorGroup_getError(MotorGroup*);
+double  MotorGroup_getTolerance(MotorGroup*);
+void    MotorGroup_setTolerance(MotorGroup*, double);
+bool    MotorGroup_onTarget(MotorGroup*);
+double  MotorGroup_getSetpoint(MotorGroup*);
+void    MotorGroup_setSetpoint(MotorGroup*, double);
 
 /********************************************************************
  * Public API: Servo                                                *

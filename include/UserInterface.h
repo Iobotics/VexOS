@@ -178,8 +178,7 @@ typedef enum {
     DeviceWindowType_Digital,
     DeviceWindowType_Analog,
     DeviceWindowType_PWM,
-    DeviceWindowType_UART,
-    DeviceWindowType_I2C
+    DeviceWindowType_UART
 } DeviceWindowType;
 
 Window* Device_getWindow(DeviceWindowType);

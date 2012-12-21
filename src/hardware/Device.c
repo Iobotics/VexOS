@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include "API.h"
+
 #include "Hardware.h"
 #include "Device.h"
 #include "UserInterface.h"
@@ -55,10 +57,16 @@ static void updateDigitalWindow(Window* win, bool full) {
 
     for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
         DigitalPortConfig dpc = digitalPorts[i];
-        PrintTextToGD(top + i, left, Color_Black, "%2d %s %.*s\n", i + 1, 
-                (dpc.mode == DigitalPortMode_Input)?  "->":
-                (dpc.mode == DigitalPortMode_Output)? "<-": "",
-                width - 6, (dpc.device)? dpc.device->name: "");
+        if(dpc.mode != DigitalPortMode_Unassigned) {
+            PrintTextToGD(top + i, left, Color_Black, "%2d %2s %-5s %.*s\n", i + 1, 
+                (dpc.mode == DigitalPortMode_Input)?  "->": "<-", 
+                Device_getTypeName(dpc.device), 
+                width - 11,
+                dpc.device->name);
+        } else {
+            PrintTextToGD(top + i, left, Color_Grey, "%2d %.*s\n", i + 1, 
+                width - 3, "(unassigned)");
+        }
     }
 }
 
@@ -70,8 +78,15 @@ static void updateAnalogWindow(Window* win, bool full) {
     unsigned char width = Window_getWidth(win);
 
     for(int i = 0; i < ANALOG_PORT_COUNT; i++) {
-        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
-                width - 3, (analogPorts[i])? analogPorts[i]->name: "");
+        if(analogPorts[i]) {
+            PrintTextToGD(top + i, left, Color_Black, "%2d %-5s %.*s\n", i + 1, 
+                Device_getTypeName(analogPorts[i]), 
+                width - 8, 
+                analogPorts[i]->name);
+        } else {
+            PrintTextToGD(top + i, left, Color_Grey, "%2d %.*s\n", i + 1, 
+                width - 3, "(unassigned)");
+        }
     }
 }
 
@@ -84,8 +99,24 @@ static void updatePWMWindow(Window* win, bool full) {
 
     for(int i = 0; i < PWM_PORT_COUNT; i++) {
         PWMPortConfig ppc = pwmPorts[i];
-        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
-                width - 3, (ppc.device)? ppc.device->name: "");
+        if(ppc.device) {
+            Motor* motor = (Motor*) ppc.device;
+            I2c xi2c     = Motor_getI2c(motor);
+            char* i2c = "";
+            if(xi2c) {
+                asprintf(&i2c, "%d", xi2c);
+            }
+            PrintTextToGD(top + i, left, Color_Black, "%2d %1s %-5s %2s %.*s\n", i + 1, 
+                Motor_isReversed(motor)? "-": "+", 
+                Device_getTypeName(ppc.device), i2c, 
+                width - 14, 
+                ppc.device->name);
+            // clean up i2c string //
+            if(strlen(i2c)) free(i2c);
+        } else {
+            PrintTextToGD(top + i, left, Color_Grey, "%2d   %.*s\n", i + 1, 
+                width - 5, "(unassigned)");
+        }
     }
 }
 
@@ -97,21 +128,15 @@ static void updateUARTWindow(Window* win, bool full) {
     unsigned char width = Window_getWidth(win);
 
     for(int i = 0; i < UART_PORT_COUNT; i++) {
-        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
-                width - 3, (uartPorts[i])? uartPorts[i]->name: "");
-    }
-}
-
-static void updateI2CWindow(Window* win, bool full) {
-    if(!full) return;
-    Rect innerRect = Window_getInnerRect(win);
-    unsigned char left  = innerRect.left;
-    unsigned char top   = innerRect.top;
-    unsigned char width = Window_getWidth(win);
-
-    for(int i = 0; i < 10; i++) {
-        PrintTextToGD(top + i, left, Color_Black, "%2d %.*s\n", i + 1, 
-                width - 3, "");
+        if(uartPorts[i]) {
+            PrintTextToGD(top + i, left, Color_Black, "%2d %-5s %.*s\n", i + 1, 
+                Device_getTypeName(uartPorts[i]), 
+                width - 8, 
+                uartPorts[i]->name);
+        } else {
+            PrintTextToGD(top + i, left, Color_Grey, "%2d %.*s\n", i + 1, 
+                width - 3, "(unassigned)");
+        }
     }
 }
 
@@ -188,6 +213,9 @@ void Device_addVirtualDevice(Device* device) {
         List_insertLast(&devices, List_newNode(device));
     }
     device->deviceId = ++lastDeviceId;
+    if(List_indexOfData(&devices, device) == -1) {
+        List_insertLast(&devices, List_newNode(device));
+    }
 }
 
 void Device_remove(Device* device) {
@@ -286,6 +314,45 @@ DeviceType Device_getType(Device* device) {
     return device->type;
 }
 
+String Device_getTypeName(Device* device) {
+    ErrorIf(device == NULL, VEXOS_ARGNULL);
+
+    switch(device->type) {
+        case DeviceType_BumpSwitch:         return "BUMP";
+        case DeviceType_LimitSwitch:        return "LIMIT";
+        case DeviceType_Jumper:             return "JUMP";
+        case DeviceType_QuadratureEncoder:  return "QDENC";
+        case DeviceType_Encoder:            return "ENC";
+        case DeviceType_Sonar:              return "SONAR";
+        // analog sensors //
+        case DeviceType_Potentiometer:      return "POT";
+        case DeviceType_LineFollower:       return "LINE";
+        case DeviceType_LightSensor:        return "LIGHT";
+        case DeviceType_Gyro:               return "GYRO";
+        case DeviceType_Accelerometer:      return "ACCEL";
+        // digital outputs //
+        case DeviceType_PneumaticValve:     return "PNEUM";
+        case DeviceType_LED:                return "LED";
+        // miscellaneous devices //
+        case DeviceType_PowerExpander:      return "EXPAN";
+        case DeviceType_LCD:                return "LCD";
+        case DeviceType_SerialPort:         return "SERIAL";
+        case DeviceType_Speaker:            return "SPEAK";
+        case DeviceType_MotorGroup:         return "MGRP";
+        // motors //
+        case DeviceType_Servo:              return "SERVO";
+        case DeviceType_Motor:
+            switch(Motor_getMotorType((Motor*) device)) {
+                case MotorType_269:    return "269";
+                case MotorType_393_HT: return "393HT";
+                case MotorType_393_HS: return "393HS";
+                default: return "MOTOR";
+            }
+            break;
+        default: return "DEVICE";
+    }
+}
+
 Device* Device_getDigitalDevice(DigitalPort port) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
 
@@ -320,6 +387,16 @@ Device* Device_getUARTDevice(UARTPort port) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
 
     return uartPorts[port - 1];
+}
+
+Device* Device_getI2cDevice(I2c i2c) {
+    ErrorIf(i2c < I2c_1 || i2c > I2c_10, VEXOS_ARGRANGE);
+
+    return i2cDevices[i2c - 1];
+}
+
+const List* Device_getDeviceList() {
+    return &devices;
 }
 
 Device* Device_getByType(DeviceType type) {
@@ -365,23 +442,19 @@ Window* Device_getWindow(DeviceWindowType type) {
     switch(type) {
         case DeviceWindowType_Digital:
             win = Window_new("Digital Ports", &updateDigitalWindow);
-            Window_setSize(win, 20, 12);
+            Window_setSize(win, 28, 12);
             break;
         case DeviceWindowType_Analog:
             win = Window_new("Analog Inputs", &updateAnalogWindow);
-            Window_setSize(win, 20, 8);
+            Window_setSize(win, 28, 8);
             break;
         case DeviceWindowType_PWM:
             win = Window_new("PWM Outputs", &updatePWMWindow);
-            Window_setSize(win, 20, 10);
+            Window_setSize(win, 40, 10);
             break;
         case DeviceWindowType_UART:
             win = Window_new("UART Ports", &updateUARTWindow);
-            Window_setSize(win, 20, 2);
-            break;
-        case DeviceWindowType_I2C:
-            win = Window_new("I2C Devices", &updateI2CWindow);
-            Window_setSize(win, 20, 10);
+            Window_setSize(win, 28, 2);
             break;
     }
     return (windows[type] = win);

@@ -30,6 +30,8 @@
 //  present in this distribution.
 //
 
+#include "API.h"
+
 #include "ButtonClass.h"
 #include "Hardware.h"
 

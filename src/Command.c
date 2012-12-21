@@ -30,6 +30,8 @@
 //  present in this distribution.
 //
 
+#include "API.h"
+
 #include "Command.h"
 #include "CommandClass.h"
 #include "CommandGroup.h"

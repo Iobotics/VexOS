@@ -40,6 +40,9 @@ struct Motor {
     Power         power;
 };
 
-void Motor_setGroup(Motor*, MotorGroup*);
+Motor* Motor_new(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
+Motor* Motor_delete(Motor*);
+Power  Motor_getPower(Motor*);
+void   Motor_setPower(Motor*, Power);
 
 #endif // _Motor_h

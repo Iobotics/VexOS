@@ -22,13 +22,12 @@
 #ifndef _VexOS_h
 #define _VexOS_h
 
+#include <stdio.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "API.h"
 
 /********************************************************************
  * Operating System Constants                                       *
@@ -36,35 +35,7 @@
 
 #define VEXOS_MAJOR_VERSION     0
 #define VEXOS_MINOR_VERSION     9
-#define VEXOS_BUILD_VERSION     0
-
-/********************************************************************
- * Operating System Hooks (you must implement)                      *
- ********************************************************************/
-
-void InitializeRobot();
-
-/********************************************************************
- * VEXnet Joystick Hardware                                         *
- ********************************************************************/
-
-typedef enum {
-    JoystickButtonType_Down = 1,
-    JoystickButtonType_Up,
-    JoystickButtonType_Left,
-    JoystickButtonType_Right
-} JoystickButtonType;
-
-typedef enum {
-    JoystickChannelType_RightX = 1,
-    JoystickChannelType_RightY,
-    JoystickChannelType_LeftY,
-    JoystickChannelType_LeftX,
-    JoystickChannelType_LeftFront,
-    JoystickChannelType_RightFront,
-    JoystickChannelType_LeftPad,
-    JoystickChannelType_RightPad
-} JoystickChannelType;
+#define VEXOS_BUILD_VERSION     1
 
 /********************************************************************
  * Reserved GlobalData Slots                                        *
@@ -88,6 +59,7 @@ typedef struct ButtonClass   ButtonClass;
 typedef struct Button        Button;
 
 // utility objects //
+typedef struct Joystick      Joystick;
 typedef struct PowerScaler   PowerScaler;
 typedef struct DebugValue    DebugValue;
 typedef struct PIDController PIDController;
@@ -202,6 +174,7 @@ unsigned long Command_timeSinceInitialized(Command*);
  * Public API: CommandGroup                                         *
  ********************************************************************/
 
+// shares all methods with Command //
 void CommandGroup_addSequential(Command*, Command*);
 void CommandGroup_addSequentialWithTimeout(Command*, Command*, unsigned long);
 void CommandGroup_addParallel(Command*, Command*);
@@ -244,6 +217,34 @@ String   Subsystem_getName(Subsystem*);
 bool     Subsystem_isInitialized(Subsystem*);
 Command* Subsystem_getCurrentCommand(Subsystem*);
 
+/********************************************************************
+ * Public API: Joystick                                             *
+ ********************************************************************/
+
+typedef enum {
+    JoystickHand_Left,
+    JoystickHand_Right
+} JoystickHand;
+
+typedef enum {
+    JoystickButtonType_Down = 1,
+    JoystickButtonType_Up,
+    JoystickButtonType_Left,
+    JoystickButtonType_Right,
+    JoystickButtonType_Bottom,
+    JoystickButtonType_Top
+} JoystickButtonType;
+
+Joystick*     Joystick_new(unsigned char);
+Joystick*     Joystick_delete(Joystick*);
+unsigned char Joystick_getId(Joystick*);
+double        Joystick_getX(Joystick*, JoystickHand);
+double        Joystick_getY(Joystick*, JoystickHand);
+Button*       Joystick_getButton(Joystick*, JoystickHand, JoystickButtonType);
+bool          Joystick_getRawButton(Joystick*, JoystickHand, JoystickButtonType);
+double        Joystick_getAccelerometerX(Joystick*);
+double        Joystick_getAccelerometerY(Joystick*);
+    
 /********************************************************************
  * Public API: PowerScaler                                          *
  ********************************************************************/
