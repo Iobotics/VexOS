@@ -33,5 +33,6 @@ typedef struct ButtonScheduler ButtonScheduler;
 void Scheduler_run();
 void Scheduler_add(Command*);
 void Scheduler_addButtonScheduler(ButtonScheduler*);
+void Scheduler_removeButtonSchedulers(Button*);
 
 #endif // _Scheduler_h

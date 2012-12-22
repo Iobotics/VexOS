@@ -30,6 +30,8 @@
  * Private API                                                      *
  ********************************************************************/
 
+#define MAX_MOTOR_POWER     127
+
 struct MotorGroup {
     // device header //
     unsigned char deviceId;
@@ -130,6 +132,7 @@ Power MotorGroup_getPower(MotorGroup* group) {
 
 void MotorGroup_setPower(MotorGroup* group, Power power) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
+    if(group->power == power) return;
 
     // power clipping //
     if(power > 1.0) power = 1.0;
@@ -138,7 +141,10 @@ void MotorGroup_setPower(MotorGroup* group, Power power) {
     // set the motors //
     ListNode* node = group->children->firstNode;
     while(node != NULL) {
-        Motor_setPower(node->data, power); 
+        Motor* motor = node->data;
+        Power mpower = power;
+        if(motor->reversed) mpower *= -1.0;
+        SetMotor(motor->port, (int) (mpower * MAX_MOTOR_POWER));
         node = node->next;
     }
     group->power = power;

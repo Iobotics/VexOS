@@ -37,12 +37,9 @@ struct Motor {
     bool          reversed;
     I2c           i2c;
     MotorGroup*   parent;
-    Power         power;
 };
 
 Motor* Motor_new(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
 Motor* Motor_delete(Motor*);
-Power  Motor_getPower(Motor*);
-void   Motor_setPower(Motor*, Power);
 
 #endif // _Motor_h

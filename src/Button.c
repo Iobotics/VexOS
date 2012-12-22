@@ -235,11 +235,24 @@ void Button_executeScheduler(ButtonScheduler* sched) {
     }
 }
 
+Button* Button_getSchedulerButton(ButtonScheduler* sched) {
+    if(sched == NULL) return NULL;
+    return sched->button;
+}
+
+void Button_freeButtonScheduler(ButtonScheduler* sched) {
+    // could have freed elsewhere, but we want to free in the object that allocs //
+    free(sched);
+}
+
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/
 
 Button* Button_new(ButtonClass* class, ...) {
+    ErrorIf(class == NULL, VEXOS_ARGNULL);
+    ErrorIf(VexOS_getRunMode() == RunMode_VexOS_Setup, VEXOS_BUTTONLOCK);
+    
     // check the class //
     if(!class->initialized) {
         initializeButtonClass(class);
@@ -263,6 +276,7 @@ Button* Button_new(ButtonClass* class, ...) {
 
 Button* Button_delete(Button* button) {
     if(!button) return NULL;
+    Scheduler_removeButtonSchedulers(button);
     callVoidMethod(button, button->class->destructor);
     free(button);
     return NULL;

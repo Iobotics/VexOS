@@ -211,6 +211,7 @@ void Command_setInterruptible(Command* cmd, bool inter) {
 
 Command* Command_new(CommandClass* class, ...) {
     ErrorIf(class == NULL, VEXOS_ARGNULL);
+    ErrorIf(VexOS_getRunMode() == RunMode_VexOS_Setup, VEXOS_COMMANDLOCK);
     
     // check the class //
     if(!class->initialized) {

@@ -44,6 +44,8 @@ struct Button {
  ********************************************************************/
 
 void Button_executeScheduler(ButtonScheduler*);
+Button* Button_getSchedulerButton(ButtonScheduler*);
+void Button_freeButtonScheduler(ButtonScheduler*);
 
 void Button_setName(Button*, String, ...);
 void Button_setArgs(Button*, String, ...);

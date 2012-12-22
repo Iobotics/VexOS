@@ -90,10 +90,12 @@ static void executeLoop(RunMode mode) {
         EventType start, periodic;
         switch(mode) {
             case RunMode_Initialize:
-                // setup Subsystems //
+                // setup Subsystems and hardware //
                 runMode = RunMode_VexOS_Setup;
                 Subsystem_initialize();
                 Robot.constructor();
+                Device_configureCortex();
+                // run robot initializer //
                 runMode = RunMode_Initialize;
                 Robot.initialize();
                 // set loop parameters //

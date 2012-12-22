@@ -352,7 +352,8 @@ void Device_remove(Device* device) {
                 if(i2cDevices[i] != device) continue;
                 i2cDevices[i] = NULL;
             }
-            Motor_setPower((Motor*) device, 0.0);
+            // ensure motor is stopped //
+            SetMotor(((Motor*) device)->port, 0);
         case DeviceType_Servo:
         case DeviceType_Speaker:
             for(int i = 0; i < PWM_PORT_COUNT; i++) {

@@ -251,6 +251,20 @@ void Scheduler_addButtonScheduler(ButtonScheduler* sched) {
     List_insertLast(&buttonList, getNode(sched));
 }
 
+void Scheduler_removeButtonSchedulers(Button* button) {
+    if(button == NULL) return;
+    ListNode* node = buttonList.firstNode;
+    while(node != NULL) {
+        ButtonScheduler* sched = node->data;
+        if(Button_getSchedulerButton(sched) == button) {
+            node = List_remove(node);
+            Button_freeButtonScheduler(sched);
+            continue;
+        }
+        node = node->next;
+    }
+}
+
 void Scheduler_run() {
     // handle buttons (go backwards to preserve priority) //
     ListNode* node = buttonList.lastNode;

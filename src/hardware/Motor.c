@@ -30,8 +30,6 @@
  * Protected API                                                    *
  ********************************************************************/
 
-#define MAX_MOTOR_POWER     127
-
 Motor* Motor_new(MotorGroup* group, String name, PWMPort port, MotorType type, bool reversed, 
     I2c i2c) 
 {
@@ -45,7 +43,6 @@ Motor* Motor_new(MotorGroup* group, String name, PWMPort port, MotorType type, b
     ret->motorType  = type;
     ret->reversed   = reversed;
     ret->i2c        = i2c;
-    ret->power      = 0.0;
     Device_addPWM(port, (Device*) ret);
     if(i2c) {
         Device_addI2c(i2c, (Device*) ret);
@@ -60,18 +57,6 @@ Motor* Motor_delete(Motor* motor) {
         free(motor);
     }
     return NULL;
-}
-
-Power Motor_getPower(Motor* motor) {
-    return motor->power;
-}
-
-void Motor_setPower(Motor* motor, Power power) {
-    if(power == motor->power) return;
-
-    if(motor->reversed) power *= -1.0;
-    SetMotor(motor->port, (int) (power * MAX_MOTOR_POWER));
-    motor->power = power;
 }
 
 /********************************************************************
