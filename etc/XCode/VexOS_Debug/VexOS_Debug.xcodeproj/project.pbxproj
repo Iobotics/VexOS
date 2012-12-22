@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		131268B5168535C0007D0BDC /* Joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = 131268B4168535C0007D0BDC /* Joystick.c */; };
 		1366D5B4167D936900FD47E7 /* Dashboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5AF167D936900FD47E7 /* Dashboard.c */; };
 		1366D5B5167D936900FD47E7 /* LCD.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B0167D936900FD47E7 /* LCD.c */; };
 		1366D5B6167D936900FD47E7 /* LCDScreen.c in Sources */ = {isa = PBXBuildFile; fileRef = 1366D5B1167D936900FD47E7 /* LCDScreen.c */; };
@@ -78,6 +79,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		131268B4168535C0007D0BDC /* Joystick.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Joystick.c; path = ../../../../src/Joystick.c; sourceTree = "<group>"; };
 		1366D5A0167D92F300FD47E7 /* LCDScreen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LCDScreen.h; sourceTree = "<group>"; };
 		1366D5A1167D92F300FD47E7 /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Window.h; sourceTree = "<group>"; };
 		1366D5AF167D936900FD47E7 /* Dashboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Dashboard.c; sourceTree = "<group>"; };
@@ -247,6 +249,7 @@
 				13D6F944167D282C0076213A /* CommandGroup.c */,
 				13D6F94C167D282C0076213A /* DebugValue.c */,
 				13D6F94D167D282C0076213A /* Error.c */,
+				131268B4168535C0007D0BDC /* Joystick.c */,
 				13D6F95E167D282C0076213A /* List.c */,
 				13D6F95F167D282C0076213A /* PIDController.c */,
 				13D6F960167D282C0076213A /* PowerScaler.c */,
@@ -502,6 +505,7 @@
 				13CC686B167EF6A80024F282 /* ButtonClass.c in Sources */,
 				13CC686C167EF6A80024F282 /* CommandClass.c in Sources */,
 				13D197F91682AD0E00BFE1DD /* cmd_GroupTest.c in Sources */,
+				131268B5168535C0007D0BDC /* Joystick.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -22,6 +22,9 @@ static void constructor() {
     lcd      = LCD_new("Main LCD", UARTPort_1);
 }
 
+// defined for XCode //
+void autoPeriodic(EventType type, void* state);
+
 static void initialize() {
     VexOS_setProgramName("My test program of DOOM!");
     InitIntegratedMotorEncoders();

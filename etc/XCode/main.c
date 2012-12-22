@@ -22,6 +22,11 @@ double getTimeMs() {
     return (t.tv_sec + (t.tv_usec / 1000000.0)) * 1000.0;
 }
 
+void autoPeriodic(EventType type, void* state) {
+    Wait(100);
+    PrintToScreen("  time: %d\n", GetMsClock());
+}
+
 int main(int argc, const char* argv[]) {
     GlobalData(GLOBALDATA_AUTO_PROGRAM) = 2;
     GlobalData(GLOBALDATA_DASH_NUMBER)  = 1;
