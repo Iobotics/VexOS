@@ -23,12 +23,22 @@
 
 #include "Hardware.h"
 #include "Device.h"
+#include "Motor.h"
 #include "UserInterface.h"
 #include "Error.h"
 
 /********************************************************************
  * Private API                                                      *
  ********************************************************************/
+
+// reversed engineered from easyC ctrl.dat file //
+typedef enum {
+    EasyCMotor_None      = 0,
+    EasyCMotor_Standard  = 1,
+    EasyCMotor_SmallIME  = 2,
+    EasyCMotor_BigIME    = 3,
+    EasyCMotor_BigIME_HS = 4
+} EasyCMotor;
 
 typedef struct {
     Device*         device;
@@ -144,10 +154,85 @@ static void updateUARTWindow(Window* win, bool full) {
  * Protected API                                                    *
  ********************************************************************/
 
+void Device_configureCortex() {
+    // set the Cortex port directions //
+    unsigned char dirs[DIGITAL_PORT_COUNT];
+    for(int i = 0; i < DIGITAL_PORT_COUNT; i++) {
+        switch(digitalPorts[i].mode) {
+            case DigitalPortMode_Output: 
+                dirs[i] = 0; 
+                break;
+            case DigitalPortMode_Input:
+            case DigitalPortMode_Unassigned:
+                dirs[i] = 1;
+                break;
+        }
+    }
+    DefineControllerIO(dirs[0], dirs[1], dirs[2], dirs[3], dirs[4],  dirs[5],
+                       dirs[6], dirs[7], dirs[8], dirs[9], dirs[10], dirs[11]);
+
+    // set the I2c ID values for each motor port //
+    bool initIMEs = false;
+    unsigned char motors[PWM_PORT_COUNT];
+    for(int i = 0; i < PWM_PORT_COUNT; i++) {
+        motors[i] = i;
+    }
+    for(int i = 0; i < PWM_PORT_COUNT; i++) {
+        // make sure we have a motor //
+        Device* device = pwmPorts[i].device;
+        if(!device || device->type != DeviceType_Motor) continue;
+        // see if motor has an I2c //
+        I2c i2c = Motor_getI2c((Motor*) device);
+        if(!i2c) continue;
+        // if so, swap with the motor that current holds that ID //
+        for(int j = 0; j < PWM_PORT_COUNT; j++) {
+            if(motors[j] != i2c) continue;
+            motors[j] = motors[i];
+            break;
+        }
+        motors[i] = i2c;
+        initIMEs  = true;
+    }
+    DefineImeTable(motors[0], motors[1], motors[2], motors[3], motors[4],
+                   motors[5], motors[6], motors[7], motors[8], motors[9]);
+    
+    // set the motor types using easyC values //
+    unsigned char mtypes[PWM_PORT_COUNT];
+    for(int i = 0; i < PWM_PORT_COUNT; i++) {
+        Device* device = pwmPorts[i].device;
+        switch(device->type) {
+            case DeviceType_Motor:
+                if(Motor_getI2c((Motor*) device)) {
+                    switch(Motor_getMotorType((Motor*) device)) {
+                        case MotorType_269:    mtypes[i] = EasyCMotor_SmallIME;  break;
+                        case MotorType_393_HT: mtypes[i] = EasyCMotor_BigIME;    break;
+                        case MotorType_393_HS: mtypes[i] = EasyCMotor_BigIME_HS; break;
+                        default: mtypes[i] = EasyCMotor_Standard; break;
+                    }
+                } else {
+                    mtypes[i] = EasyCMotor_Standard;
+                }
+                break;
+            case DeviceType_Servo:
+            default:
+                mtypes[i] = EasyCMotor_None;
+                break;
+        }
+    }
+    DefineMotorTypes(mtypes[0], mtypes[1], mtypes[2], mtypes[3], mtypes[4], 
+                     mtypes[5], mtypes[6], mtypes[7], mtypes[8], mtypes[9]);
+
+    // if we are using IMEs, initialize them //
+    if(initIMEs) {
+        InitIntegratedMotorEncoders();
+    }
+}
+
 void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
     ErrorMsgIf(digitalPorts[port - 1].device, VEXOS_OPINVALID, 
                "Digital port is already allocated: %d", port);
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
 
     digitalPorts[port - 1].device = device;
     digitalPorts[port - 1].mode   = mode;
@@ -161,6 +246,7 @@ void Device_addAnalog(AnalogPort port, Device* device) {
     ErrorIf(port < AnalogPort_1 || port > AnalogPort_8, VEXOS_ARGRANGE);
     ErrorMsgIf(analogPorts[port - 1], VEXOS_OPINVALID, 
                "Analog port is already allocated: %d", port);
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
 
     analogPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
@@ -173,6 +259,7 @@ void Device_addPWM(PWMPort port, Device* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
     ErrorMsgIf(pwmPorts[port - 1].device, VEXOS_OPINVALID, 
                "PWM port is already allocated: %d", port);
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
 
     pwmPorts[port - 1].device   = device;
     pwmPorts[port - 1].expander = NULL;
@@ -186,13 +273,15 @@ void Device_addI2c(I2c i2c, Device* device) {
     ErrorIf(i2c < I2c_1 || i2c > I2c_10, VEXOS_ARGRANGE);
     ErrorMsgIf(i2cDevices[i2c - 1], VEXOS_OPINVALID, 
                "I2C device is already allocated: %d", i2c);
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
 
     i2cDevices[i2c - 1] = device;
 }
 
 void Device_setPWMExpander(PWMPort port, PowerExpander* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
-    
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+
     pwmPorts[port - 1].expander = (PowerExpander*) device;
 }
 
@@ -200,6 +289,7 @@ void Device_addUART(UARTPort port, Device* device) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
     ErrorMsgIf(uartPorts[port - 1], VEXOS_OPINVALID, 
                "UART port is already allocated: %d", port);
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
 
     uartPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
@@ -209,13 +299,11 @@ void Device_addUART(UARTPort port, Device* device) {
 }
 
 void Device_addVirtualDevice(Device* device) {
+    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
     device->deviceId = ++lastDeviceId;
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
 }
 
 void Device_remove(Device* device) {
@@ -264,6 +352,7 @@ void Device_remove(Device* device) {
                 if(i2cDevices[i] != device) continue;
                 i2cDevices[i] = NULL;
             }
+            Motor_setPower((Motor*) device, 0.0);
         case DeviceType_Servo:
         case DeviceType_Speaker:
             for(int i = 0; i < PWM_PORT_COUNT; i++) {

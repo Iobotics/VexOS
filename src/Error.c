@@ -30,10 +30,11 @@ static String errorMsg;
 
 static String getMessage(ErrorCode error) {
     switch(error) {
-        case VEXOS_ARGNULL:     return "Required argument is null";
-        case VEXOS_ARGRANGE:    return "Argument is out of range";
-        case VEXOS_ARGINVALID:  return "Argument is invalid";
-        case VEXOS_OPINVALID:   return "Invalid operation";
+        case VEXOS_ARGNULL:      return "Required argument is null";
+        case VEXOS_ARGRANGE:     return "Argument is out of range";
+        case VEXOS_ARGINVALID:   return "Argument is invalid";
+        case VEXOS_OPINVALID:    return "Invalid operation";
+        case VEXOS_HARDWARELOCK: return "Hardware must be added in robot or subsystem constructors";
         default:
             return "No error"; // this should not occur //
     }

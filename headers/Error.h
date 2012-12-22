@@ -39,7 +39,8 @@ typedef enum {
     VEXOS_ARGNULL,
     VEXOS_ARGRANGE,
     VEXOS_ARGINVALID,
-    VEXOS_OPINVALID
+    VEXOS_OPINVALID,
+    VEXOS_HARDWARELOCK
 } ErrorCode;
 
 void   Error_setCode(ErrorCode);

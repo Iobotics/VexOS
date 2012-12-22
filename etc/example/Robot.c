@@ -22,13 +22,10 @@ static void constructor() {
     lcd      = LCD_new("Main LCD", UARTPort_1);
 }
 
-// defined for XCode //
-void autoPeriodic(EventType type, void* state);
-
 static void initialize() {
     VexOS_setProgramName("My test program of DOOM!");
     InitIntegratedMotorEncoders();
-        
+    
     Button* b = Joystick_getButton(joystick, JoystickHand_Left, JoystickButtonType_Up);
     Button_whileHeld(b, Command_new(&AutoDrive));
     

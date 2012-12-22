@@ -32,6 +32,7 @@
 // internal headers //
 extern const struct Robot Robot;
 extern void Subsystem_initialize();
+extern void Device_configureCortex();
 
 // event handling //
 static List* events[EVENT_COUNT];
@@ -123,7 +124,9 @@ static void executeLoop(RunMode mode) {
         }
     } else {
         // error handling trap //
+        Wait(500);
         Error_setCode(err);
+        Info("****\n");
         Info(Error_getMessage());
         fireEvent(EventType_SystemError);
         while(true) Wait(1000);
