@@ -69,7 +69,6 @@ Power Motor_getPower(Motor* motor) {
 void Motor_setPower(Motor* motor, Power power) {
     if(power == motor->power) return;
 
-    PrintToScreen("%d %f\n", motor->port, power);
     if(motor->reversed) power *= -1.0;
     SetMotor(motor->port, (int) (power * MAX_MOTOR_POWER));
     motor->power = power;

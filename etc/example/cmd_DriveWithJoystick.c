@@ -15,18 +15,15 @@
 
 DeclareCommandClass(DriveWithJoystick, { });
 
-static Joystick* stick;
-
 static void constructor(va_list argp) {
-    stick = Joystick_new(1);
     require(&Drive);
 }
 
 static void initialize() { }
 
 static void execute() {
-    Drive_setPower(Joystick_getY(stick, JoystickHand_Left),
-                   Joystick_getY(stick, JoystickHand_Right));
+    Drive_setPower(Joystick_getY(joystick, JoystickHand_Left),
+                   Joystick_getY(joystick, JoystickHand_Right));
 }
 
 static bool isFinished() {

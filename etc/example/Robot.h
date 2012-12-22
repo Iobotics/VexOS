@@ -81,5 +81,8 @@ typedef enum {
 void Pivot_setPosition(PivotPosition pos);
 PivotPosition Pivot_getPosition();
 
+extern Joystick* joystick;
+
 #endif
+
 
