@@ -151,6 +151,8 @@ DigitalIn*    DigitalIn_newLimit(String, DigitalPort);
 DigitalIn*    DigitalIn_newJumper(String, DigitalPort);
 DigitalIn*    DigitalIn_delete(DigitalIn*);
 DigitalPort   DigitalIn_getPort(DigitalIn*);
+bool          DigitalIn_isInverted(DigitalIn*);
+void          DigitalIn_setInverted(DigitalIn*, bool);
 bool          DigitalIn_get(DigitalIn*);
 InterruptMode DigitalIn_getInterruptMode(DigitalIn*);
 void          DigitalIn_setInterruptMode(DigitalIn*, InterruptMode);
@@ -161,18 +163,20 @@ Button*       DigitalIn_getButton(DigitalIn*);
  * Public API: Encoder                                              *
  ********************************************************************/
 
-#define TicksPerRev_QUAD_ENCODER    360.0
-#define TicksPerRev_OLD_ENCODER     100.0
-
 Encoder*    Encoder_newQuadrature(String, DigitalPort, DigitalPort, bool);
 Encoder*    Encoder_new(String, DigitalPort);
 Encoder*    Encoder_delete(Encoder*);
 DigitalPort Encoder_getPort(Encoder*);
 DigitalPort Encoder_getPort2(Encoder*);
+bool        Encoder_isReversed(Encoder*);
 bool        Encoder_isEnabled(Encoder*);
 void        Encoder_setEnabled(Encoder*, bool);
-double      Encoder_get(Encoder*);
-void        Encoder_set(Encoder*, double);
+float       Encoder_getScaleFactor(Encoder*);
+void        Encoder_setScaleFactor(Encoder*, float);
+long        Encoder_getRaw(Encoder*);
+void        Encoder_presetRaw(Encoder*, long);
+float       Encoder_get(Encoder*);
+void        Encoder_preset(Encoder*, float);
 
 /********************************************************************
  * Public API: Sonar                                                *
@@ -191,12 +195,19 @@ float  Sonar_getDistanceCentimeters(Sonar*);
  * Public API: AnalogIn                                             *
  ********************************************************************/
 
+#define MAX_ANALOG_IN_RAW   4096
+
 AnalogIn*  AnalogIn_newPotentiometer(String, AnalogPort);
 AnalogIn*  AnalogIn_newLineFollower(String, AnalogPort);
 AnalogIn*  AnalogIn_newLightSensor(String, AnalogPort);
 AnalogIn*  AnalogIn_delete(AnalogIn*);
 AnalogPort AnalogIn_getPort(AnalogIn*);
-int        AnalogIn_get(AnalogIn*);
+float      AnalogIn_getScaleFactor(AnalogIn*);
+void       AnalogIn_setScaleFactor(AnalogIn*, float);
+int        AnalogIn_getRaw(AnalogIn*);
+void       AnalogIn_presetRaw(AnalogIn*, int);
+float      AnalogIn_get(AnalogIn*);
+void       AnalogIn_preset(AnalogIn*, float);
 
 /********************************************************************
  * Public API: Gyro                                                 *
@@ -247,11 +258,6 @@ typedef enum {
     MotorType_393_HT = 393,
     MotorType_393_HS = 394
 } MotorType;
-
-// encoder ticks per revolution //
-#define TicksPerRev_IME_393HT       627.2
-#define TicksPerRev_IME_393HS       392.0
-#define TicksPerRev_IME_293         240.448
 
 PWMPort     Motor_getPort(Motor*);
 MotorType   Motor_getMotorType(Motor*);

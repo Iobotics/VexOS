@@ -29,6 +29,8 @@
  * Private API                                                      *
  ********************************************************************/
 
+#define POTENTIOMETER_TRAVEL_DEGREES    250
+
 struct AnalogIn {
     // device header //
     unsigned char deviceId;
@@ -36,15 +38,19 @@ struct AnalogIn {
     String        name;
     // device item fields //
     AnalogPort    port;
+    float         scale;
+    int           offset;
 };
 
 static AnalogIn* new(String name, DeviceType type, AnalogPort port) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     AnalogIn* ret = malloc(sizeof(AnalogIn));
-    ret->type = type;
-    ret->name = name;
-    ret->port = port;
+    ret->type   = type;
+    ret->name   = name;
+    ret->port   = port;
+    ret->scale  = 1.0;
+    ret->offset = 0;
     Device_addAnalog(port, (Device*) ret);
     return ret;
 }
@@ -56,6 +62,7 @@ static AnalogIn* new(String name, DeviceType type, AnalogPort port) {
 AnalogIn* AnalogIn_newPotentiometer(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_Potentiometer, port);
+    in->scale = POTENTIOMETER_TRAVEL_DEGREES / (360.0 * MAX_ANALOG_IN_RAW);
     ErrorEntryClear();
     return in;
 }
@@ -88,9 +95,40 @@ AnalogPort AnalogIn_getPort(AnalogIn* in) {
     return in->port;
 }
 
-int AnalogIn_get(AnalogIn* in) {
+float AnalogIn_getScaleFactor(AnalogIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+    
+    return in->scale;
+}
+
+void AnalogIn_setScaleFactor(AnalogIn* in, float scale) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+    ErrorIf(scale == 0.0, VEXOS_ARGINVALID);
+    
+    in->scale = scale;
+}
+
+int AnalogIn_getRaw(AnalogIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
     
     return GetAnalogInputHR(in->port);
+}
+
+void AnalogIn_presetRaw(AnalogIn* in, int value) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    in->offset = GetAnalogInputHR(in->port) - value;
+}
+
+float AnalogIn_get(AnalogIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    return (GetAnalogInputHR(in->port) - in->offset) * in->scale;
+}
+
+void AnalogIn_preset(AnalogIn* in, float value) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    in->offset = GetAnalogInputHR(in->port) - (int)(value / in->scale);
 }
 

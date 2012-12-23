@@ -29,6 +29,9 @@
  * Private API                                                      *
  ********************************************************************/
 
+#define TicksPerRev_QUAD_ENCODER    360.0
+#define TicksPerRev_OLD_ENCODER     100.0
+
 struct Encoder {
     // device header //
     unsigned char deviceId;
@@ -39,6 +42,7 @@ struct Encoder {
     DigitalPort   portB;
     bool          reverse;
     bool          enabled;
+    float         scale;
 };
 
 /********************************************************************
@@ -55,6 +59,7 @@ Encoder* Encoder_newQuadrature(String name, DigitalPort portA, DigitalPort portB
     ret->portB   = portB;
     ret->reverse = reverse;
     ret->enabled = false;
+    ret->scale   = (360.0 / TicksPerRev_QUAD_ENCODER);
     Device_addDigital(portA, DigitalPortMode_Input, (Device*) ret);
     Device_addDigital(portB, DigitalPortMode_Input, (Device*) ret);
     return ret;
@@ -68,7 +73,9 @@ Encoder* Encoder_new(String name, DigitalPort port) {
     ret->name    = name;
     ret->portA   = port;
     ret->portB   = 0;
+    ret->reverse = false;
     ret->enabled = false;
+    ret->scale   = (360.0 / TicksPerRev_OLD_ENCODER);
     Device_addDigital(port, DigitalPortMode_Input, (Device*) ret);
     return ret;
 }
@@ -91,6 +98,12 @@ DigitalPort Encoder_getPort2(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
     
     return encoder->portB;
+}
+
+bool Encoder_isReversed(Encoder* encoder) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+
+    return encoder->reverse;
 }
 
 bool Encoder_isEnabled(Encoder* encoder) {
@@ -124,35 +137,73 @@ void Encoder_setEnabled(Encoder* encoder, bool value) {
     encoder->enabled = value;
 }
 
-double Encoder_get(Encoder* encoder) {
+float Encoder_getScaleFactor(Encoder* encoder) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+
+    return encoder->scale;
+}
+
+void Encoder_setScaleFactor(Encoder* encoder, float scale) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+    ErrorIf(scale == 0.0, VEXOS_ARGINVALID);
+
+    encoder->scale = scale;
+}
+
+long Encoder_getRaw(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
 
     switch(encoder->type) {
         case DeviceType_QuadratureEncoder:
-            return (TicksPerRev_QUAD_ENCODER / 360.0) * GetQuadEncoder(encoder->portA, encoder->portB);
+            return GetQuadEncoder(encoder->portA, encoder->portB);
         case DeviceType_Encoder:
-            return (TicksPerRev_OLD_ENCODER / 360.0) * GetEncoder(encoder->portA);
+            return GetEncoder(encoder->portA);
         default: 
-            // will not occur //
             return 0;
     }
 }
 
-void Encoder_set(Encoder* encoder, double value) {
+void Encoder_presetRaw(Encoder* encoder, long value) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
     
-    long ivalue;
     switch(encoder->type) {
         case DeviceType_QuadratureEncoder:
-            ivalue = (long) value * (TicksPerRev_QUAD_ENCODER / 360.0);
+            PresetQuadEncoder(encoder->portA, encoder->portB, value);
+            break;
+        case DeviceType_Encoder:
+            PresetEncoder(encoder->portA, value);
+            break;
+        default: 
+            break;
+    }
+}
+
+
+float Encoder_get(Encoder* encoder) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+
+    switch(encoder->type) {
+        case DeviceType_QuadratureEncoder:
+            return GetQuadEncoder(encoder->portA, encoder->portB) * encoder->scale;
+        case DeviceType_Encoder:
+            return GetEncoder(encoder->portA) * encoder->scale;
+        default: 
+            return 0.0;
+    }
+}
+
+void Encoder_preset(Encoder* encoder, float value) {
+    ErrorIf(encoder == NULL, VEXOS_ARGNULL);
+    
+    long ivalue = value / encoder->scale;
+    switch(encoder->type) {
+        case DeviceType_QuadratureEncoder:
             PresetQuadEncoder(encoder->portA, encoder->portB, ivalue);
             break;
         case DeviceType_Encoder:
-            ivalue = (long) value * (TicksPerRev_OLD_ENCODER / 360.0);
             PresetEncoder(encoder->portA, ivalue);
             break;
         default: 
-            // will not occur //
             break;
     }
 }

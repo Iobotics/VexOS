@@ -37,6 +37,7 @@ struct DigitalIn {
     // device item fields //
     DigitalPort   port;
     Button*       button;
+    bool          inverted;
     InterruptMode interruptMode;
 };
 
@@ -48,6 +49,7 @@ static DigitalIn* new(String name, DeviceType type, DigitalPort port) {
     ret->type          = type;
     ret->port          = port;
     ret->button        = NULL;
+    ret->inverted      = false;
     ret->interruptMode = InterruptMode_Disabled;
     Device_addDigital(port, DigitalPortMode_Input, (Device*) ret);
     return ret;
@@ -60,6 +62,7 @@ static DigitalIn* new(String name, DeviceType type, DigitalPort port) {
 DigitalIn* DigitalIn_newBump(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_BumpSwitch, port);
+    in->inverted  = true;
     ErrorEntryClear();
     return in;
 }
@@ -67,6 +70,7 @@ DigitalIn* DigitalIn_newBump(String name, DigitalPort port) {
 DigitalIn* DigitalIn_newLimit(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_LimitSwitch, port);
+    in->inverted  = true;
     ErrorEntryClear();
     return in;
 }
@@ -74,6 +78,7 @@ DigitalIn* DigitalIn_newLimit(String name, DigitalPort port) {
 DigitalIn* DigitalIn_newJumper(String name, DigitalPort port) {
     ErrorEntryPoint();
     DigitalIn* in = new(name, DeviceType_Jumper, port);
+    in->inverted  = true;
     ErrorEntryClear();
     return in;
 }
@@ -92,10 +97,29 @@ DigitalPort DigitalIn_getPort(DigitalIn* in) {
     return in->port;
 }
 
+bool DigitalIn_isInverted(DigitalIn* in) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    return in->inverted;
+}
+
+void DigitalIn_setInverted(DigitalIn* in, bool value) {
+    ErrorIf(in == NULL, VEXOS_ARGNULL);
+
+    InterruptMode imode = in->interruptMode;
+    if(imode != InterruptMode_Disabled) {
+        DigitalIn_setInterruptMode(in, InterruptMode_Disabled);
+    }
+    in->inverted = value;
+    if(imode != InterruptMode_Disabled) {
+        DigitalIn_setInterruptMode(in, imode);
+    }
+}
+
 bool DigitalIn_get(DigitalIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
 
-    return GetDigitalInput(in->port);
+    return GetDigitalInput(in->port) ^ in->inverted;
 }
 
 InterruptMode DigitalIn_getInterruptMode(DigitalIn* in) {
@@ -108,16 +132,23 @@ void DigitalIn_setInterruptMode(DigitalIn* in, InterruptMode mode) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
     ErrorIf(mode < InterruptMode_Disabled || mode > InterruptMode_FallingEdge, VEXOS_ARGRANGE);
 
+    in->interruptMode = mode;
     switch(mode) {
         case InterruptMode_Disabled:
-            StopInterruptWatcher(in->port);
+            if(in->interruptMode != InterruptMode_Disabled) {
+                StopInterruptWatcher(in->port);
+            }
             break;
         case InterruptMode_RisingEdge:
         case InterruptMode_FallingEdge:
+            if(in->inverted) {
+                mode = (mode == InterruptMode_RisingEdge)? 
+                            InterruptMode_FallingEdge: 
+                            InterruptMode_RisingEdge;
+            }
             StartInterruptWatcher(in->port, mode);
             break;
     }
-    in->interruptMode = mode;
 }
 
 bool DigitalIn_getInterrupted(DigitalIn* in) {
