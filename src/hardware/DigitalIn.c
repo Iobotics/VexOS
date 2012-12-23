@@ -83,14 +83,6 @@ DigitalIn* DigitalIn_newJumper(String name, DigitalPort port) {
     return in;
 }
 
-DigitalIn* DigitalIn_delete(DigitalIn* in) {
-    if(in) {
-        Device_remove((Device*) in);
-        free(in);
-    }
-    return NULL;
-}
-
 DigitalPort DigitalIn_getPort(DigitalIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
 

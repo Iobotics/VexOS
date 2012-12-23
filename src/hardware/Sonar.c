@@ -58,14 +58,6 @@ Sonar* Sonar_new(String name, DigitalPort inputPort, DigitalPort outputPort) {
     return ret;
 }
 
-Sonar* Sonar_delete(Sonar* sonar) {
-    if(sonar) {
-        Device_remove((Device*) sonar);
-        free(sonar);
-    }
-    return NULL;
-}
-
 DigitalPort Sonar_getInputPort(Sonar* sonar) {
     ErrorIf(sonar == NULL, VEXOS_ARGNULL);
     

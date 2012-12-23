@@ -57,14 +57,6 @@ Servo* Servo_new(String name, PWMPort port) {
     return ret;
 }
 
-Servo* Servo_delete(Servo* servo) {
-    if(servo) {
-        Device_remove((Device*) servo);
-        free(servo);
-    }
-    return NULL;
-}
-
 PWMPort Servo_getPort(Servo* servo) {
     ErrorIf(servo == NULL, VEXOS_ARGNULL);
     

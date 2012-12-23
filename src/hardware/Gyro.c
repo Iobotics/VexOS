@@ -59,14 +59,6 @@ Gyro* Gyro_new(String name, AnalogPort port) {
     return ret;
 }
 
-Gyro* Gyro_delete(Gyro* gyro) {
-    if(gyro) {
-        Device_remove((Device*) gyro);
-        free(gyro);
-    }
-    return NULL;
-}
-
 AnalogPort Gyro_getPort(Gyro* gyro) {
     ErrorIf(gyro == NULL, VEXOS_ARGNULL);
     

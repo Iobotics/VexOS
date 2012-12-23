@@ -55,14 +55,6 @@ Accelerometer* Accelerometer_new(String name, AnalogPort port) {
     return ret;
 }
 
-Accelerometer* Accelerometer_delete(Accelerometer* accel) {
-    if(accel) {
-        Device_remove((Device*) accel);
-        free(accel);
-    }
-    return NULL;
-}
-
 AnalogPort Accelerometer_getPort(Accelerometer* accel) {
     ErrorIf(accel == NULL, VEXOS_ARGNULL);
     

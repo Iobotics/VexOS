@@ -39,6 +39,5 @@ void Device_addI2c(I2c, Device*);
 void Device_setPWMExpander(PWMPort, PowerExpander*);
 void Device_addUART(UARTPort, Device*);
 void Device_addVirtualDevice(Device*);
-void Device_remove(Device*);
 
 #endif // _Device_h

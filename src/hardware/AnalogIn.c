@@ -81,14 +81,6 @@ AnalogIn* AnalogIn_newLightSensor(String name, AnalogPort port) {
     return in;
 }
 
-AnalogIn* AnalogIn_delete(AnalogIn* in) {
-    if(in) {
-        Device_remove((Device*) in);
-        free(in);
-    }
-    return NULL;
-}
-
 AnalogPort AnalogIn_getPort(AnalogIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
     

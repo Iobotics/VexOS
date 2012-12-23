@@ -80,14 +80,6 @@ Encoder* Encoder_new(String name, DigitalPort port) {
     return ret;
 }
 
-Encoder* Encoder_delete(Encoder* encoder) {
-    if(encoder) {
-        Device_remove((Device*) encoder);
-        free(encoder);
-    }
-    return NULL;
-}
-
 DigitalPort Encoder_getPort(Encoder* encoder) {
     ErrorIf(encoder == NULL, VEXOS_ARGNULL);
     

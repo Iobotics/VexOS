@@ -40,6 +40,5 @@ struct Motor {
 };
 
 Motor* Motor_new(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
-Motor* Motor_delete(Motor*);
 
 #endif // _Motor_h

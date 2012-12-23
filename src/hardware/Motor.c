@@ -50,15 +50,6 @@ Motor* Motor_new(MotorGroup* group, String name, PWMPort port, MotorType type, b
     return ret;
 }
 
-Motor* Motor_delete(Motor* motor) {
-    if(motor) {
-        SetMotor(motor->port, 0);
-        Device_remove((Device*) motor);
-        free(motor);
-    }
-    return NULL;
-}
-
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/

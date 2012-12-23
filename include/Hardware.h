@@ -149,7 +149,6 @@ typedef enum {
 DigitalIn*    DigitalIn_newBump(String, DigitalPort);
 DigitalIn*    DigitalIn_newLimit(String, DigitalPort);
 DigitalIn*    DigitalIn_newJumper(String, DigitalPort);
-DigitalIn*    DigitalIn_delete(DigitalIn*);
 DigitalPort   DigitalIn_getPort(DigitalIn*);
 bool          DigitalIn_isInverted(DigitalIn*);
 void          DigitalIn_setInverted(DigitalIn*, bool);
@@ -165,7 +164,6 @@ Button*       DigitalIn_getButton(DigitalIn*);
 
 Encoder*    Encoder_newQuadrature(String, DigitalPort, DigitalPort, bool);
 Encoder*    Encoder_new(String, DigitalPort);
-Encoder*    Encoder_delete(Encoder*);
 DigitalPort Encoder_getPort(Encoder*);
 DigitalPort Encoder_getPort2(Encoder*);
 bool        Encoder_isReversed(Encoder*);
@@ -183,7 +181,6 @@ void        Encoder_preset(Encoder*, float);
  ********************************************************************/
 
 Sonar* Sonar_new(String, DigitalPort, DigitalPort);
-Sonar* Sonar_delete(Sonar*);
 DigitalPort Sonar_getInputPort(Sonar*);
 DigitalPort Sonar_getOutputPort(Sonar*);
 bool   Sonar_isEnabled(Sonar*);
@@ -200,7 +197,6 @@ float  Sonar_getDistanceCentimeters(Sonar*);
 AnalogIn*  AnalogIn_newPotentiometer(String, AnalogPort);
 AnalogIn*  AnalogIn_newLineFollower(String, AnalogPort);
 AnalogIn*  AnalogIn_newLightSensor(String, AnalogPort);
-AnalogIn*  AnalogIn_delete(AnalogIn*);
 AnalogPort AnalogIn_getPort(AnalogIn*);
 float      AnalogIn_getScaleFactor(AnalogIn*);
 void       AnalogIn_setScaleFactor(AnalogIn*, float);
@@ -216,7 +212,6 @@ void       AnalogIn_preset(AnalogIn*, float);
 #define GYRO_DEFAULT_DEADBAND 3
 
 Gyro*      Gyro_new(String, AnalogPort);
-Gyro*      Gyro_delete(Gyro*);
 AnalogPort Gyro_getPort(Gyro*);
 void       Gyro_init(Gyro*);
 bool       Gyro_isEnabled(Gyro*);
@@ -230,7 +225,6 @@ float      Gyro_getAngleDegrees(Gyro *);
  ********************************************************************/
 
 Accelerometer* Accelerometer_new(String, AnalogPort);
-Accelerometer* Accelerometer_delete(Accelerometer*);
 AnalogPort     Accelerometer_getPort(Accelerometer*);
 void           Accelerometer_init(Accelerometer*);
 bool           Accelerometer_isEnabled(Accelerometer*);
@@ -243,7 +237,6 @@ float          Accelerometer_getAccelerationG(Accelerometer*);
 
 DigitalOut* DigitalOut_newPneumaticValve(String, DigitalPort);
 DigitalOut* DigitalOut_newLED(String, DigitalPort);
-DigitalOut* DigitalOut_delete(DigitalOut*);
 DigitalPort DigitalOut_getPort(DigitalOut*);
 bool        DigitalOut_get(DigitalOut*);
 void        DigitalOut_set(DigitalOut*, bool);
@@ -277,10 +270,8 @@ typedef enum {
 } FeedbackType;
 
 MotorGroup* MotorGroup_new(String);
-MotorGroup* MotorGroup_delete(MotorGroup*);
 void        MotorGroup_add(MotorGroup*, String, PWMPort, MotorType, bool);
 void        MotorGroup_addWithIME(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
-void        MotorGroup_remove(MotorGroup*, Motor*);
 const List* MotorGroup_getMotorList(MotorGroup*);
 
 // open loop control //
@@ -323,7 +314,6 @@ void    MotorGroup_setSetpoint(MotorGroup*, float);
 #define SERVO_TRAVEL_DEGREES 100
 
 Servo*  Servo_new(String, PWMPort);
-Servo*  Servo_delete(Servo*);
 PWMPort Servo_getPort(Servo*);
 float   Servo_getAngleDegrees(Servo*);
 void    Servo_setAngleDegrees(Servo*, float);
@@ -338,7 +328,6 @@ typedef enum {
 } PowerExpanderType;
 
 PowerExpander*    PowerExpander_new(String, PowerExpanderType, AnalogPort);
-PowerExpander*    PowerExpander_delete(PowerExpander*);
 PowerExpanderType PowerExpander_getType(PowerExpander*);
 AnalogPort        PowerExpander_getStatusPort(PowerExpander*);
 void              PowerExpander_setPWMPorts(PowerExpander*, PWMPort, PWMPort, PWMPort, PWMPort);
@@ -351,7 +340,6 @@ float             PowerExpander_getBatteryVoltage(PowerExpander*);
 
 // note: there are more LCD methods in UserInterface.h //
 LCD*     LCD_new(String, UARTPort);
-LCD*     LCD_delete(LCD*);
 UARTPort LCD_getPort(LCD*);
 void     LCD_setBacklight(LCD*, bool);
 bool     LCD_getBacklight(LCD*);

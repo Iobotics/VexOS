@@ -68,14 +68,6 @@ DigitalOut* DigitalOut_newLED(String name, DigitalPort port) {
     return out;
 }
 
-DigitalOut* DigitalOut_delete(DigitalOut* out) {
-    if(out) {
-        Device_remove((Device*) out);
-        free(out);
-    }
-    return NULL;
-}
-
 DigitalPort DigitalOut_getPort(DigitalOut* out) {
     ErrorIf(out == NULL, VEXOS_ARGNULL);
     

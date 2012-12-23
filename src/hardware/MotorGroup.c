@@ -89,26 +89,6 @@ MotorGroup* MotorGroup_new(String name) {
     return ret;
 }
 
-MotorGroup* MotorGroup_delete(MotorGroup* group) {
-    if(group) {
-        Device_remove((Device*) group);
-        // free children //
-        ListNode* node = group->children->firstNode;
-        while(node != NULL) {
-            ListNode* temp = node->next;
-            MotorGroup_remove(group, node->data);
-            free(node);
-            node = temp;
-        }
-        free(group->children);
-        if(group->controller) {
-            PIDController_delete(group->controller);
-        }
-        free(group);
-    }
-    return NULL;
-}
-
 void MotorGroup_add(MotorGroup* group, String name, PWMPort port, MotorType type, bool reversed) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
@@ -138,23 +118,6 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
         case MotorType_393_HS: group->feedbackScale = (360.0 / TicksPerRev_IME_393HS); break;
         default: break;
     }
-}
-
-void MotorGroup_remove(MotorGroup* group, Motor* motor) {
-    ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(motor == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(Motor_getGroup(motor) != group, VEXOS_OPINVALID, 
-               "Motor is not part of MotorGroup: %s", motor->name);
-
-    ListNode* node = List_findNode(group->children, motor);
-    Motor_delete(motor);
-    // check for IME //
-    if(node && motor->i2c) {
-        group->feedbackDevice = NULL;
-        group->feedbackType   = FeedbackType_None;
-        group->feedbackScale  = 1.0;
-    }
-    if(node) List_remove(node);
 }
 
 const List* MotorGroup_getMotorList(MotorGroup* group) {

@@ -161,24 +161,6 @@ LCD* LCD_new(String name, UARTPort port) {
     return ret;
 }
 
-LCD* LCD_delete(LCD* lcd) {
-    if(lcd) {
-        ListNode* node = List_findNode(&lcds, lcd);
-        if(node) List_remove(node);
-        StopLCDButtonsWatcher(lcd->port);
-        Device_remove((Device*) lcd);
-        free(lcd);
-    }
-    // check for last LCD and remove handler //
-    if(lcds.nodeCount == 0) {
-        VexOS_removeEventHandler(EventType_DisabledPeriodic,   &eventCallback);
-        VexOS_removeEventHandler(EventType_AutonomousPeriodic, &eventCallback);
-        VexOS_removeEventHandler(EventType_OperatorPeriodic,   &eventCallback);
-        VexOS_removeEventHandler(EventType_SystemError,        &eventCallback);
-    }
-    return NULL;
-}
-
 UARTPort LCD_getPort(LCD* lcd) {
     ErrorIf(lcd == NULL, VEXOS_ARGNULL);
 

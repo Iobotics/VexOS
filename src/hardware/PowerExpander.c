@@ -62,14 +62,6 @@ PowerExpander* PowerExpander_new(String name, PowerExpanderType type, AnalogPort
     return ret;
 }
 
-PowerExpander* PowerExpander_delete(PowerExpander* expand) {
-    if(expand) {
-        Device_remove((Device*) expand);
-        free(expand);
-    }
-    return NULL;
-}
-
 PowerExpanderType PowerExpander_getType(PowerExpander* expand) {
     ErrorIf(expand == NULL, VEXOS_ARGNULL);
     
