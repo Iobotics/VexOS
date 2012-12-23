@@ -294,27 +294,27 @@ Device*      MotorGroup_getSensor(MotorGroup*);
 FeedbackType MotorGroup_getFeedbackType(MotorGroup*);
 bool         MotorGroup_isFeedbackEnabled(MotorGroup*);
 void         MotorGroup_setFeedbackEnabled(MotorGroup*, bool);
-double       MotorGroup_getOutputRatio(MotorGroup*);
-void         MotorGroup_setOutputRatio(MotorGroup*, double);
-double       MotorGroup_getFeedbackRatio(MotorGroup*);
-void         MotorGroup_setFeedbackRatio(MotorGroup*, double);
-double       MotorGroup_getPosition(MotorGroup*);
-void         MotorGroup_presetPosition(MotorGroup*, double);
-double       MotorGroup_getSpeed(MotorGroup*);
+float        MotorGroup_getOutputScaleFactor(MotorGroup*);
+void         MotorGroup_setOutputScaleFactor(MotorGroup*, float);
+float        MotorGroup_getFeedbackScaleFactor(MotorGroup*);
+void         MotorGroup_setFeedbackScaleFactor(MotorGroup*, float);
+float        MotorGroup_getPosition(MotorGroup*);
+void         MotorGroup_presetPosition(MotorGroup*, float);
+float        MotorGroup_getSpeed(MotorGroup*);
 
 // closed loop control //
 bool    MotorGroup_isPIDEnabled(MotorGroup*);
 void    MotorGroup_setPIDEnabled(MotorGroup*, bool);
-void    MotorGroup_setPID(MotorGroup*, double, double, double);
-double  MotorGroup_getP(MotorGroup*);
-double  MotorGroup_getI(MotorGroup*);
-double  MotorGroup_getD(MotorGroup*);
-double  MotorGroup_getError(MotorGroup*);
-double  MotorGroup_getTolerance(MotorGroup*);
-void    MotorGroup_setTolerance(MotorGroup*, double);
+void    MotorGroup_setPID(MotorGroup*, float, float, float);
+float   MotorGroup_getP(MotorGroup*);
+float   MotorGroup_getI(MotorGroup*);
+float   MotorGroup_getD(MotorGroup*);
+float   MotorGroup_getError(MotorGroup*);
+float   MotorGroup_getTolerance(MotorGroup*);
+void    MotorGroup_setTolerance(MotorGroup*, float);
 bool    MotorGroup_onTarget(MotorGroup*);
-double  MotorGroup_getSetpoint(MotorGroup*);
-void    MotorGroup_setSetpoint(MotorGroup*, double);
+float   MotorGroup_getSetpoint(MotorGroup*);
+void    MotorGroup_setSetpoint(MotorGroup*, float);
 
 /********************************************************************
  * Public API: Servo                                                *
