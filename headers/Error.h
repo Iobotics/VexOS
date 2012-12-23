@@ -67,6 +67,11 @@ String Error_getMessage();
           longjmp(ErrorEvn, errorCode); \
       }
 
+  #define RaiseError(errorCode, msg, ...) \
+      if(!ErrorFunction) ErrorFunction = __FUNCTION__; \
+      asprintf((char **) &ErrorMessage, msg, ##__VA_ARGS__); \
+      longjmp(ErrorEvn, errorCode);
+
   #define ErrorEntryPoint() \
       ErrorFunction = __FUNCTION__;
 
@@ -83,6 +88,9 @@ String Error_getMessage();
 
   #define ErrorMsgIf(test, errorCode, msg, ...) \
       if(test) longjmp(ErrorEvn, errorCode);
+
+  #define RaiseError(errorCode, msg, ...) \
+      longjmp(ErrorEvn, errorCode);
 
   #define ErrorEntryPoint()
   #define ErrorEntryClear()
