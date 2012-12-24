@@ -73,6 +73,9 @@ static List processList;
 // no attempt was made to optimize this ISR, test it as is, then optimize if //
 // it starts to cause problems for the rest of the code.                     //
 static void processISR() {
+    // do not run during computations //
+    if(VexOS_getRunMode() <= RunMode_Initialize) return;
+
     // general IME data //
     if(imeCapture && imeCount > 0) {
         GetIntegratedMotorEncodersData(ime);
