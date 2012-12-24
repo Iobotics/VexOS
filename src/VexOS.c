@@ -58,7 +58,6 @@ static String programName;
 
 static void loopStart() {
     loopCount = 0;
-    Dashboard_refresh();
 }
 
 static void loopPeriodic() {

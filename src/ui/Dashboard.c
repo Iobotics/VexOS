@@ -87,7 +87,11 @@ static void drawBackground() {
     }
 }
 
-static void eventCallback(EventType type, void* state) {
+static void startCallback(EventType type, void* state) {
+    Dashboard_refresh();
+}
+
+static void periodicCallback(EventType type, void* state) {
     static unsigned long nextTime = 0;
     unsigned long time = GetMsClock();
     
@@ -136,10 +140,16 @@ Dashboard* Dashboard_new(String name) {
     
     // check for first LCD and install handler //
     if(dashboards.nodeCount == 1) {
-        VexOS_addEventHandler(EventType_DisabledPeriodic,   &eventCallback, NULL);
-        VexOS_addEventHandler(EventType_AutonomousPeriodic, &eventCallback, NULL);
-        VexOS_addEventHandler(EventType_OperatorPeriodic,   &eventCallback, NULL);
-        VexOS_addEventHandler(EventType_SystemError,        &errorCallback, NULL);
+        // set the start update event //
+        VexOS_addEventHandler(EventType_DisabledStart,   &startCallback, NULL);
+        VexOS_addEventHandler(EventType_AutonomousStart, &startCallback, NULL);
+        VexOS_addEventHandler(EventType_OperatorStart,   &startCallback, NULL);
+        // set the periodic update event //
+        VexOS_addEventHandler(EventType_DisabledPeriodic,   &periodicCallback, NULL);
+        VexOS_addEventHandler(EventType_AutonomousPeriodic, &periodicCallback, NULL);
+        VexOS_addEventHandler(EventType_OperatorPeriodic,   &periodicCallback, NULL);
+        // set the system error trap //
+        VexOS_addEventHandler(EventType_SystemError, &errorCallback, NULL);
     }
     
     return ret;
@@ -153,10 +163,13 @@ Dashboard* Dashboard_delete(Dashboard* dash) {
     }
     // check for last LCD and remove handler //
     if(dashboards.nodeCount == 0) {
-        VexOS_removeEventHandler(EventType_DisabledPeriodic,   &eventCallback);
-        VexOS_removeEventHandler(EventType_AutonomousPeriodic, &eventCallback);
-        VexOS_removeEventHandler(EventType_OperatorPeriodic,   &eventCallback);
-        VexOS_removeEventHandler(EventType_SystemError,        &eventCallback);
+        VexOS_removeEventHandler(EventType_DisabledStart,      &startCallback);
+        VexOS_removeEventHandler(EventType_AutonomousStart,    &startCallback);
+        VexOS_removeEventHandler(EventType_OperatorStart,      &startCallback);
+        VexOS_removeEventHandler(EventType_DisabledPeriodic,   &periodicCallback);
+        VexOS_removeEventHandler(EventType_AutonomousPeriodic, &periodicCallback);
+        VexOS_removeEventHandler(EventType_OperatorPeriodic,   &periodicCallback);
+        VexOS_removeEventHandler(EventType_SystemError,        &errorCallback);
     }
     return NULL;
 }
