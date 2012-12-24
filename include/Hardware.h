@@ -292,6 +292,7 @@ void         MotorGroup_setFeedbackScaleFactor(MotorGroup*, float);
 float        MotorGroup_getPosition(MotorGroup*);
 void         MotorGroup_presetPosition(MotorGroup*, float);
 float        MotorGroup_getSpeed(MotorGroup*);
+void         MotorGroup_restorePosition(MotorGroup*);
 
 // closed loop control //
 bool    MotorGroup_isPIDEnabled(MotorGroup*);

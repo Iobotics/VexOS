@@ -46,6 +46,10 @@
 #define GLOBALDATA_DASH_NUMBER      19
 #define GLOBALDATA_LCD_SCREEN       18
 #define GLOBALDATA_DEBUG_VALUE      17
+// saved non-IME MotorGroup PID positions grow upwards from this //
+// value. this means there are effectively 5 slots available if  //
+// the other VexOS state values are used.                        //
+#define GLOBALDATA_MOTORGROUP_STATE 12
 
 /********************************************************************
  * Public Object Definitions                                        *

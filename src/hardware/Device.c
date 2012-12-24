@@ -224,6 +224,7 @@ void Device_configureCortex() {
 
     // if we are using IMEs, initialize them //
     if(initIMEs) {
+        SetSaveCompetitionIme(true); // save state //
         InitIntegratedMotorEncoders();
     }
 }

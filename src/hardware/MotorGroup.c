@@ -57,6 +57,7 @@ struct MotorGroup {
     bool           feedbackEnabled;
     FeedbackType   feedbackType;
     Device*        feedbackDevice;
+    unsigned char  globaldataSlot;
     float          outputScale;
     float          feedbackScale;
     PIDData        pidData;
@@ -65,6 +66,7 @@ struct MotorGroup {
 };
 
 // internal state fields //
+static char globaldataNextSlot = GLOBALDATA_MOTORGROUP_STATE;
 static ImeData ime[MAX_IME];
 static bool          imeCapture;
 static unsigned char imeCount;
@@ -84,6 +86,7 @@ static void processISR() {
     ListNode* node  = processList.firstNode;
     ListNode* mnode = NULL;
     PIDData pid;
+    long sensor;
     while(node != NULL) {
         MotorGroup* group = node->data;
         switch(group->feedbackType) {
@@ -111,12 +114,16 @@ static void processISR() {
                 pid = group->pidData;
                 if(!pid.enabled) break;
                 
-                // compute error //
+                // get sensor value and save to globalData //
                 if(group->feedbackType == FeedbackType_Encoder) {
-                    pid.error = pid.setpoint - Encoder_getRaw((Encoder*) group->feedbackDevice);
+                    sensor = Encoder_getRaw((Encoder*) group->feedbackDevice);
                 } else {
-                    pid.error = pid.setpoint - AnalogIn_getRaw((AnalogIn*) group->feedbackDevice);
+                    sensor = AnalogIn_getRaw((AnalogIn*) group->feedbackDevice);
                 }
+                GlobalData(group->globaldataSlot) = sensor;
+
+                // compute error //
+                pid.error = pid.setpoint - sensor;
                 
                 // handle I //
                 if(((pid.sigmaError + pid.error) * group->kI < MAX_MOTOR_POWER)
@@ -189,6 +196,7 @@ MotorGroup* MotorGroup_new(String name) {
     ret->feedbackEnabled = false;
     ret->feedbackType    = FeedbackType_None;
     ret->feedbackDevice  = NULL;
+    ret->globaldataSlot  = 0;
     ret->outputScale     = 1.0;
     ret->feedbackScale   = 1.0;
     memset(&ret->pidData, 0, sizeof(PIDData));
@@ -283,6 +291,7 @@ void MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder) {
     group->feedbackType   = FeedbackType_Encoder;
     group->feedbackDevice = device;
     group->feedbackScale  = Encoder_getScaleFactor(encoder);
+    group->globaldataSlot = globaldataNextSlot++;
 }
 
 void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
@@ -296,6 +305,7 @@ void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
     group->feedbackType   = FeedbackType_Potentiometer;
     group->feedbackDevice = device;
     group->feedbackScale  = AnalogIn_getScaleFactor(pot);
+    group->globaldataSlot = globaldataNextSlot++;
 }
 
 Device* MotorGroup_getSensor(MotorGroup* group) {
@@ -431,6 +441,29 @@ float MotorGroup_getSpeed(MotorGroup* group) {
             RaiseError(VEXOS_OPINVALID, "Not supported with current feedback mechanism");
         default: 
             return 0.0;
+    }
+}
+
+void MotorGroup_restorePosition(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+    ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
+               "MotorGroup has no feedback mechanism: %s", group->name);
+
+    Device* device = group->feedbackDevice;
+    PWMPort port;
+    switch(group->feedbackType) {
+        case FeedbackType_IME:
+            port = ((Motor*) device)->port;
+            PresetIntegratedMotorEncoder(port, GetSavedCompetitionIme(port));
+            break;
+        case FeedbackType_Encoder:
+            Encoder_presetRaw((Encoder*) device, GlobalData(group->globaldataSlot));
+            break;
+        case FeedbackType_Potentiometer:
+            AnalogIn_presetRaw((AnalogIn*) device, GlobalData(group->globaldataSlot));
+            break;
+        default: 
+            break;
     }
 }
 
