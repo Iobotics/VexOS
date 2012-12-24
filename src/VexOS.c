@@ -146,7 +146,7 @@ unsigned long VexOS_getRunTime() {
     return (unsigned long) (lastTime / 1000);
 }
 
-double VexOS_getLoopFrequency() {
+float VexOS_getLoopFrequency() {
     return (1000.0 * LOOP_SAMPLE / loopTime);
 }
 

@@ -88,7 +88,7 @@ unsigned char Joystick_getId(Joystick* stick) {
     return stick->id;
 }
 
-double Joystick_getX(Joystick* stick, JoystickHand hand) {
+float Joystick_getX(Joystick* stick, JoystickHand hand) {
     ErrorIf(stick == NULL, VEXOS_ARGNULL);
 
     if(hand == JoystickHand_Left) {
@@ -98,13 +98,41 @@ double Joystick_getX(Joystick* stick, JoystickHand hand) {
     }
 }
 
-double Joystick_getY(Joystick* stick, JoystickHand hand) {
+float Joystick_getY(Joystick* stick, JoystickHand hand) {
     ErrorIf(stick == NULL, VEXOS_ARGNULL);
 
     if(hand == JoystickHand_Left) {
         return GetJoystickAnalog(stick->id, JoystickChannelType_LeftY) / MAX_JOYSTICK_POWER;
     } else {
         return GetJoystickAnalog(stick->id, JoystickChannelType_RightY) / MAX_JOYSTICK_POWER;
+    }
+}
+
+void Joystick_setXDeadband(Joystick* stick, JoystickHand hand, float lower, float upper) {
+    ErrorIf(stick == NULL, VEXOS_ARGNULL);
+    ErrorIf(lower < -1.0 || lower > 0, VEXOS_ARGRANGE);
+    ErrorIf(upper > 1.0 || upper < 0, VEXOS_ARGRANGE);
+
+    if(hand == JoystickHand_Left) {
+        SetJoystickAnalogDeadband(stick->id, JoystickChannelType_LeftX, 
+                lower * MAX_JOYSTICK_POWER, upper * MAX_JOYSTICK_POWER);
+    } else {
+        SetJoystickAnalogDeadband(stick->id, JoystickChannelType_RightX, 
+                lower * MAX_JOYSTICK_POWER, upper * MAX_JOYSTICK_POWER);
+    }
+}
+
+void Joystick_setYDeadband(Joystick* stick, JoystickHand hand, float lower, float upper) {
+    ErrorIf(stick == NULL, VEXOS_ARGNULL);
+    ErrorIf(lower < -1.0 || lower > 0, VEXOS_ARGRANGE);
+    ErrorIf(upper > 1.0 || upper < 0, VEXOS_ARGRANGE);
+
+    if(hand == JoystickHand_Left) {
+        SetJoystickAnalogDeadband(stick->id, JoystickChannelType_LeftY, 
+                lower * MAX_JOYSTICK_POWER, upper * MAX_JOYSTICK_POWER);
+    } else {
+        SetJoystickAnalogDeadband(stick->id, JoystickChannelType_RightY, 
+                lower * MAX_JOYSTICK_POWER, upper * MAX_JOYSTICK_POWER);
     }
 }
 
@@ -124,14 +152,32 @@ bool Joystick_getRawButton(Joystick* stick, JoystickHand hand, JoystickButtonTyp
     return GetJoystickDigital(stick->id, data.channel, data.button);
 }
 
-double Joystick_getAccelerometerX(Joystick* stick) {
+float Joystick_getAccelerometerX(Joystick* stick) {
     ErrorIf(stick == NULL, VEXOS_ARGNULL);
 
     return GetJoystickAccelerometer(stick->id, JOYSTICK_ACCEL_X) / MAX_JOYSTICK_ACCEL;
 }
 
-double Joystick_getAccelerometerY(Joystick* stick) {
+float Joystick_getAccelerometerY(Joystick* stick) {
     ErrorIf(stick == NULL, VEXOS_ARGNULL);
 
     return GetJoystickAccelerometer(stick->id, JOYSTICK_ACCEL_Y) / MAX_JOYSTICK_ACCEL;
+}
+
+void Joystick_setAccelerometerXDeadband(Joystick* stick, float lower, float upper) {
+    ErrorIf(stick == NULL, VEXOS_ARGNULL);
+    ErrorIf(lower < -1.0 || lower > 0, VEXOS_ARGRANGE);
+    ErrorIf(upper > 1.0 || upper < 0, VEXOS_ARGRANGE);
+
+    SetJoystickAccelDeadband(stick->id, JOYSTICK_ACCEL_X, 
+                lower * MAX_JOYSTICK_ACCEL, upper * MAX_JOYSTICK_ACCEL);
+}
+
+void Joystick_setAccelerometerYDeadband(Joystick* stick, float lower, float upper) {
+    ErrorIf(stick == NULL, VEXOS_ARGNULL);
+    ErrorIf(lower < -1.0 || lower > 0, VEXOS_ARGRANGE);
+    ErrorIf(upper > 1.0 || upper < 0, VEXOS_ARGRANGE);
+
+    SetJoystickAccelDeadband(stick->id, JOYSTICK_ACCEL_Y, 
+                lower * MAX_JOYSTICK_ACCEL, upper * MAX_JOYSTICK_ACCEL);
 }

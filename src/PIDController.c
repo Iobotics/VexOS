@@ -43,19 +43,19 @@ struct PIDController {
     // state object //
     void* state;
     // configuration fields //
-    double p, i, d;
-    double period;
-    double minOutput, maxOutput;
-    double minInput, maxInput;
+    float p, i, d;
+    float period;
+    float minOutput, maxOutput;
+    float minInput, maxInput;
     bool isContinuous;
     bool enabled;
-    double tolerance;
-    double setpoint;
+    float tolerance;
+    float setpoint;
     PIDInput* pidInput;
     PIDOutput* pidOutput;
     // state fields //
-    double error, prevError, totalError;
-    double result;
+    float error, prevError, totalError;
+    float result;
 };
 
 /********************************************************************
@@ -108,7 +108,7 @@ static void pidISR() {
  * Public API                                                       *
  ********************************************************************/
 
-PIDController* PIDController_new(double p, double i, double d, PIDInput input, PIDOutput output, void* state) {
+PIDController* PIDController_new(float p, float i, float d, PIDInput input, PIDOutput output, void* state) {
     ErrorIf(p < 0.0, VEXOS_ARGRANGE);
     ErrorIf(i < 0.0, VEXOS_ARGRANGE);
     ErrorIf(d < 0.0, VEXOS_ARGRANGE);
@@ -164,37 +164,37 @@ void* PIDController_getState(PIDController* pid) {
     return pid->state;
 }
 
-double PIDController_get(PIDController* pid) {
+float PIDController_get(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->result;
 }
 
-double PIDController_getError(PIDController* pid) {
+float PIDController_getError(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->error;
 }
 
-double PIDController_getP(PIDController* pid) {
+float PIDController_getP(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->p;
 }
 
-double PIDController_getI(PIDController* pid) {
+float PIDController_getI(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->i;
 }
 
-double PIDController_getD(PIDController* pid) {
+float PIDController_getD(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->d;
 }
 
-double PIDController_getSetpoint(PIDController* pid) {
+float PIDController_getSetpoint(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     return pid->setpoint;
@@ -242,7 +242,7 @@ void PIDController_setEnabled(PIDController* pid, bool value) {
     pid->enabled = value;
 }
 
-void PIDController_setInputRange(PIDController* pid, double min, double max) {
+void PIDController_setInputRange(PIDController* pid, float min, float max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
 
@@ -251,7 +251,7 @@ void PIDController_setInputRange(PIDController* pid, double min, double max) {
     PIDController_setSetpoint(pid, pid->setpoint);
 }
 
-void PIDController_setOutputRange(PIDController* pid, double min, double max) {
+void PIDController_setOutputRange(PIDController* pid, float min, float max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
 
@@ -259,7 +259,7 @@ void PIDController_setOutputRange(PIDController* pid, double min, double max) {
     pid->maxOutput = max;
 }
 
-void PIDController_setPID(PIDController* pid, double p, double i, double d) {
+void PIDController_setPID(PIDController* pid, float p, float i, float d) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     ErrorIf(p < 0.0, VEXOS_ARGRANGE);
     ErrorIf(i < 0.0, VEXOS_ARGRANGE);
@@ -270,7 +270,7 @@ void PIDController_setPID(PIDController* pid, double p, double i, double d) {
     pid->d = d;
 }
 
-void PIDController_setSetpoint(PIDController* pid, double setpoint) {
+void PIDController_setSetpoint(PIDController* pid, float setpoint) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
     if(pid->maxInput > pid->minInput) {
@@ -286,7 +286,7 @@ void PIDController_setSetpoint(PIDController* pid, double setpoint) {
     }
 }
 
-void PIDController_setTolerance(PIDController* pid, double tolerance) {
+void PIDController_setTolerance(PIDController* pid, float tolerance) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     ErrorIf(tolerance < 0 || tolerance > 1, VEXOS_ARGRANGE);
     

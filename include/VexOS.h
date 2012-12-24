@@ -102,7 +102,7 @@ typedef void (EventHandler)(EventType, void*);
 // main system functions //
 RunMode       VexOS_getRunMode();
 unsigned long VexOS_getRunTime();
-double        VexOS_getLoopFrequency();
+float         VexOS_getLoopFrequency();
 String        VexOS_getProgramName();
 void          VexOS_setProgramName(String);
 
@@ -242,12 +242,16 @@ typedef enum {
 Joystick*     Joystick_new(unsigned char);
 Joystick*     Joystick_delete(Joystick*);
 unsigned char Joystick_getId(Joystick*);
-double        Joystick_getX(Joystick*, JoystickHand);
-double        Joystick_getY(Joystick*, JoystickHand);
+float         Joystick_getX(Joystick*, JoystickHand);
+float         Joystick_getY(Joystick*, JoystickHand);
+void          Joystick_setXDeadband(Joystick*, JoystickHand, float, float); 
+void          Joystick_setYDeadband(Joystick*, JoystickHand, float, float);
 Button*       Joystick_getButton(Joystick*, JoystickHand, JoystickButtonType);
 bool          Joystick_getRawButton(Joystick*, JoystickHand, JoystickButtonType);
-double        Joystick_getAccelerometerX(Joystick*);
-double        Joystick_getAccelerometerY(Joystick*);
+float         Joystick_getAccelerometerX(Joystick*);
+float         Joystick_getAccelerometerY(Joystick*);
+void          Joystick_setAccelerometerXDeadband(Joystick*, float, float); 
+void          Joystick_setAccelerometerYDeadband(Joystick*, float, float);
     
 /********************************************************************
  * Public API: PowerScaler                                          *
@@ -283,29 +287,29 @@ void        DebugValue_set(DebugValue*, ...);
 
 #define PID_PERIOD  0.05
 
-typedef double (PIDInput)(void*);
-typedef void (PIDOutput)(void*, double);
+typedef float (PIDInput)(void*);
+typedef void (PIDOutput)(void*, float);
 
-PIDController* PIDController_new(double, double, double, PIDInput, PIDOutput, void*);
+PIDController* PIDController_new(float, float, float, PIDInput, PIDOutput, void*);
 PIDController* PIDController_delete(PIDController*);
 void*   PIDController_getState(PIDController*);
-double  PIDController_get(PIDController*);
-double  PIDController_getError(PIDController*);
-double  PIDController_getP(PIDController*);
-double  PIDController_getI(PIDController*);
-double  PIDController_getD(PIDController*);
-double  PIDController_getSetpoint(PIDController*);
+float   PIDController_get(PIDController*);
+float   PIDController_getError(PIDController*);
+float   PIDController_getP(PIDController*);
+float   PIDController_getI(PIDController*);
+float   PIDController_getD(PIDController*);
+float   PIDController_getSetpoint(PIDController*);
 bool    PIDController_onTarget(PIDController*);
 void    PIDController_reset(PIDController*);
 bool    PIDController_isContinuous(PIDController*);
 void    PIDController_setContinuous(PIDController*, bool);
 bool    PIDController_isEnabled(PIDController*);
 void    PIDController_setEnabled(PIDController*, bool);
-void    PIDController_setInputRange(PIDController*, double, double);
-void    PIDController_setOutputRange(PIDController*, double, double);
-void    PIDController_setPID(PIDController*, double, double, double);
-void    PIDController_setSetpoint(PIDController*, double);
-void    PIDController_setTolerance(PIDController*, double);
+void    PIDController_setInputRange(PIDController*, float, float);
+void    PIDController_setOutputRange(PIDController*, float, float);
+void    PIDController_setPID(PIDController*, float, float, float);
+void    PIDController_setSetpoint(PIDController*, float);
+void    PIDController_setTolerance(PIDController*, float);
 
 /********************************************************************
  * Public API: Timer                                                  *
