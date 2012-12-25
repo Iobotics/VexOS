@@ -38,7 +38,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(WaitUntilCommand, {
+DefineCommandClass(WaitUntilCommand, {
     unsigned long gameTime;
 });
 

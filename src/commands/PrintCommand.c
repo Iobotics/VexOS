@@ -39,7 +39,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(PrintCommand, {
+DefineCommandClass(PrintCommand, {
     String msg;
 });
 

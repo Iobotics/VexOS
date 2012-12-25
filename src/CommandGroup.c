@@ -30,7 +30,7 @@
  * Class Declaration                                                *
  ********************************************************************/
 
-DeclareCommandClass(CommandGroup, {
+DefineCommandClass(CommandGroup, {
     String    name;
     List      commands;
     List      children;

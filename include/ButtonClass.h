@@ -55,7 +55,7 @@ struct Button {
  * User-friendliness Inheritance Macros                             *
  ********************************************************************/
 
-#define DeclareButtonClass(class, ...) \
+#define DefineButtonClass(class, ...) \
     static void constructor(va_list); \
     static bool get(); \
     static Button* self; \

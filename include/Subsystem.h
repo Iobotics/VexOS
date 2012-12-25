@@ -57,7 +57,7 @@ void Subsystem_setDefaultCommand(Subsystem*, Command*);
  * User-friendliness Singleton Definition Macros                    *
  ********************************************************************/
 
-#define DeclareSubsystem(class) \
+#define DefineSubsystem(class) \
     static void constructor(); \
     static void initDefaultCommand(); \
     static Subsystem* self; \

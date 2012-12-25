@@ -38,7 +38,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareButtonClass(JoystickButton, {
+DefineButtonClass(JoystickButton, {
     unsigned char joystick;
     unsigned char channel;
     unsigned char button;

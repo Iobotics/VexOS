@@ -370,7 +370,7 @@ struct Robot {
     void (*initialize)();
 };
 
-#define DeclareRobot(...) \
+#define DefineRobot(...) \
     static Subsystem* subsystems[] = { __VA_ARGS__, NULL }; \
     static void constructor(); \
     static void initialize(); \
@@ -380,13 +380,13 @@ struct Robot {
         .initialize  = &initialize \
     };
 
-#define SubsystemHeader(class) \
+#define DeclareSubsystem(class) \
     extern Subsystem class;
 
-#define CommandHeader(class) \
+#define DeclareCommandClass(class) \
     extern CommandClass class;
 
-#define ButtonHeader(class) \
+#define DeclareButtonClass(class) \
     extern ButtonClass class;
 
 
@@ -395,16 +395,16 @@ struct Robot {
  ********************************************************************/
 
 // commands //
-CommandHeader(CommandGroup);
-CommandHeader(PrintCommand);
-CommandHeader(StartCommand);
-CommandHeader(WaitCommand);
-CommandHeader(WaitForChildren);
-CommandHeader(WaitUntilCommand);
+DeclareCommandClass(CommandGroup);
+DeclareCommandClass(PrintCommand);
+DeclareCommandClass(StartCommand);
+DeclareCommandClass(WaitCommand);
+DeclareCommandClass(WaitForChildren);
+DeclareCommandClass(WaitUntilCommand);
 
 // buttons //
-ButtonHeader(DigitalIOButton);
-ButtonHeader(InternalButton);
-ButtonHeader(JoystickButton);
+DeclareButtonClass(DigitalIOButton);
+DeclareButtonClass(InternalButton);
+DeclareButtonClass(JoystickButton);
 
 #endif // _VexOS_H

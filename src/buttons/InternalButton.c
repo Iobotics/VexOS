@@ -37,7 +37,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareButtonClass(InternalButton, {
+DefineButtonClass(InternalButton, {
     bool state;
 });
 

@@ -36,7 +36,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(WaitCommand, { });
+DefineCommandClass(WaitCommand, { });
 
 static void constructor(va_list argp) {
     unsigned long timeout = va_arg(argp, unsigned long);

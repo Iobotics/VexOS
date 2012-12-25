@@ -36,7 +36,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(StartCommand, {
+DefineCommandClass(StartCommand, {
     Command* command;
 });
 

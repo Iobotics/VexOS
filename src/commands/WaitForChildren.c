@@ -37,7 +37,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(WaitForChildren, { });
+DefineCommandClass(WaitForChildren, { });
 
 static void constructor(va_list argp) { }
 

@@ -62,7 +62,7 @@ struct Command {
  * User-friendliness Inheritance Macros                             *
  ********************************************************************/
 
-#define DeclareCommandClass(class, ...) \
+#define DefineCommandClass(class, ...) \
     static void constructor(va_list); \
     static void initialize(); \
     static void execute(); \
@@ -113,7 +113,7 @@ struct Command {
         Command_setInterruptible(self, value); \
     }
 
-#define DeclareCommandGroup(class) \
+#define DefineCommandGroup(class) \
     static void constructor(va_list); \
     static Command* self; \
     CommandClass class = { \

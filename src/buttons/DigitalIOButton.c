@@ -39,7 +39,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareButtonClass(DigitalIOButton, {
+DefineButtonClass(DigitalIOButton, {
     DigitalPort port;
 });
 
