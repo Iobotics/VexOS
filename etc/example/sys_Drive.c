@@ -14,7 +14,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareSubsystem(Drive);
+DefineSubsystem(Drive);
 
 static MotorGroup* leftDrive;
 static MotorGroup* rightDrive;
@@ -60,6 +60,7 @@ void Drive_move(int inches) {
 void Drive_turn(int degrees) {
     // FIXME //
 }
+
 
 
 

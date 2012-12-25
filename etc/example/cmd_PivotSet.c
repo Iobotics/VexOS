@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(PivotSet, {
+DefineCommandClass(PivotSet, {
     PivotPosition pos;
 });
 
@@ -36,6 +36,7 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
 
 
 

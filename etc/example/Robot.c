@@ -10,9 +10,10 @@
 #include "Robot.h"
 #include "API.h"
 
-DeclareRobot(&Drive, &Lift, &Intake, &Pivot);
+DefineRobot(&Drive, &Lift, &Intake, &Pivot);
 
 Joystick* joystick;
+
 static PowerExpander* expander;
 static LCD* lcd;
 
@@ -65,8 +66,4 @@ static void initialize() {
     VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
 #endif
 }
-
-
-
-
 

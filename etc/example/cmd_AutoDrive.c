@@ -14,7 +14,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(AutoDrive, { });
+DefineCommandClass(AutoDrive, { });
 
 static void constructor(va_list argp) {
     require(&Drive);
@@ -35,6 +35,7 @@ static void end() {
 }
 
 static void interrupted() { }
+
 
 
 

@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(DriveWithJoystick, { });
+DefineCommandClass(DriveWithJoystick, { });
 
 static void constructor(va_list argp) {
     require(&Drive);
@@ -35,6 +35,7 @@ static void end() {
 }
 
 static void interrupted() { }
+
 
 
 

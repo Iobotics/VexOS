@@ -19,7 +19,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareSubsystem(Lift);
+DefineSubsystem(Lift);
 
 static LiftPosition currentPos = LiftPosition_Ground;
 static MotorGroup*  left;
@@ -29,15 +29,18 @@ static DigitalIn*   resetSwitch;
 static void constructor() {
     left  = MotorGroup_new("lift left");
     MotorGroup_addWithIME(left, "lift left", MOTOR_LIFT_L, MotorType_393_HS, false, I2c_1);
-    MotorGroup_setOutputRatio(left, 12.0 / 84.0);
+    MotorGroup_setOutputScaleFactor(left, 12.0 / 84.0);
     MotorGroup_setPID(left, Kp, Ki, Kd);
 
     right = MotorGroup_new("lift right");
     MotorGroup_addWithIME(right, "lift right", MOTOR_LIFT_R, MotorType_393_HS, true, I2c_2);
-    MotorGroup_setOutputRatio(right, 12.0 / 84.0);
+    MotorGroup_setOutputScaleFactor(right, 12.0 / 84.0);
     MotorGroup_setPID(right, Kp, Ki, Kd);
 
     resetSwitch = DigitalIn_newLimit("reset switch", DIGITAL_LIFT_RESET);
+
+    MotorGroup_setPIDEnabled(left, true);
+    MotorGroup_setPIDEnabled(right, true);
 }
 
 static void initDefaultCommand() { }
@@ -86,6 +89,8 @@ bool Lift_getOnTarget() {
 bool Lift_getResetSwitch() {
     return DigitalIn_get(resetSwitch);
 }
+
+
 
 
 

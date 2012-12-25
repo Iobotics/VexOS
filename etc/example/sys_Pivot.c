@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareSubsystem(Pivot);
+DefineSubsystem(Pivot);
 
 static PivotPosition currentPos = PivotPosition_Down;
 static DigitalOut* valve;
@@ -47,6 +47,7 @@ void Pivot_setPosition(PivotPosition pos) {
 PivotPosition Pivot_getPosition() {
     return currentPos;
 }
+
 
 
 

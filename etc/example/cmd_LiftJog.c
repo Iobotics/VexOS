@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(LiftJog, {
+DefineCommandClass(LiftJog, {
     LiftJogDirection dir;
 });
 
@@ -58,6 +58,7 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
 
 
 

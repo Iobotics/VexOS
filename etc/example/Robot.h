@@ -34,23 +34,23 @@
 #define LCD_PORT            UARTPort_1
 
 // command class declarations //
-CommandHeader(DriveWithJoystick);
-CommandHeader(AutoDrive);
-CommandHeader(SetIntake);
-CommandHeader(PivotSet);
+DeclareCommandClass(DriveWithJoystick);
+DeclareCommandClass(AutoDrive);
+DeclareCommandClass(SetIntake);
+DeclareCommandClass(PivotSet);
 typedef enum {
     LiftJogDirection_Up,
     LiftJogDirection_Down
 } LiftJogDirection;
-CommandHeader(LiftJog);
-CommandHeader(GroupTest);
+DeclareCommandClass(LiftJog);
+DeclareCommandClass(GroupTest);
 
 // drive subsystem //
-SubsystemHeader(Drive);
+DeclareSubsystem(Drive);
 void Drive_setPower(Power left, Power right);
 
 // intake subsystem //
-SubsystemHeader(Intake);
+DeclareSubsystem(Intake);
 typedef enum {
     IntakeDirection_Stop,
     IntakeDirection_Suck,
@@ -59,7 +59,7 @@ typedef enum {
 IntakeDirection Intake_getDirection();
 void Intake_setDirection(IntakeDirection dir);
 
-SubsystemHeader(Lift);
+DeclareSubsystem(Lift);
 typedef enum {
     LiftPosition_Ground   = 0,
     LiftPosition_Descore  = 60,
@@ -73,7 +73,7 @@ void Lift_resetEncoders();
 bool Lift_getResetSwitch();
 bool Lift_getOnTarget();
 
-SubsystemHeader(Pivot);
+DeclareSubsystem(Pivot);
 typedef enum {
     PivotPosition_Down = 5,
     PivotPosition_Up
@@ -84,5 +84,6 @@ PivotPosition Pivot_getPosition();
 extern Joystick* joystick;
 
 #endif
+
 
 

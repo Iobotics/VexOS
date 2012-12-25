@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandClass(SetIntake, {
+DefineCommandClass(SetIntake, {
     IntakeDirection dir;
 });
 
@@ -38,6 +38,7 @@ static bool isFinished() {
 static void end() { }
 
 static void interrupted() { }
+
 
 
 

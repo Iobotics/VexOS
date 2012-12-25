@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareCommandGroup(GroupTest);
+DefineCommandGroup(GroupTest);
 
 static void constructor(va_list argp) {
     CommandGroup_addSequentialWithTimeout(self, Command_new(&WaitCommand, 5500), 2800);
@@ -24,5 +24,9 @@ static void constructor(va_list argp) {
     CommandGroup_addSequential(self, Command_new(&WaitForChildren));
     CommandGroup_addSequential(self, Command_new(&PrintCommand, "Hello Yeah!"));
     CommandGroup_addSequential(self, Command_new(&WaitCommand, 7000));
+
+    setName("Will Kaialua");
 }
+
+
 

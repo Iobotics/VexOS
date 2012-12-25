@@ -13,7 +13,7 @@
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareSubsystem(Intake);
+DefineSubsystem(Intake);
 
 static IntakeDirection currentDir = IntakeDirection_Stop;
 static MotorGroup* motors;
@@ -60,6 +60,7 @@ void Intake_setDirection(IntakeDirection dir) {
     }
     currentDir = dir;
 }
+
 
 
 
