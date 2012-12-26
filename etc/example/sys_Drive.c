@@ -22,7 +22,7 @@ static MotorGroup* rightDrive;
 static DebugValue* lDebug;
 static DebugValue* rDebug;
 
-static void constructor(va_list argp) {
+static void constructor() {
     leftDrive  = MotorGroup_new("left drive");
     MotorGroup_add(leftDrive, "left top", MOTOR_DRIVE_L_IME, MotorType_393_HS, false);
     MotorGroup_add(leftDrive, "left middle", MOTOR_DRIVE_L_1, MotorType_393_HS, true);
