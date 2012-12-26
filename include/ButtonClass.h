@@ -23,7 +23,6 @@
 #define _ButtonClass_h
 
 #include "VexOS.h"
-#include "Error.h"
 
 /********************************************************************
  * ButtonClass Structures                                           *
@@ -81,10 +80,7 @@ struct Button {
         va_start(argp, fmt); \
         Button_setvName(self, fmt, argp); \
         va_end(argp); \
-    } \
-    static void checkInstance(Button* button) { \
-        ErrorIf(button->class != &xclass, VEXOS_OBJTYPE); \
-    }
+    } 
 
 /********************************************************************
  * GCC Compiler Pragmas                                             *

@@ -23,7 +23,6 @@
 #define _CommandClass_h
 
 #include "VexOS.h"
-#include "Error.h"
 
 /********************************************************************
  * CommandClass Structures                                          *
@@ -112,10 +111,7 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
-    } \
-    static void checkInstance(Command* cmd) { \
-        ErrorIf(cmd->class != &xclass, VEXOS_OBJTYPE); \
-    }
+    } 
 
 #define DefineCommandGroup(xclass) \
     static void constructor(va_list); \
@@ -142,10 +138,7 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
-    } \
-    static void checkInstance(Command* cmd) { \
-        ErrorIf(cmd->class != &xclass, VEXOS_OBJTYPE); \
-    }
+    } 
 
 /********************************************************************
  * GCC Compiler Pragmas                                             *
