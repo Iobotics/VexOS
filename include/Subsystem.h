@@ -50,7 +50,6 @@ struct Subsystem {
 
 extern List Subsystems;
 
-Command* Subsystem_getDefaultCommand(Subsystem*);
 void Subsystem_setDefaultCommand(Subsystem*, Command*);
 
 /********************************************************************

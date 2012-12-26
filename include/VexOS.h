@@ -220,6 +220,7 @@ void InternalButton_set(Button*, bool);
 String   Subsystem_getName(Subsystem*);
 bool     Subsystem_isInitialized(Subsystem*);
 Command* Subsystem_getCurrentCommand(Subsystem*);
+Command* Subsystem_getDefaultCommand(Subsystem*);
 
 /********************************************************************
  * Public API: Joystick                                             *
