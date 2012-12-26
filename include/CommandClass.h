@@ -23,6 +23,7 @@
 #define _CommandClass_h
 
 #include "VexOS.h"
+#include "Error.h"
 
 /********************************************************************
  * CommandClass Structures                                          *
@@ -62,7 +63,7 @@ struct Command {
  * User-friendliness Inheritance Macros                             *
  ********************************************************************/
 
-#define DefineCommandClass(class, ...) \
+#define DefineCommandClass(xclass, ...) \
     static void constructor(va_list); \
     static void initialize(); \
     static void execute(); \
@@ -71,8 +72,8 @@ struct Command {
     static void interrupted(); \
     static Command* self; \
     typedef struct Fields __VA_ARGS__ Fields; \
-    CommandClass class = { \
-        .name        = #class, \
+    CommandClass xclass = { \
+        .name        = #xclass, \
         .selfPtr     = &self, \
         .fieldSize   = sizeof(struct Fields), \
         .constructor = &constructor, \
@@ -111,13 +112,16 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
+    } \
+    static void checkInstance(Command* cmd) { \
+        ErrorIf(cmd->class != &xclass, VEXOS_OBJTYPE); \
     }
 
-#define DefineCommandGroup(class) \
+#define DefineCommandGroup(xclass) \
     static void constructor(va_list); \
     static Command* self; \
-    CommandClass class = { \
-        .name             = #class, \
+    CommandClass xclass = { \
+        .name             = #xclass, \
         .groupConstructor = &constructor, \
         .groupSelfPtr     = &self \
     }; \
@@ -138,6 +142,9 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
+    } \
+    static void checkInstance(Command* cmd) { \
+        ErrorIf(cmd->class != &xclass, VEXOS_OBJTYPE); \
     }
 
 /********************************************************************

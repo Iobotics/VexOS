@@ -37,6 +37,7 @@ static String getMessage(ErrorCode error) {
         case VEXOS_HARDWARELOCK: return "Hardware must be added in robot or subsystem constructors";
         case VEXOS_COMMANDLOCK:  return "Commands cannot be created in constructors";
         case VEXOS_BUTTONLOCK:   return "Buttons cannot be created in constructors";
+        case VEXOS_OBJTYPE:      return "Input object is not an instance of source class";
         default:
             return "No error"; // this should not occur //
     }

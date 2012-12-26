@@ -42,7 +42,8 @@ typedef enum {
     VEXOS_OPINVALID,
     VEXOS_HARDWARELOCK,
     VEXOS_COMMANDLOCK,
-    VEXOS_BUTTONLOCK
+    VEXOS_BUTTONLOCK,
+    VEXOS_OBJTYPE
 } ErrorCode;
 
 void   Error_setCode(ErrorCode);
