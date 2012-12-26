@@ -111,7 +111,11 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
-    } 
+    } \
+    void Command_checkInstance(Command*, CommandClass*); \
+    static void checkInstance(Command* cmd) { \
+        Command_checkInstance(cmd, &xclass); \
+    }
 
 #define DefineCommandGroup(xclass) \
     static void constructor(va_list); \
@@ -138,7 +142,11 @@ struct Command {
     void Command_setInterruptible(Command*, bool); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
-    } 
+    } \
+    void Command_checkInstance(Command*, CommandClass*); \
+    static void checkInstance(Command* cmd) { \
+        Command_checkInstance(cmd, &xclass); \
+    }
 
 /********************************************************************
  * GCC Compiler Pragmas                                             *

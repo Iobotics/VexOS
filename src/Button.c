@@ -139,36 +139,6 @@ static void initializeButtonClass(ButtonClass* class) {
  * Protected API                                                    *
  ********************************************************************/
 
-void Button_setvName(Button* button, String fmt, va_list argp) {
-    char* old = (char*) button->name;
-    vasprintf((char**) &button->name, fmt, argp);
-    if(old) free(old);
-}
-
-void Button_setName(Button* button, String fmt, ...) {
-    va_list argp;
-    va_start(argp, fmt);
-    Button_setvName(button, fmt, argp);
-    va_end(argp);
-}
-
-void Button_setvArgs(Button* button, String fmt, va_list argp) {
-    char* old = (char*) Button_getName(button);
-    char* xfmt;
-    asprintf(&xfmt, "%s(%s)", old, fmt);
-    // print new name //
-    vasprintf((char**) &button->name, xfmt, argp);
-    free(xfmt);
-    free(old);
-}
-
-void Button_setArgs(Button* button, String fmt, ...) {
-    va_list argp;
-    va_start(argp, fmt);
-    Button_setvArgs(button, fmt, argp);
-    va_end(argp);
-}
-
 void Button_executeScheduler(ButtonScheduler* sched) {
     // get the button //
     bool state = Button_get(sched->button);
@@ -240,9 +210,29 @@ Button* Button_getSchedulerButton(ButtonScheduler* sched) {
     return sched->button;
 }
 
-void Button_freeButtonScheduler(ButtonScheduler* sched) {
-    // could have freed elsewhere, but we want to free in the object that allocs //
-    free(sched);
+/********************************************************************
+ * Protected API: Implicit Scope Methods                            *
+ ********************************************************************/
+
+void Button_setvName(Button* button, String fmt, va_list argp) {
+    char* old = (char*) button->name;
+    vasprintf((char**) &button->name, fmt, argp);
+    if(old) free(old);
+}
+
+void Button_setvArgs(Button* button, String fmt, va_list argp) {
+    char* old = (char*) Button_getName(button);
+    char* xfmt;
+    asprintf(&xfmt, "%s(%s)", old, fmt);
+    // print new name //
+    vasprintf((char**) &button->name, xfmt, argp);
+    free(xfmt);
+    free(old);
+}
+
+void Button_checkInstance(Button* button, ButtonClass* class) {
+    ErrorIf(button == NULL, VEXOS_ARGNULL);
+    ErrorIf(button->class != class, VEXOS_OBJTYPE);
 }
 
 /********************************************************************

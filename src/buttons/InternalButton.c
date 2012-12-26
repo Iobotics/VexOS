@@ -54,10 +54,7 @@ static bool get() {
  ********************************************************************/
 
 void InternalButton_set(Button* button, bool value) {
-    ErrorIf(button == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(button->class != &InternalButton, VEXOS_OPINVALID,
-               "Invalid Button class, not an InternalButton: %s", 
-               ButtonClass_getName(Button_getClass(button)));
+    checkInstance(button);
 
     button->fields->state = value;
 }

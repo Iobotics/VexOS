@@ -55,9 +55,12 @@ void Command_startRunning(Command*);
 void Command_removed(Command*);
 void Command_setCancelled(Command*);
 
+void Command_setvName(Command*, String, va_list);
+void Command_setvArgs(Command*, String, va_list);
 void Command_require(Command*, Subsystem*);
 void Command_setTimeout(Command*, unsigned long);
 bool Command_isTimedOut(Command*);
 void Command_setInterruptible(Command*, bool);
+void Command_checkInstance(Command*, CommandClass*);
 
 #endif // _Command_h

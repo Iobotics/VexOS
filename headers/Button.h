@@ -45,9 +45,9 @@ struct Button {
 
 void Button_executeScheduler(ButtonScheduler*);
 Button* Button_getSchedulerButton(ButtonScheduler*);
-void Button_freeButtonScheduler(ButtonScheduler*);
 
-void Button_setName(Button*, String, ...);
-void Button_setArgs(Button*, String, ...);
+void Button_setvName(Button*, String, va_list);
+void Button_setvArgs(Button*, String, va_list);
+void Button_checkInstance(Button*, ButtonClass*);
 
 #endif // _Button_h

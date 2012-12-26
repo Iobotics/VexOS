@@ -205,6 +205,11 @@ void Command_setInterruptible(Command* cmd, bool inter) {
     cmd->interruptible = inter;
 }
 
+void Command_checkInstance(Command* cmd, CommandClass* class) {
+    ErrorIf(cmd == NULL, VEXOS_ARGNULL);
+    ErrorIf(cmd->class != class, VEXOS_OBJTYPE);
+}
+
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/

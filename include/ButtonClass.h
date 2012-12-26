@@ -80,7 +80,11 @@ struct Button {
         va_start(argp, fmt); \
         Button_setvName(self, fmt, argp); \
         va_end(argp); \
-    } 
+    } \
+    void Button_checkInstance(Button*, ButtonClass*); \
+    static void checkInstance(Button* button) { \
+        Button_checkInstance(button, &xclass); \
+    }
 
 /********************************************************************
  * GCC Compiler Pragmas                                             *
