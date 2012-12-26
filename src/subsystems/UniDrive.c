@@ -7,7 +7,7 @@ extern void UniDrive_configure(Subsystem*);
  * Class Definition                                                 *
  ********************************************************************/
 
-DeclareSubsystem(UniDrive);
+DefineSubsystem(UniDrive);
 
 static void constructor() {
     UniDrive_configure(self);
