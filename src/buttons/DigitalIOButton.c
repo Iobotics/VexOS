@@ -51,9 +51,3 @@ static void constructor(va_list argp) {
 static bool get() {
     return !GetDigitalInput(self->fields->port);
 }
-
-const ButtonClass DigitialIOButton = {
-    .name        = "DigitialIOButton",
-    .constructor = &constructor,
-    .get         = &get
-};
