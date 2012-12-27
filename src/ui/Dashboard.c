@@ -141,7 +141,7 @@ Dashboard* Dashboard_new(String name) {
     // check for first LCD and install handler //
     if(dashboards.nodeCount == 1) {
         // set the start update event //
-        VexOS_addEventHandler(EventType_DisabledStart,   &startCallback, NULL);
+        VexOS_addEventHandler(EventType_Initialize,      &startCallback, NULL);
         VexOS_addEventHandler(EventType_AutonomousStart, &startCallback, NULL);
         VexOS_addEventHandler(EventType_OperatorStart,   &startCallback, NULL);
         // set the periodic update event //
@@ -163,7 +163,7 @@ Dashboard* Dashboard_delete(Dashboard* dash) {
     }
     // check for last LCD and remove handler //
     if(dashboards.nodeCount == 0) {
-        VexOS_removeEventHandler(EventType_DisabledStart,      &startCallback);
+        VexOS_removeEventHandler(EventType_Initialize,         &startCallback);
         VexOS_removeEventHandler(EventType_AutonomousStart,    &startCallback);
         VexOS_removeEventHandler(EventType_OperatorStart,      &startCallback);
         VexOS_removeEventHandler(EventType_DisabledPeriodic,   &periodicCallback);

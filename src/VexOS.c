@@ -86,11 +86,11 @@ static void executeLoop(RunMode mode) {
     ErrorCode err;
     if(!(err = setjmp(ErrorEvn))) {
         bool enabled = true;
-        EventType start, periodic;
+        EventType start, periodic, end;
         switch(mode) {
             case RunMode_Initialize:
                 // setup Subsystems and hardware //
-                runMode = RunMode_VexOS_Setup;
+                runMode = RunMode_Setup;
                 Subsystem_initialize();
                 Robot.constructor();
                 Device_configureCortex();
@@ -98,19 +98,22 @@ static void executeLoop(RunMode mode) {
                 runMode = RunMode_Initialize;
                 Robot.initialize();
                 // set loop parameters //
-                start    = EventType_DisabledStart;
+                start    = EventType_Initialize;
                 periodic = EventType_DisabledPeriodic;
+                end      = EventType_DisabledEnd;
                 enabled  = false;
                 break;
             case RunMode_Autonomous:
                 runMode  = RunMode_Autonomous;
                 start    = EventType_AutonomousStart;
                 periodic = EventType_AutonomousPeriodic;
+                end      = -1;
                 break;
             case RunMode_Operator:
                 runMode  = RunMode_Operator;
                 start    = EventType_OperatorStart;
                 periodic = EventType_OperatorPeriodic;
+                end      = -1;
                 break;
             default:
                 ErrorMsgIf(true, VEXOS_OPINVALID, "Invalid RunMode: %d", mode);
@@ -123,6 +126,7 @@ static void executeLoop(RunMode mode) {
             loopPeriodic();
             fireEvent(periodic);
         }
+        if(end > -1) fireEvent(end);
     } else {
         // error handling trap //
         Wait(500);
@@ -159,7 +163,7 @@ void VexOS_setProgramName(String name) {
 }
 
 bool VexOS_addEventHandler(EventType type, EventHandler* handler, void* state) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
+    ErrorMsgIf(type < EventType_Initialize || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
 
@@ -178,7 +182,7 @@ bool VexOS_addEventHandler(EventType type, EventHandler* handler, void* state) {
 }
 
 bool VexOS_removeEventHandler(EventType type, EventHandler* handler) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
+    ErrorMsgIf(type < EventType_Initialize || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
     
@@ -197,7 +201,7 @@ bool VexOS_removeEventHandler(EventType type, EventHandler* handler) {
 }
 
 bool VexOS_hasEventHandler(EventType type, EventHandler* handler) {
-    ErrorMsgIf(type < EventType_DisabledStart || type > EventType_SystemError,
+    ErrorMsgIf(type < EventType_Initialize || type > EventType_SystemError,
                VEXOS_ARGRANGE, "Invalid EventType");
     ErrorIf(handler == NULL, VEXOS_ARGNULL);
     

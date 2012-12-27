@@ -78,7 +78,7 @@ typedef float       Power;
  ********************************************************************/
 
 typedef enum {
-    RunMode_VexOS_Setup,
+    RunMode_Setup,
     RunMode_Initialize,
     RunMode_Autonomous,
     RunMode_Operator
@@ -87,7 +87,7 @@ typedef enum {
 #define EVENT_COUNT     8
 
 typedef enum {
-    EventType_DisabledStart,
+    EventType_Initialize,
     EventType_DisabledPeriodic,
     EventType_DisabledEnd,
     EventType_AutonomousStart,

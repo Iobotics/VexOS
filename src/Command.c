@@ -216,7 +216,7 @@ void Command_checkInstance(Command* cmd, CommandClass* class) {
 
 Command* Command_new(CommandClass* class, ...) {
     ErrorIf(class == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_VexOS_Setup, VEXOS_COMMANDLOCK);
+    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_COMMANDLOCK);
     
     // check the class //
     if(!class->initialized) {

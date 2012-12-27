@@ -37,7 +37,7 @@ static void updateWindow(Window* win, bool full) {
     // run mode //
     if(full) {
         switch(VexOS_getRunMode()) {
-            case RunMode_VexOS_Setup:
+            case RunMode_Setup:
                 PrintTextToGD(top + 1, left, Color_Black, "Mode: Setup\n");
                 break;
             case RunMode_Initialize:
@@ -58,7 +58,7 @@ static void updateWindow(Window* win, bool full) {
 static void drawLCDScreen(LCDScreen* screen, LCDButtonType pressed) {
     const char* modeStr = NULL;
     switch(VexOS_getRunMode()) {
-        case RunMode_VexOS_Setup:   modeStr = "VexOS";    break;
+        case RunMode_Setup:         modeStr = "Setup";    break;
         case RunMode_Initialize:    modeStr = "Disabled"; break;
         case RunMode_Autonomous:    modeStr = "Auto";     break;
         case RunMode_Operator:      modeStr = "Operator"; break;

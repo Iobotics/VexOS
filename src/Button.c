@@ -241,7 +241,6 @@ void Button_checkInstance(Button* button, ButtonClass* class) {
 
 Button* Button_new(ButtonClass* class, ...) {
     ErrorIf(class == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_VexOS_Setup, VEXOS_BUTTONLOCK);
     
     // check the class //
     if(!class->initialized) {

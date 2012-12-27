@@ -233,7 +233,7 @@ void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
     ErrorMsgIf(digitalPorts[port - 1].device, VEXOS_OPINVALID, 
                "Digital port is already allocated: %d", port);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     digitalPorts[port - 1].device = device;
     digitalPorts[port - 1].mode   = mode;
@@ -247,7 +247,7 @@ void Device_addAnalog(AnalogPort port, Device* device) {
     ErrorIf(port < AnalogPort_1 || port > AnalogPort_8, VEXOS_ARGRANGE);
     ErrorMsgIf(analogPorts[port - 1], VEXOS_OPINVALID, 
                "Analog port is already allocated: %d", port);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     analogPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
@@ -260,7 +260,7 @@ void Device_addPWM(PWMPort port, Device* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
     ErrorMsgIf(pwmPorts[port - 1].device, VEXOS_OPINVALID, 
                "PWM port is already allocated: %d", port);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     pwmPorts[port - 1].device   = device;
     pwmPorts[port - 1].expander = NULL;
@@ -274,14 +274,14 @@ void Device_addI2c(I2c i2c, Device* device) {
     ErrorIf(i2c < I2c_1 || i2c > I2c_10, VEXOS_ARGRANGE);
     ErrorMsgIf(i2cDevices[i2c - 1], VEXOS_OPINVALID, 
                "I2C device is already allocated: %d", i2c);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     i2cDevices[i2c - 1] = device;
 }
 
 void Device_setPWMExpander(PWMPort port, PowerExpander* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     pwmPorts[port - 1].expander = (PowerExpander*) device;
 }
@@ -290,7 +290,7 @@ void Device_addUART(UARTPort port, Device* device) {
     ErrorIf(port < UARTPort_1 || port > UARTPort_2, VEXOS_ARGRANGE);
     ErrorMsgIf(uartPorts[port - 1], VEXOS_OPINVALID, 
                "UART port is already allocated: %d", port);
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     uartPorts[port - 1] = device;
     if(List_indexOfData(&devices, device) == -1) {
@@ -300,7 +300,7 @@ void Device_addUART(UARTPort port, Device* device) {
 }
 
 void Device_addVirtualDevice(Device* device) {
-    ErrorIf(VexOS_getRunMode() != RunMode_VexOS_Setup, VEXOS_HARDWARELOCK);
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
     if(List_indexOfData(&devices, device) == -1) {
         List_insertLast(&devices, List_newNode(device));
     }
