@@ -47,7 +47,9 @@ static void setActiveProgram(ListNode* node) {
     GlobalData(GLOBALDATA_AUTO_PROGRAM) = (node)? (List_indexOfNode(node) + 1): 0;
     // if there is a program, register the event to run it //
     if(activeProgram) {
-        VexOS_addEventHandler(EventType_AutonomousStart, autoStartHandler, NULL);
+        VexOS_addEventHandler(EventType_AutonomousStart, &autoStartHandler, NULL);
+    } else {
+        VexOS_removeEventHandler(EventType_AutonomousStart, &autoStartHandler);
     }
 }
 
