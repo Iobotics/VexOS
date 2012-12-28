@@ -58,29 +58,16 @@ OBJS := $(addprefix $(OBJDIR)/,$(ALL_OBJS))
 $(OBJDIR)/VexOS.lib : $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
+# build the output objects, generating a dependency fragment (-MMD) #
 $(OBJDIR)/%.o : %.c
-	$(CC) $(INCLUDES) $(CFLAGS) $(OUTPUT_OPTION) $<
+	$(CC) -MMD $(INCLUDES) $(CFLAGS) $(OUTPUT_OPTION) $<
+
 $(OBJS): | $(OBJDIR) 
 $(OBJDIR):
 	mkdir $(OBJDIR)
 
-# code-to-header dependencies #
-$(OBJDIR)/%.o : %.h
-$(OBJDIR)/Button.o : ButtonClass.h Scheduler.h
-$(OBJDIR)/Command.o : CommandClass.h CommandGroup.h Scheduler.h 
-$(OBJDIR)/CommandGroup.o : Command.h CommandClass.h
-$(OBJDIR)/Dashboard.o : Window.h
-$(OBJDIR)/DebugValue.o : LCDScreen.h
-$(OBJDIR)/LCD.o : LCDScreen.h
-$(OBJDIR)/Scheduler.o : Button.h Command.h Subsystem.h
-$(OBJDIR)/VexOS.o : Error.h Scheduler.h
-$(OBJS) : VexOS.h Error.h
-
-# built-in objects depend on their class headers #
-$(addprefix $(OBJDIR)/,$(BTN_OBJS)) : ButtonClass.h
-$(addprefix $(OBJDIR)/,$(CMD_OBJS)) : CommandClass.h
-$(addprefix $(OBJDIR)/,$(UI_OBJS))  : UserInterface.h
-$(addprefix $(OBJDIR)/,$(HDW_OBJS)) : Device.h Hardware.h
+# include the auto-generated dependency rules #
+-include $(OBJS:.o=.d)
 
 # install into external easyC project directory #
 .PHONY : project-install
