@@ -19,6 +19,9 @@
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 ##
 
+# distribution zip file #
+DISTZIP := vexos_0_9_6
+
 # project paths #
 SRCDIR    := src
 ETCDIR    := etc
@@ -118,3 +121,9 @@ global-uninstall:
 .PHONY : clean
 clean:
 	rm -Rf $(OBJDIR)
+
+# build the distribution archive #
+.PHONY : dist
+dist:
+	zip -j $(OBJDIR)/$(DISTZIP).zip $(OBJDIR)/VexOS.lib $(INCPUBDIR)/*.h
+
