@@ -61,6 +61,7 @@ struct MotorGroup {
     float          outputScale;
     float          feedbackScale;
     PIDData        pidData;
+    bool           setpointReversed;
     float          kP, kI, kD;
     long           tolerance;
 };
@@ -85,7 +86,6 @@ static void processISR() {
 
     ListNode* node  = processList.firstNode;
     ListNode* mnode = NULL;
-    PIDData pid;
     long sensor;
     while(node != NULL) {
         MotorGroup* group = node->data;
@@ -103,7 +103,11 @@ static void processISR() {
                     &group->pidData.sigmaError);
                 mnode = mnode->next;
                 while(mnode != NULL) {
-                    SetMotor(((Motor*) mnode->data)->port, group->pidData.power);
+                    if(!((Motor*) mnode->data)->reversed) {
+                        SetMotor(((Motor*) mnode->data)->port, group->pidData.power);
+                    } else {
+                        SetMotor(((Motor*) mnode->data)->port, -group->pidData.power);
+                    }
                     mnode = mnode->next;
                 }
                 group->power = group->pidData.power / MAX_MOTOR_POWER;
@@ -111,8 +115,7 @@ static void processISR() {
             case FeedbackType_Encoder:
             case FeedbackType_Potentiometer:
                 // update the PID structure //
-                pid = group->pidData;
-                if(!pid.enabled) break;
+                if(!group->pidData.enabled) break;
                 
                 // get sensor value and save to globalData //
                 if(group->feedbackType == FeedbackType_Encoder) {
@@ -123,33 +126,38 @@ static void processISR() {
                 GlobalData(group->globaldataSlot) = sensor;
 
                 // compute error //
-                pid.error = pid.setpoint - sensor;
+                group->pidData.error = group->pidData.setpoint - sensor;
                 
                 // handle I //
-                if(((pid.sigmaError + pid.error) * group->kI < MAX_MOTOR_POWER)
-                   && ((pid.sigmaError + pid.error) * group->kI > -MAX_MOTOR_POWER)) {
-                    pid.sigmaError += pid.error;
+                if(((group->pidData.sigmaError + group->pidData.error) * group->kI < MAX_MOTOR_POWER)
+                   && ((group->pidData.sigmaError + group->pidData.error) * group->kI > -MAX_MOTOR_POWER)) {
+                    group->pidData.sigmaError += group->pidData.error;
                 }
     
                 // handle P, D //
-                pid.power = (group->kP * pid.error + group->kI * pid.sigmaError + group->kD * (pid.error - pid.deltaError));
-                pid.deltaError = pid.error;
+                group->pidData.power = (group->kP * group->pidData.error 
+                                      + group->kI * group->pidData.sigmaError 
+                                      + group->kD * (group->pidData.error - group->pidData.deltaError));
+                group->pidData.deltaError = group->pidData.error;
     
                 // limit output //
-                if(pid.power > MAX_MOTOR_POWER) {
-                    pid.power = MAX_MOTOR_POWER;
-                } else if(pid.power < -MAX_MOTOR_POWER) {
-                    pid.power = -MAX_MOTOR_POWER;
+                if(group->pidData.power > MAX_MOTOR_POWER) {
+                    group->pidData.power = MAX_MOTOR_POWER;
+                } else if(group->pidData.power < -MAX_MOTOR_POWER) {
+                    group->pidData.power = -MAX_MOTOR_POWER;
                 }
 
-                // set the motors //
+                // set the motors // 
                 mnode = group->children.firstNode;
                 while(mnode != NULL) {
-                    SetMotor(((Motor*) mnode->data)->port, pid.power);
+                    if(!((Motor*) mnode->data)->reversed) {
+                        SetMotor(((Motor*) mnode->data)->port, group->pidData.power);
+                    } else {
+                        SetMotor(((Motor*) mnode->data)->port, -group->pidData.power);
+                    }
                     mnode = mnode->next;
                 }
 
-                group->pidData = pid;
                 group->power = group->pidData.power / MAX_MOTOR_POWER;
                 break;
             case FeedbackType_None:
@@ -189,21 +197,22 @@ MotorGroup* MotorGroup_new(String name) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
 
     MotorGroup* ret = malloc(sizeof(MotorGroup));
-    ret->type            = DeviceType_MotorGroup;
-    ret->name            = name;
+    ret->type             = DeviceType_MotorGroup;
+    ret->name             = name;
     memset(&ret->children, 0, sizeof(List));
-    ret->power           = 0.0;
-    ret->feedbackEnabled = false;
-    ret->feedbackType    = FeedbackType_None;
-    ret->feedbackDevice  = NULL;
-    ret->globaldataSlot  = 0;
-    ret->outputScale     = 1.0;
-    ret->feedbackScale   = 1.0;
+    ret->power            = 0.0;
+    ret->feedbackEnabled  = false;
+    ret->feedbackType     = FeedbackType_None;
+    ret->feedbackDevice   = NULL;
+    ret->globaldataSlot   = 0;
+    ret->outputScale      = 1.0;
+    ret->feedbackScale    = 1.0;
     memset(&ret->pidData, 0, sizeof(PIDData));
-    ret->kP              = 0.0;
-    ret->kI              = 0.0;
-    ret->kD              = 0.0;
-    ret->tolerance       = 32; 
+    ret->setpointReversed = false;
+    ret->kP               = 0.0;
+    ret->kI               = 0.0;
+    ret->kD               = 0.0;
+    ret->tolerance        = 32; 
     Device_addVirtualDevice((Device*) ret);
     return ret;
 }
@@ -237,6 +246,7 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
         case MotorType_393_HS: group->feedbackScale = (360.0 / TicksPerRev_IME_393HS); break;
         default: break;
     }
+    group->setpointReversed = reversed;
 }
 
 const List* MotorGroup_getMotorList(MotorGroup* group) {
@@ -617,6 +627,18 @@ bool MotorGroup_onTarget(MotorGroup* group) {
     return true;
 }
 
+bool MotorGroup_isSetpointReversed(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return group->setpointReversed;
+}
+
+void MotorGroup_setSetpointReversed(MotorGroup* group, bool value) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    group->setpointReversed = value;
+}
+
 float MotorGroup_getSetpoint(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
@@ -628,6 +650,7 @@ void MotorGroup_setSetpoint(MotorGroup* group, float value) {
 
     Device* device = group->feedbackDevice;
     long ticks = value / (group->outputScale * group->feedbackScale);
+    if(group->setpointReversed) ticks = -ticks;
     switch(group->feedbackType) {
         case FeedbackType_IME:
             UpdateSetpointIntegratedMotorEncoderPID(((Motor*) device)->port, ticks);

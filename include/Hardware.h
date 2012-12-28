@@ -305,6 +305,8 @@ float   MotorGroup_getError(MotorGroup*);
 float   MotorGroup_getTolerance(MotorGroup*);
 void    MotorGroup_setTolerance(MotorGroup*, float);
 bool    MotorGroup_onTarget(MotorGroup*);
+bool    MotorGroup_isSetpointReversed(MotorGroup*);
+void    MotorGroup_setSetpointReversed(MotorGroup*, bool);
 float   MotorGroup_getSetpoint(MotorGroup*);
 void    MotorGroup_setSetpoint(MotorGroup*, float);
 
