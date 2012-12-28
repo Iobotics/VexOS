@@ -258,7 +258,7 @@ void Scheduler_removeButtonSchedulers(Button* button) {
         ButtonScheduler* sched = node->data;
         if(Button_getSchedulerButton(sched) == button) {
             node = List_remove(node);
-            Button_freeButtonScheduler(sched);
+            free(sched);
             continue;
         }
         node = node->next;
