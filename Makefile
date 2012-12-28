@@ -32,8 +32,8 @@ TOOLSBIN := $(TOOLS)\arm-gcc\bin
 STEMDIR  := $(TOOLS)\STM32F103VD
 CC := $(TOOLSBIN)\arm-none-eabi-gcc.exe
 AR := $(TOOLSBIN)\arm-none-eabi-ar.exe
-INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)\hardware -I $(INCINTDIR)\ui \
-			-I $(STEMDIR)\inc -I $(TOOLS)\API
+INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)/hardware -I $(INCINTDIR)/ui \
+			-I $(ETCDIR)/easyC
 CFLAGS   := -mthumb -D DEBUG -O3 -Wall -std=gnu99 -ffunction-sections -c
 
 # objects #
