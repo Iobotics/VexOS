@@ -31,6 +31,7 @@
 
 // internal headers //
 extern const struct Robot Robot;
+extern void Subsystem_construct();
 extern void Subsystem_initialize();
 extern void Device_configureCortex();
 
@@ -91,11 +92,12 @@ static void executeLoop(RunMode mode) {
             case RunMode_Initialize:
                 // setup Subsystems and hardware //
                 runMode = RunMode_Setup;
-                Subsystem_initialize();
+                Subsystem_construct();
                 Robot.constructor();
                 Device_configureCortex();
                 // run robot initializer //
                 runMode = RunMode_Initialize;
+                Subsystem_initialize();
                 Robot.initialize();
                 // set loop parameters //
                 start    = EventType_Initialize;

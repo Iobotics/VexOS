@@ -36,11 +36,10 @@ struct Subsystem {
     struct Fields*  fields;
     // Subsystem methods //
     void (*constructor)();
-    void (*initDefaultCommand)();
+    void (*initialize)();
     // internal fields //
     Command* currentCommand;
     Command* defaultCommand;
-    bool     initializedDefaultCommand;
     bool     isEnabled;
 };
 
@@ -56,15 +55,15 @@ void Subsystem_setDefaultCommand(Subsystem*, Command*);
  * User-friendliness Singleton Definition Macros                    *
  ********************************************************************/
 
-#define DefineSubsystem(class) \
+#define DefineSubsystem(xclass) \
     static void constructor(); \
-    static void initDefaultCommand(); \
+    static void initialize(); \
     static Subsystem* self; \
-    Subsystem class = { \
-        .name               = #class, \
-        .selfPtr            = &self, \
-        .constructor        = &constructor, \
-        .initDefaultCommand = &initDefaultCommand \
+    Subsystem xclass = { \
+        .name        = #xclass, \
+        .selfPtr     = &self, \
+        .constructor = &constructor, \
+        .initialize  = &initialize \
     }; \
     static Command* getDefaultCommand() { \
         return Subsystem_getDefaultCommand(self); \

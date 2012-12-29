@@ -3,6 +3,7 @@ ButtonClass.h
 CommandClass.h
 Hardware.h
 Subsystem.h
+UniBot.h
 UserInterface.h
 VexOS.h
 

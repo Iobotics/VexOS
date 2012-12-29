@@ -37,7 +37,7 @@ static void constructor() {
     rDebug = DebugValue_new("rDrive", DebugValueType_Float);
 }
 
-static void initDefaultCommand() {
+static void initialize() {
     setDefaultCommand(Command_new(&DriveWithJoystick));
 }
 

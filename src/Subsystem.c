@@ -40,24 +40,29 @@
 extern struct Robot Robot;
 List Subsystems;
 
-void Subsystem_initialize() {
+void Subsystem_construct() {
     int i = 0;
     Subsystem* sys;
     while((sys = Robot.subsystems[i++])) {
         if(sys->initialized) continue;
-        sys->initialized = true;
         *(sys->selfPtr)  = sys;
         // call constructor //
         if(sys->constructor) sys->constructor();
+        sys->initialized = true;
         List_insertLast(&Subsystems, List_newNode(sys));
     }
 }
 
-Command* Subsystem_getDefaultCommand(Subsystem* sys) {
-    if(!sys->initializedDefaultCommand) {
-        sys->initializedDefaultCommand = true;
-        if(sys->initDefaultCommand) sys->initDefaultCommand();
+void Subsystem_initialize() {
+    ListNode* node = Subsystems.firstNode;
+    while(node != NULL) {
+        Subsystem* sys = node->data;
+        if(sys->initialize) sys->initialize();
+        node = node->next;
     }
+}
+
+Command* Subsystem_getDefaultCommand(Subsystem* sys) {
     return sys->defaultCommand;
 }
 

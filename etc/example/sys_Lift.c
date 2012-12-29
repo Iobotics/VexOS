@@ -43,7 +43,7 @@ static void constructor() {
     MotorGroup_setPIDEnabled(right, true);
 }
 
-static void initDefaultCommand() { }
+static void initialize() { }
 
 /********************************************************************
  * Public API                                                       *

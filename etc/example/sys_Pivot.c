@@ -22,7 +22,7 @@ static void constructor() {
     valve = DigitalOut_newPneumaticValve("pivot valve", DIGITAL_PIVOT_VALVE);
 }
 
-static void initDefaultCommand() {
+static void initialize() {
     //setDefaultCommand(Command_new(&PivotSet, PivotPosition_Down));
 }
 

@@ -24,7 +24,7 @@ static void constructor() {
     //MotorGroup_add(motors, "intake right", MOTOR_INTAKE_R, MotorType_393_HT, false);
 }
 
-static void initDefaultCommand() {
+static void initialize() {
     setDefaultCommand(Command_new(&SetIntake, IntakeDirection_Stop));
 }
 
