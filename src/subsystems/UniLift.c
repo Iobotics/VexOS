@@ -85,6 +85,16 @@ static void initialize() {
     setDefaultCommand(UniLift_getDefaultCommand(self));
 }
 
+static ListNode* getNode(int id) {
+    ListNode* node = positionList.firstNode;
+    while(node != NULL) {
+        Position* position = node->data;
+        if(position->id == id) return node;
+        node = node->next;
+    }
+    return NULL;
+}
+
 static void setPositionNode(ListNode* node) {
     if(node) {
         Position* position = node->data;
@@ -129,12 +139,7 @@ void UniLift_addPosition(int id, String name, float value) {
     ErrorIf(name == NULL, VEXOS_ARGNULL);
     
     // make sure id is not already defined //
-    ListNode* node = positionList.firstNode;
-    while(node != NULL) {
-        Position* position = node->data;
-        ErrorMsgIf(position->id == id, VEXOS_ARGINVALID, "Position ID is already defined: %d", id);
-        node = node->next;
-    }
+    ErrorMsgIf(getNode(id), VEXOS_ARGINVALID, "Position ID is already defined: %d", id);
 
     // create the position and add it //
     Position* position = malloc(sizeof(Position));
@@ -144,37 +149,29 @@ void UniLift_addPosition(int id, String name, float value) {
     List_insertLast(&positionList, List_newNode(position));
 }
 
+String UniLift_getPositionName(int id) {
+    ListNode* node = getNode(id);
+    return (node)? ((Position*) node->data)->name: NULL;
+}
+
+float UniLift_getPositionValue(int id) {
+    ListNode* node = getNode(id);
+    return (node)? ((Position*) node->data)->value: NAN;
+}
+
+
 int UniLift_getPosition() {
     if(!positionNode) return -1;
     Position* position = positionNode->data;
     return position->id;
 }
 
-String UniLift_getPositionName() {
-    if(!positionNode) return NULL;
-    Position* position = positionNode->data;
-    return position->name;
-}
-
-float UniLift_getPositionValue() {
-    if(!positionNode) return NAN;
-    Position* position = positionNode->data;
-    return position->value;
-}
-
 void UniLift_setPosition(int id) {
     ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniLift does not have PID feedback");
 
-    ListNode* node = positionList.firstNode;
-    while(node != NULL) {
-        Position* position = node->data;
-        if(position->id == id) {
-            setPositionNode(node);
-            return;
-        }
-        node = node->next;
-    }
-    RaiseError(VEXOS_ARGINVALID, "Invalid position ID: %d", id);
+    ListNode* node = getNode(id);
+    ErrorMsgIf(!node, VEXOS_ARGINVALID, "Invalid position ID: %d", id);
+    setPositionNode(node);
 }
 
 int UniLift_jogPosition(UniLiftJogDirection dir) {
@@ -203,6 +200,24 @@ bool UniLift_hasHomeSwitch() {
 bool UniLift_getHomeSwitch() {
     ErrorMsgIf(!setup.homeSwitch, VEXOS_OPINVALID, "Lift does not have a home switch");
     return DigitalIn_get(setup.homeSwitch);
+}
+
+void UniLift_resetPosition(int id) {
+    ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniLift does not have PID feedback");
+    
+    ListNode* node = getNode(id);
+    ErrorMsgIf(!node, VEXOS_ARGINVALID, "Invalid position ID: %d", id);
+    Position* position = node->data;
+    switch(setup.type) {
+        case UniLiftType_Single:
+            MotorGroup_presetPosition(setup.motors.single, position->value);
+            break;
+        case UniLiftType_Split:
+            MotorGroup_presetPosition(setup.motors.split.left,  position->value);
+            MotorGroup_presetPosition(setup.motors.split.right, position->value);
+            break;
+    }
+    setPositionNode(node);
 }
 
 void UniLift_setPower(Power power) {

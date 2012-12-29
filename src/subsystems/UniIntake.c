@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
+#include <math.h>
+
 #include "Subsystem.h"
 #include "UniBot.h"
 #include "Error.h"
@@ -50,6 +52,16 @@ static void initialize() {
     setDefaultCommand(UniIntake_getDefaultCommand(self));
 }
 
+static ListNode* getNode(int id) {
+    ListNode* node = directionList.firstNode;
+    while(node != NULL) {
+        Direction* direction = node->data;
+        if(direction->id == id) return node;
+        node = node->next;
+    }
+    return NULL;
+}
+
 static void setDirectionNode(ListNode* node) {
     if(node) {
         Direction* direction = node->data;
@@ -68,12 +80,7 @@ void UniIntake_addDirection(int id, String name, Power power) {
     ErrorIf(power < -1.0 || power > 1.0, VEXOS_ARGRANGE);
     
     // make sure id is not already defined //
-    ListNode* node = directionList.firstNode;
-    while(node != NULL) {
-        Direction* direction = node->data;
-        ErrorMsgIf(direction->id == id, VEXOS_ARGINVALID, "Direction ID is already defined: %d", id);
-        node = node->next;
-    }
+    ErrorMsgIf(getNode(id), VEXOS_ARGINVALID, "Direction ID is already defined: %d", id);
 
     // create the direction and add it //
     Direction* direction = malloc(sizeof(Direction));
@@ -83,35 +90,26 @@ void UniIntake_addDirection(int id, String name, Power power) {
     List_insertLast(&directionList, List_newNode(direction));
 }
 
+String UniIntake_getDirectionName(int id) {
+    ListNode* node = getNode(id);
+    return (node)? ((Direction*) node->data)->name: NULL;
+}
+
+Power UniIntake_getDirectionPower(int id) {
+    ListNode* node = getNode(id);
+    return (node)? ((Direction*) node->data)->power: NAN;
+}
+
 int UniIntake_getDirection() {
     if(!directionNode) return -1;
     Direction* direction = directionNode->data;
     return direction->id;
 }
 
-String UniIntake_getDirectionName() {
-    if(!directionNode) return NULL;
-    Direction* direction = directionNode->data;
-    return direction->name;
-}
-
-Power UniIntake_getDirectionPower() {
-    if(!directionNode) return 0.0;
-    Direction* direction = directionNode->data;
-    return direction->power;
-}
-
-void UniIntake_setPosition(int id) {
-    ListNode* node = directionList.firstNode;
-    while(node != NULL) {
-        Direction* direction = node->data;
-        if(direction->id == id) {
-            setDirectionNode(node);
-            return;
-        }
-        node = node->next;
-    }
-    RaiseError(VEXOS_ARGINVALID, "Invalid direction ID: %d", id);
+void UniIntake_setDirection(int id) {
+    ListNode* node = getNode(id);
+    ErrorMsgIf(!node, VEXOS_ARGINVALID, "Invalid direction ID: %d", id);
+    setDirectionNode(node);
 }
 
 void UniIntake_setPower(Power power) {

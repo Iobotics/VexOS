@@ -73,6 +73,8 @@ typedef enum {
 } UniDriveAction;
 
 // API methods to call //
+UniDriveType UniDrive_getType();
+
 void UniDrive_driveTank(Power left, Power right);
 void UniDrive_driveHolo(Power leftFront, Power leftRear, Power rightFront, Power rightRear);
 void UniDrive_driveH(Power left, Power right, Power center);
@@ -90,8 +92,8 @@ Command* UniDrive_getDefaultCommand(Subsystem*);
 // Command Components //
 DeclareCommandClass(UniDriveMove);
 DeclareCommandClass(UniDriveTurn);
-DeclareCommandClass(UniDriveJoystickControl);
-void UniDriveJoystickControl_setPowerScaler(Command* cmd, PowerScaler*);
+DeclareCommandClass(UniDriveWithJoystick);
+void UniDriveWithJoystick_setPowerScaler(Command* cmd, PowerScaler*);
 
 /********************************************************************
  * UniLift: Universal Lift                                          *
@@ -131,15 +133,16 @@ typedef enum {
 
 // API methods to call //
 void   UniLift_addPosition(int id, String name, float value);
+String UniLift_getPositionName(int id);
+float  UniLift_getPositionValue(int id);
 
 int    UniLift_getPosition();
-String UniLift_getPositionName();
-float  UniLift_getPositionValue();
 void   UniLift_setPosition(int id);
 int    UniLift_jogPosition(UniLiftJogDirection dir);
 
 bool   UniLift_hasHomeSwitch();
 bool   UniLift_getHomeSwitch();
+void   UniLift_resetPosition(int id);
 void   UniLift_setPower(Power power);
 
 // methods you must implement //
@@ -163,12 +166,11 @@ typedef struct {
 
 // API methods to call //
 void   UniIntake_addDirection(int id, String name, Power power);
+String UniIntake_getDirectionName(int id);
+Power  UniIntake_getDirectionPower(int id);
 
 int    UniIntake_getDirection();
-String UniIntake_getDirectionName();
-Power  UniIntake_getDirectionPower();
 void   UniIntake_setDirection(int id);
-
 void   UniIntake_setPower(Power power);
 
 // methods you must implement //

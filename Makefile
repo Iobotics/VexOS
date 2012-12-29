@@ -43,7 +43,9 @@ CFLAGS   := -mthumb -D DEBUG -O3 -Wall -std=gnu99 -ffunction-sections -c
 OS_OBJS  := Autonomous.o Battery.o Button.o ButtonClass.o Command.o CommandClass.o \
 			CommandGroup.o DebugValue.o Error.o List.o PIDController.o Joystick.o \
 			PowerScaler.o Scheduler.o Subsystem.o Timer.o VexOS.o
-CMD_OBJS := PrintCommand.o StartCommand.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
+CMD_OBJS := PrintCommand.o StartCommand.o UniDriveMove.o UniDriveTurn.o UniDriveWithJoystick.o \
+			UniIntakeSet.o UniLiftHome.o UniLiftJog.o UniLiftSet.o WaitCommand.o \
+			WaitForChildren.o WaitUntilCommand.o
 BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
 HDW_OBJS := Accelerometer.o AnalogIn.o Device.o DigitalIn.o DigitalOut.o Encoder.o Gyro.o \
 			Motor.o MotorGroup.o PowerExpander.o SerialPort.o Servo.o Sonar.o 
