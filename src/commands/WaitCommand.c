@@ -39,9 +39,9 @@
 DefineCommandClass(WaitCommand, { });
 
 static void constructor(va_list argp) {
-    unsigned long timeout = va_arg(argp, unsigned long);
-    setTimeout(timeout);
-    setArgs("%ld", timeout);
+    float timeout = (float) va_arg(argp, double);
+    setTimeout(timeout * 1000);
+    setArgs("%f", timeout);
 }
 
 static void initialize() { }

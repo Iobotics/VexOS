@@ -30,8 +30,6 @@
 //  present in this distribution.
 //
 
-#include "API.h"
-
 #include "CommandClass.h"
 
 /********************************************************************
@@ -39,12 +37,12 @@
  ********************************************************************/
 
 DefineCommandClass(WaitUntilCommand, {
-    unsigned long gameTime;
+    float gameTime;
 });
 
 static void constructor(va_list argp) {
-    self->fields->gameTime = va_arg(argp, unsigned long);
-    setArgs("%ld", self->fields->gameTime);
+    self->fields->gameTime = (float) va_arg(argp, double);
+    setArgs("%f", self->fields->gameTime);
 }
 
 static void initialize() { }
@@ -52,7 +50,7 @@ static void initialize() { }
 static void execute() { }
 
 static bool isFinished(Command* cmd) {
-    return (GetMsClock() >= self->fields->gameTime);
+    return (VexOS_getRunTime() >= self->fields->gameTime);
 }
 
 static void end() { }
