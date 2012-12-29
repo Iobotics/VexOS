@@ -30,14 +30,15 @@ static String errorMsg;
 
 static String getMessage(ErrorCode error) {
     switch(error) {
-        case VEXOS_ARGNULL:      return "Required argument is null";
-        case VEXOS_ARGRANGE:     return "Argument is out of range";
-        case VEXOS_ARGINVALID:   return "Argument is invalid";
-        case VEXOS_OPINVALID:    return "Invalid operation";
-        case VEXOS_HARDWARELOCK: return "Hardware must be added in robot or subsystem constructors";
-        case VEXOS_COMMANDLOCK:  return "Commands cannot be created in constructors";
-        case VEXOS_BUTTONLOCK:   return "Buttons cannot be created in constructors";
-        case VEXOS_OBJTYPE:      return "Input object is not an instance of source class";
+        case VEXOS_ARGNULL:        return "Required argument is null";
+        case VEXOS_ARGRANGE:       return "Argument is out of range";
+        case VEXOS_ARGINVALID:     return "Argument is invalid";
+        case VEXOS_OPINVALID:      return "Invalid operation";
+        case VEXOS_HARDWARELOCK:   return "Hardware must be added in robot or subsystem constructors";
+        case VEXOS_COMMANDLOCK:    return "Commands cannot be created in constructors";
+        case VEXOS_BUTTONLOCK:     return "Buttons cannot be created in constructors";
+        case VEXOS_OBJTYPE:        return "Input object is not an instance of source class";
+        case VEXOS_NOTINITIALIZED: return "Operation is not permitted until robot is initializing";
         default:
             return "No error"; // this should not occur //
     }

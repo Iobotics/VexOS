@@ -43,7 +43,8 @@ typedef enum {
     VEXOS_HARDWARELOCK,
     VEXOS_COMMANDLOCK,
     VEXOS_BUTTONLOCK,
-    VEXOS_OBJTYPE
+    VEXOS_OBJTYPE,
+    VEXOS_NOTINITIALIZED
 } ErrorCode;
 
 void   Error_setCode(ErrorCode);

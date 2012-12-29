@@ -340,6 +340,7 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
+    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
 
     if(group->feedbackEnabled == value) return;
     group->feedbackEnabled = value;
@@ -487,6 +488,7 @@ bool MotorGroup_isPIDEnabled(MotorGroup* group) {
 
 void MotorGroup_setPIDEnabled(MotorGroup* group, bool value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
+    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
     if(value == group->pidData.enabled) return;
 
     // if enabling, enable feedback if not active already //
