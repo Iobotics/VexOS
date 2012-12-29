@@ -48,7 +48,7 @@ BTN_OBJS := JoystickButton.o DigitalIOButton.o InternalButton.o
 HDW_OBJS := Accelerometer.o AnalogIn.o Device.o DigitalIn.o DigitalOut.o Encoder.o Gyro.o \
 			Motor.o MotorGroup.o PowerExpander.o SerialPort.o Servo.o Sonar.o 
 UI_OBJS  := Dashboard.o LCD.o LCDScreen.o Status.o Window.o
-SYS_OBJS := UniDrive.o
+SYS_OBJS := UniDrive.o UniIntake.o UniLift.o
 ALL_OBJS := $(OS_OBJS) $(CMD_OBJS) $(BTN_OBJS) $(HDW_OBJS) $(UI_OBJS) $(SYS_OBJS)
 
 # make everything to the build directory #

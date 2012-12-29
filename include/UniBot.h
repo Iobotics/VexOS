@@ -26,6 +26,7 @@
  * UniDrive: Universal Drivetrain                                   *
  ********************************************************************/
 
+// Subsystem components //
 DeclareSubsystem(UniDrive);
 
 typedef enum {
@@ -34,8 +35,11 @@ typedef enum {
     UniDriveType_HDrive
 } UniDriveType;
 
+#define UniDrive_PID_Default_kP     0.5
+#define UniDrive_PID_Default_kI     0.0
+#define UniDrive_PID_Default_kD     0.3
+
 typedef struct {
-    Subsystem*   system;
     UniDriveType type;
     float        wheelDiameter;
     float        driveWidth;
@@ -46,10 +50,10 @@ typedef struct {
             MotorGroup* right;
         } tank;
         struct {
-            MotorGroup* leftFront;
             MotorGroup* leftRear;
-            MotorGroup* rightFront;
             MotorGroup* rightRear;
+            MotorGroup* leftFront;
+            MotorGroup* rightFront;
         } holo;
         struct {
             MotorGroup* left;
@@ -57,15 +61,119 @@ typedef struct {
             MotorGroup* center;
         } H;
     } motors;
+    struct {
+        float kP, kI, kD;
+    } pid;
 } UniDriveSetup;
 
+typedef enum {
+    UniDriveAction_None,
+    UniDriveAction_Move,
+    UniDriveAction_Turn
+} UniDriveAction;
+
+// API methods to call //
 void UniDrive_driveTank(Power left, Power right);
 void UniDrive_driveHolo(Power leftFront, Power leftRear, Power rightFront, Power rightRear);
 void UniDrive_driveH(Power left, Power right, Power center);
 
-void UniDrive_autoDrive(float distance);
-void UniDrive_autoTurn(float angle);
+void UniDrive_autoBeginMove(float distance);
+void UniDrive_autoBeginTurn(float angle);
+bool UniDrive_autoIsComplete();
+void UniDrive_autoEnd();
+UniDriveAction UniDrive_autoGetAction();
 
 // methods you must implement //
 void UniDrive_configure(Subsystem*, UniDriveSetup* setup);
 Command* UniDrive_getDefaultCommand(Subsystem*);
+
+// Command Components //
+DeclareCommandClass(UniDriveMove);
+DeclareCommandClass(UniDriveTurn);
+DeclareCommandClass(UniDriveJoystickControl);
+void UniDriveJoystickControl_setPowerScaler(Command* cmd, PowerScaler*);
+
+/********************************************************************
+ * UniLift: Universal Lift                                          *
+ ********************************************************************/
+
+DeclareSubsystem(UniLift);
+
+typedef enum {
+    UniLiftType_Single,
+    UniLiftType_Split,
+} UniLiftType; 
+
+#define UniLift_PID_Default_kP     0.5
+#define UniLift_PID_Default_kI     0.0
+#define UniLift_PID_Default_kD     0.3
+
+typedef struct {
+    UniLiftType type;
+    float       gearRatio;
+    union {
+        MotorGroup* single;
+        struct {
+            MotorGroup* left;
+            MotorGroup* right;
+        } split;
+    } motors;
+    struct {
+        float kP, kI, kD;
+    } pid;
+    DigitalIn* homeSwitch;
+} UniLiftSetup;
+
+typedef enum {
+    UniLiftJogDirection_Up   = 1,
+    UniLiftJogDirection_Down = -1
+} UniLiftJogDirection;
+
+// API methods to call //
+void   UniLift_addPosition(int id, String name, float value);
+
+int    UniLift_getPosition();
+String UniLift_getPositionName();
+float  UniLift_getPositionValue();
+void   UniLift_setPosition(int id);
+int    UniLift_jogPosition(UniLiftJogDirection dir);
+
+bool   UniLift_hasHomeSwitch();
+bool   UniLift_getHomeSwitch();
+void   UniLift_setPower(Power power);
+
+// methods you must implement //
+void UniLift_configure(Subsystem*, UniLiftSetup* setup);
+Command* UniLift_getDefaultCommand(Subsystem*);
+
+// Command Components //
+DeclareCommandClass(UniLiftSet);
+DeclareCommandClass(UniLiftJog);
+DeclareCommandClass(UniLiftHome);
+
+/********************************************************************
+ * UniIntake: Universal Intake                                      *
+ ********************************************************************/
+
+DeclareSubsystem(UniIntake);
+
+typedef struct {
+    MotorGroup* motors;
+} UniIntakeSetup;
+
+// API methods to call //
+void   UniIntake_addDirection(int id, String name, Power power);
+
+int    UniIntake_getDirection();
+String UniIntake_getDirectionName();
+Power  UniIntake_getDirectionPower();
+void   UniIntake_setDirection(int id);
+
+void   UniIntake_setPower(Power power);
+
+// methods you must implement //
+void UniIntake_configure(Subsystem*, UniIntakeSetup* setup);
+Command* UniIntake_getDefaultCommand(Subsystem*);
+
+// Command Components //
+DeclareCommandClass(UniIntakeSet);

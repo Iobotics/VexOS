@@ -33,14 +33,17 @@ DefineSubsystem(UniDrive);
 
 static UniDriveSetup setup;
 static bool pidAllowed = false;
+static UniDriveAction action;
 
 static void constructor() {
     // set the default values //
-    setup.system        = self;
     setup.type          = UniDriveType_Tank;
     setup.wheelDiameter = 4.0;
     setup.gearRatio     = 1.0;
     setup.driveWidth    = 7.5;
+    setup.pid.kP        = UniDrive_PID_Default_kP;
+    setup.pid.kI        = UniDrive_PID_Default_kI;
+    setup.pid.kD        = UniDrive_PID_Default_kD;
 
     // call the end-user constructor //
     UniDrive_configure(self, &setup);
@@ -62,8 +65,6 @@ static void initialize() {
                        "Tank drive motors are not defined");
             MotorGroup_setOutputScaleFactor(setup.motors.tank.left,  outputScale);
             MotorGroup_setOutputScaleFactor(setup.motors.tank.right, outputScale);
-            pidAllowed = (MotorGroup_getFeedbackType(setup.motors.tank.left)  != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.tank.right) != FeedbackType_None);
             break;
         case UniDriveType_Holonomic:
             ErrorMsgIf(!setup.motors.holo.leftFront  || !setup.motors.holo.leftRear
@@ -73,10 +74,6 @@ static void initialize() {
             MotorGroup_setOutputScaleFactor(setup.motors.holo.leftRear,   outputScale);
             MotorGroup_setOutputScaleFactor(setup.motors.holo.rightFront, outputScale);
             MotorGroup_setOutputScaleFactor(setup.motors.holo.rightRear,  outputScale);
-            pidAllowed = (MotorGroup_getFeedbackType(setup.motors.holo.leftFront)  != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.holo.leftRear)   != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.holo.rightFront) != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.holo.rightRear)  != FeedbackType_None);
             break;
         case UniDriveType_HDrive:
             ErrorMsgIf(!setup.motors.H.left || !setup.motors.H.right || !setup.motors.H.center, 
@@ -84,10 +81,14 @@ static void initialize() {
             MotorGroup_setOutputScaleFactor(setup.motors.H.left,   outputScale);
             MotorGroup_setOutputScaleFactor(setup.motors.H.right,  outputScale);
             MotorGroup_setOutputScaleFactor(setup.motors.H.center, outputScale);
-            pidAllowed = (MotorGroup_getFeedbackType(setup.motors.H.left)   != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.H.right)  != FeedbackType_None)
-                      && (MotorGroup_getFeedbackType(setup.motors.H.center) != FeedbackType_None);
             break;
+    }
+    // all motor definitions overlay into these slots //
+    pidAllowed = (MotorGroup_getFeedbackType(setup.motors.tank.left)  != FeedbackType_None)
+              && (MotorGroup_getFeedbackType(setup.motors.tank.right) != FeedbackType_None);
+    if(pidAllowed) {
+        MotorGroup_setPID(setup.motors.tank.left,  setup.pid.kP, setup.pid.kI, setup.pid.kD);
+        MotorGroup_setPID(setup.motors.tank.right, setup.pid.kP, setup.pid.kI, setup.pid.kD);
     }
 
     setDefaultCommand(UniDrive_getDefaultCommand(self));
@@ -121,13 +122,59 @@ void UniDrive_driveH(Power left, Power right, Power center) {
     MotorGroup_setPower(setup.motors.H.center, center);
 }
 
-void UniDrive_autoDrive(float distance) {
-    ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniDrive does not have full PID feedback");
+void UniDrive_autoBeginDrive(float distance) {
+    ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniDrive does not have PID feedback");
+    ErrorMsgIf(action != UniDriveAction_None, VEXOS_OPINVALID, 
+               "UniDrive is already running an action");
 
+    // reset the encoders //
+    MotorGroup_presetPosition(setup.motors.tank.left,  0.0);
+    MotorGroup_presetPosition(setup.motors.tank.right, 0.0);
+    
+    // set the setpoints for drive //
+    MotorGroup_setSetpoint(setup.motors.tank.left,  distance);
+    MotorGroup_setSetpoint(setup.motors.tank.right, distance);
+
+    // enable PID //
+    MotorGroup_setPIDEnabled(setup.motors.tank.left,  true);
+    MotorGroup_setPIDEnabled(setup.motors.tank.right, true);
 }
 
-void UniDrive_autoTurn(float angle) {
-    ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniDrive does not have full PID feedback");
+void UniDrive_autoBeginTurn(float angle) {
+    ErrorMsgIf(!pidAllowed, VEXOS_OPINVALID, "UniDrive does not have PID feedback");
+    ErrorMsgIf(action != UniDriveAction_None, VEXOS_OPINVALID, 
+               "UniDrive is already running an action");
 
+    // reset the encoders //
+    MotorGroup_presetPosition(setup.motors.tank.left,  0.0);
+    MotorGroup_presetPosition(setup.motors.tank.right, 0.0);
+
+    // set the setpoints for turn (counter-clockwise) //
+    float distance = angle * M_PI * setup.driveWidth / 360.0;
+    MotorGroup_setSetpoint(setup.motors.tank.left,  -distance);
+    MotorGroup_setSetpoint(setup.motors.tank.right, distance);
+
+    // enabled PID //
+    MotorGroup_setPIDEnabled(setup.motors.tank.left, true);
+    MotorGroup_setPIDEnabled(setup.motors.tank.right, true);
 }
 
+bool UniDrive_autoIsComplete() {
+    if(action == UniDriveAction_None) return true;
+
+    return MotorGroup_onTarget(setup.motors.tank.left)
+        && MotorGroup_onTarget(setup.motors.tank.right);
+}
+
+void UniDrive_autoEnd() {
+    ErrorMsgIf(action == UniDriveAction_None, VEXOS_OPINVALID, 
+               "UniDrive is not running an action");
+
+    MotorGroup_setPIDEnabled(setup.motors.tank.left, false);
+    MotorGroup_setPIDEnabled(setup.motors.tank.right, false);
+    action = UniDriveAction_None;
+}
+
+UniDriveAction UniDrive_autoGetAction() {
+    return action;
+}
