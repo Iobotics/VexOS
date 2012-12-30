@@ -289,6 +289,8 @@ float        MotorGroup_getOutputScaleFactor(MotorGroup*);
 void         MotorGroup_setOutputScaleFactor(MotorGroup*, float);
 float        MotorGroup_getFeedbackScaleFactor(MotorGroup*);
 void         MotorGroup_setFeedbackScaleFactor(MotorGroup*, float);
+bool         MotorGroup_isFeedbackReversed(MotorGroup*);
+void         MotorGroup_setFeedbackReversed(MotorGroup*, bool);
 float        MotorGroup_getPosition(MotorGroup*);
 void         MotorGroup_presetPosition(MotorGroup*, float);
 float        MotorGroup_getSpeed(MotorGroup*);
@@ -305,8 +307,6 @@ float   MotorGroup_getError(MotorGroup*);
 float   MotorGroup_getTolerance(MotorGroup*);
 void    MotorGroup_setTolerance(MotorGroup*, float);
 bool    MotorGroup_onTarget(MotorGroup*);
-bool    MotorGroup_isSetpointReversed(MotorGroup*);
-void    MotorGroup_setSetpointReversed(MotorGroup*, bool);
 float   MotorGroup_getSetpoint(MotorGroup*);
 void    MotorGroup_setSetpoint(MotorGroup*, float);
 
