@@ -20,7 +20,7 @@
 ##
 
 # distribution zip file #
-DISTZIP := vexos_0_9_6
+DISTZIP := vexos_0_9_7
 
 # project paths #
 SRCDIR    := src
@@ -126,6 +126,6 @@ clean:
 
 # build the distribution archive #
 .PHONY : dist
-dist:
+dist : $(OBJDIR)/$(DISTZIP).zip
+$(OBJDIR)/$(DISTZIP).zip : $(OBJDIR)/VexOS.lib $(INCPUBDIR)/*.h
 	zip -j $(OBJDIR)/$(DISTZIP).zip $(OBJDIR)/VexOS.lib $(INCPUBDIR)/*.h
-
