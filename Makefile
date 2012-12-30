@@ -75,8 +75,8 @@ $(OBJDIR):
 -include $(OBJS:.o=.d)
 
 # install into external easyC project directory #
-.PHONY : project-install
-project-install: $(OBJDIR)/VexOS.lib
+.PHONY : project
+project: $(OBJDIR)/VexOS.lib
 ifdef ROBOTPROJECT
 	cp $(INCPUBDIR)\*.h $(ROBOTPROJECT)
 	cp $(OBJDIR)\VexOS.lib $(ROBOTPROJECT)
