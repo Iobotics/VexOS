@@ -645,7 +645,7 @@ void MotorGroup_setTolerance(MotorGroup* group, float value) {
 bool MotorGroup_onTarget(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
-    if(!group->pidData.enabled) return false;
+    if(!group->pidData.enabled) return true;
 
     Device* device = group->feedbackDevice;
     switch(group->feedbackType) {
