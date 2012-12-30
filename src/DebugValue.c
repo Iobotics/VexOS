@@ -216,8 +216,8 @@ void DebugValue_set(DebugValue* value, ...) {
         // update if different //
         value->valueString = vstring;
         value->changeTime  = GetMsClock();
-    } else {
-        // not different, free new string //
+    } else if(value->valueType != DebugValueType_Bool){
+        // not different, free new string if we allocated it //
         free(vstring);
     }
 }
