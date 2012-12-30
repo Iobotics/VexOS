@@ -200,6 +200,8 @@ void Button_executeScheduler(ButtonScheduler* sched) {
             }
             if(sched->button->toggleState) {
                 Command_start(sched->command);
+            } else if(Command_getStatus(sched->command) & CommandStatus_Running) {
+                Command_cancel(sched->command);
             }
             break;
     }
