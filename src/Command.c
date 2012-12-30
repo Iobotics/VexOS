@@ -296,7 +296,7 @@ Command* Command_getParent(Command* cmd) {
     return cmd->parent;
 }
 
-CommandStatus Command_GetStatus(Command* cmd) {
+CommandStatus Command_getStatus(Command* cmd) {
     ErrorIf(cmd == NULL, VEXOS_ARGNULL);
     
     return cmd->status;
