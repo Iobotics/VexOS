@@ -79,10 +79,10 @@ void PowerExpander_setPWMPorts(PowerExpander* expand, PWMPort port1, PWMPort por
 {
     ErrorIf(expand == NULL, VEXOS_ARGNULL);
     // clear out old expander ports //
-    Device_setPWMExpander(expand->pwmPorts[0], NULL);
-    Device_setPWMExpander(expand->pwmPorts[1], NULL);
-    Device_setPWMExpander(expand->pwmPorts[2], NULL);
-    Device_setPWMExpander(expand->pwmPorts[3], NULL);
+    if(expand->pwmPorts[0]) Device_setPWMExpander(expand->pwmPorts[0], NULL);
+    if(expand->pwmPorts[1]) Device_setPWMExpander(expand->pwmPorts[1], NULL);
+    if(expand->pwmPorts[2]) Device_setPWMExpander(expand->pwmPorts[2], NULL);
+    if(expand->pwmPorts[3]) Device_setPWMExpander(expand->pwmPorts[3], NULL);
     // set the expander ports //
     expand->pwmPorts[0] = port1;
     Device_setPWMExpander(port1, expand);
