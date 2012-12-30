@@ -191,6 +191,17 @@ int UniLift_jogPosition(UniLiftJogDirection dir) {
     return -1;
 }
 
+bool UniLift_onTarget() {
+    switch(setup.type) {
+        case UniLiftType_Single:
+            return MotorGroup_onTarget(setup.motors.single);
+        case UniLiftType_Split:
+            return MotorGroup_onTarget(setup.motors.split.left)
+                && MotorGroup_onTarget(setup.motors.split.right);
+    }
+    return true;
+}
+
 bool UniLift_hasHomeSwitch() {
     return (setup.homeSwitch != NULL);
 }

@@ -57,7 +57,7 @@ static void initialize() {
 static void execute() { }
 
 static bool isFinished() {
-    return true;
+    return UniLift_onTarget();
 }
 
 static void end() { }

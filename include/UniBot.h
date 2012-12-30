@@ -139,6 +139,7 @@ float  UniLift_getPositionValue(int id);
 int    UniLift_getPosition();
 void   UniLift_setPosition(int id);
 int    UniLift_jogPosition(UniLiftJogDirection dir);
+bool   UniLift_onTarget();
 
 bool   UniLift_hasHomeSwitch();
 bool   UniLift_getHomeSwitch();
