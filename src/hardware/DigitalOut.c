@@ -45,6 +45,7 @@ static DigitalOut* new(String name, DeviceType type, DigitalPort port) {
     DigitalOut* ret = malloc(sizeof(DigitalOut));
     ret->type  = type;
     ret->name  = name;
+    ret->port  = port;
     ret->value = false;
     Device_addDigital(port, DigitalPortMode_Output, (Device*) ret);
     return ret;
