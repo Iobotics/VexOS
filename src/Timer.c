@@ -86,14 +86,15 @@ void Timer_setEnabled(Timer* timer, bool value) {
     timer->enabled = value;
 }
 
-void Timer_preset(Timer* timer, unsigned long value) {
+void Timer_preset(Timer* timer, float timeSec) {
     ErrorIf(timer == NULL, VEXOS_ARGNULL);
+    ErrorIf(timeSec < 0.0, VEXOS_ARGRANGE);
     
-    PresetTimer(timer->id, value);
+    PresetTimer(timer->id, (unsigned long) (timeSec * 1000));
 }
 
-unsigned long Timer_get(Timer* timer) {
+float Timer_get(Timer* timer) {
     ErrorIf(timer == NULL, VEXOS_ARGNULL);
 
-    return GetTimer(timer->id);
+    return (GetTimer(timer->id) / 1000.0);
 }

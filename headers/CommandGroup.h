@@ -40,12 +40,12 @@ typedef struct GroupEntry GroupEntry;
 struct GroupEntry {
     Command*        command;
     GroupEntryState state;
-    unsigned long   timeout;
+    float           timeout;
 };
 
-bool        CommandGroup_isGroup(Command*);
-bool        CommandGroup_isInterruptible(Command*);
-Command*    CommandGroup_getCurrentCommand(Command*);
-const List* CommandGroup_getChildList(Command*);
+bool        CommandGroup_isGroup(Command* cmd);
+bool        CommandGroup_isInterruptible(Command* group);
+Command*    CommandGroup_getCurrentCommand(Command* group);
+const List* CommandGroup_getChildList(Command* group);
 
 #endif

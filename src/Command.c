@@ -30,8 +30,6 @@
 //  present in this distribution.
 //
 
-#include "API.h"
-
 #include "Command.h"
 #include "CommandClass.h"
 #include "CommandGroup.h"
@@ -105,7 +103,7 @@ static void initializeCommandClass(CommandClass* class) {
  ********************************************************************/
 
 bool Command_run(Command* cmd) {
-    if(!cmd->runWhenDisabled && !cmd->parent && !IsEnabled()) {
+    if(!cmd->runWhenDisabled && !cmd->parent && VexOS_getRunMode() == RunMode_Initialize) {
         Command_cancel(cmd);
     }
     if(cmd->status & CommandStatus_Cancelled) {
@@ -113,7 +111,7 @@ bool Command_run(Command* cmd) {
     }
     if(!(cmd->status & CommandStatus_Initialized)) {
         cmd->status |= CommandStatus_Initialized;
-        cmd->startTime = GetMsClock();
+        cmd->startTime = VexOS_getRunTime();
         Debug("Initialize:  %s", Command_getName(cmd));
         callVoidMethod(cmd, cmd->class->initialize);
     }
@@ -152,7 +150,7 @@ void Command_setParent(Command* cmd, Command* group) {
 
 void Command_startRunning(Command* cmd) {
     cmd->status |= CommandStatus_Running;
-    cmd->startTime = -1;
+    cmd->startTime = NAN;
     
 }
 
@@ -192,12 +190,12 @@ void Command_require(Command* cmd, Subsystem* sys) {
     }
 }
 
-void Command_setTimeout(Command* cmd, unsigned long time) {
-    cmd->timeout = time;
+void Command_setTimeout(Command* cmd, float timeoutSec) {
+    cmd->timeout = timeoutSec;
 }
 
 bool Command_isTimedOut(Command* cmd) {
-    return (cmd->timeout != -1) &&
+    return !isnan(cmd->timeout) &&
         (Command_timeSinceInitialized(cmd) >= cmd->timeout);
 }
 
@@ -230,8 +228,8 @@ Command* Command_new(CommandClass* class, ...) {
     cmd->name            = NULL;
     cmd->parent          = NULL;
     cmd->status          = 0;
-    cmd->startTime       = -1;
-    cmd->timeout         = -1;
+    cmd->startTime       = NAN;
+    cmd->timeout         = NAN;
     cmd->interruptible   = true;
     cmd->runWhenDisabled = false;
     memset(&cmd->requiresList, 0, sizeof(List));
@@ -337,8 +335,9 @@ bool Command_doesRequireSubsystem(Command* cmd, Subsystem* sys) {
     return false;
 }
 
-unsigned long Command_timeSinceInitialized(Command* cmd) {
+float Command_timeSinceInitialized(Command* cmd) {
     ErrorIf(cmd == NULL, VEXOS_ARGNULL);
     
-    return (GetMsClock() - cmd->startTime);
+    if(isnan(cmd->startTime)) return -1.0;
+    return (VexOS_getRunTime() - cmd->startTime);
 }

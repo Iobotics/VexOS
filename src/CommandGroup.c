@@ -62,7 +62,7 @@ static ListNode* freeNode(ListNode* node) {
     return next;
 }
 
-static void addEntryNode(Command* group, Command* cmd, GroupEntryState state, unsigned long timeout) {
+static void addEntryNode(Command* group, Command* cmd, GroupEntryState state, float timeoutSec) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(!CommandGroup_isGroup(group), VEXOS_ARGINVALID,
                "Command is not a CommandGroup: %s", Command_getName(group));
@@ -73,7 +73,7 @@ static void addEntryNode(Command* group, Command* cmd, GroupEntryState state, un
     GroupEntry* entry = (GroupEntry*) malloc(sizeof(GroupEntry));
     entry->command = cmd;
     entry->state   = state;
-    entry->timeout = timeout;
+    entry->timeout = timeoutSec;
     // add to command list //
     List_insertLast(&group->fields->commands, getNode(entry));
     cmd->parent = group;
@@ -86,11 +86,11 @@ static void addEntryNode(Command* group, Command* cmd, GroupEntryState state, un
 }
 
 static bool isEntryTimedOut(GroupEntry* entry) {
-    if(entry->timeout == -1) {
+    if(isnan(entry->timeout)) {
         return false;
     } else {
-        unsigned long time = Command_timeSinceInitialized(entry->command);
-        return (time == 0)? false : (time >= entry->timeout);
+        float time = Command_timeSinceInitialized(entry->command);
+        return (time == -1.0)? false : (time >= entry->timeout);
     }
 }
 
@@ -285,24 +285,24 @@ const List* CommandGroup_getChildList(Command* group) {
 
 void CommandGroup_addSequential(Command* group, Command* cmd) {
     ErrorEntryPoint();
-    CommandGroup_addSequentialWithTimeout(group, cmd, -1);
+    CommandGroup_addSequentialWithTimeout(group, cmd, NAN);
     ErrorEntryClear();
 }
 
-void CommandGroup_addSequentialWithTimeout(Command* group, Command* cmd, unsigned long timeout) {
+void CommandGroup_addSequentialWithTimeout(Command* group, Command* cmd, float timeoutSec) {
     ErrorEntryPoint();
-    addEntryNode(group, cmd, GroupEntryState_InSequence, timeout);
+    addEntryNode(group, cmd, GroupEntryState_InSequence, timeoutSec);
     ErrorEntryClear();
 }
 
 void CommandGroup_addParallel(Command* group, Command* cmd) {
     ErrorEntryPoint();
-    CommandGroup_addParallelWithTimeout(group, cmd, -1);
+    CommandGroup_addParallelWithTimeout(group, cmd, NAN);
     ErrorEntryClear();
 }
 
-void CommandGroup_addParallelWithTimeout(Command* group, Command* cmd, unsigned long timeout) {
+void CommandGroup_addParallelWithTimeout(Command* group, Command* cmd, float timeoutSec) {
     ErrorEntryPoint();
-    addEntryNode(group, cmd, GroupEntryState_BranchChild, timeout);
+    addEntryNode(group, cmd, GroupEntryState_BranchChild, timeoutSec);
     ErrorEntryClear();
 }

@@ -100,9 +100,9 @@ struct Command {
     static void require(Subsystem* sys) { \
         Command_require(self, sys); \
     } \
-    void Command_setTimeout(Command* cmd, unsigned long time); \
-    static void setTimeout(unsigned long time) { \
-        Command_setTimeout(self, time); \
+    void Command_setTimeout(Command* cmd, float timeoutSec); \
+    static void setTimeout(float timeoutSec) { \
+        Command_setTimeout(self, timeoutSec); \
     } \
     bool Command_isTimedOut(Command* cmd); \
     static bool isTimedOut() { \

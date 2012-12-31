@@ -173,7 +173,7 @@ bool          Command_isInterruptible(Command* cmd);
 bool          Command_runWhenDisabled(Command* cmd);
 void          Command_setRunWhenDisabled(Command* cmd, bool value);
 bool          Command_doesRequireSubsystem(Command* cmd, Subsystem* sys);
-unsigned long Command_timeSinceInitialized(Command* cmd);
+float         Command_timeSinceInitialized(Command* cmd);
 
 /********************************************************************
  * Public API: CommandGroup                                         *
@@ -181,9 +181,9 @@ unsigned long Command_timeSinceInitialized(Command* cmd);
 
 // shares all methods with Command //
 void CommandGroup_addSequential(Command* group, Command* cmd);
-void CommandGroup_addSequentialWithTimeout(Command* group, Command* cmd, unsigned long timeout);
+void CommandGroup_addSequentialWithTimeout(Command* group, Command* cmd, float timeout);
 void CommandGroup_addParallel(Command* group, Command* cmd);
-void CommandGroup_addParallelWithTimeout(Command* group, Command* cmd, unsigned long timeout);
+void CommandGroup_addParallelWithTimeout(Command* group, Command* cmd, float timeout);
 
 /********************************************************************
  * Public API: ButtonClass                                          *
@@ -322,13 +322,13 @@ typedef enum {
     Timer_1 = 1, Timer_2, Timer_3, Timer_4, Timer_5, Timer_6
 } TimerId;
 
-Timer*        Timer_new(String name, TimerId timeId);
-Timer*        Timer_delete(Timer* timer);
-String        Timer_getName(Timer* timer);
-bool          Timer_isEnabled(Timer* timer);
-void          Timer_setEnabled(Timer* timer, bool value);
-void          Timer_preset(Timer* timer, unsigned long);
-unsigned long Timer_get(Timer* timer);
+Timer* Timer_new(String name, TimerId timeId);
+Timer* Timer_delete(Timer* timer);
+String Timer_getName(Timer* timer);
+bool   Timer_isEnabled(Timer* timer);
+void   Timer_setEnabled(Timer* timer, bool value);
+void   Timer_preset(Timer* timer, float);
+float  Timer_get(Timer* timer);
 
 /********************************************************************
  * Public API: List                                                 *

@@ -38,8 +38,8 @@ struct Command {
     String              name;
     Command*            parent;
     CommandStatus       status;
-    unsigned long       startTime;
-    unsigned long       timeout;
+    float               startTime;
+    float               timeout;
     bool                interruptible;
     bool                runWhenDisabled;
     List                requiresList;
@@ -49,18 +49,18 @@ struct Command {
  * Protected API                                                    *
  ********************************************************************/
 
-void Command_constructor(Command*);
-bool Command_run(Command*);
-void Command_startRunning(Command*);
-void Command_removed(Command*);
-void Command_setCancelled(Command*);
+void Command_constructor(Command* cmd);
+bool Command_run(Command* cmd);
+void Command_startRunning(Command* cmd);
+void Command_removed(Command* cmd);
+void Command_setCancelled(Command* cmd);
 
-void Command_setvName(Command*, String, va_list);
-void Command_setvArgs(Command*, String, va_list);
-void Command_require(Command*, Subsystem*);
-void Command_setTimeout(Command*, unsigned long);
-bool Command_isTimedOut(Command*);
-void Command_setInterruptible(Command*, bool);
-void Command_checkInstance(Command*, CommandClass*);
+void Command_setvName(Command* cmd, String fmtString, va_list argp);
+void Command_setvArgs(Command* cmd, String fmtString, va_list argp);
+void Command_require(Command* cmd, Subsystem* sys);
+void Command_setTimeout(Command* cmd, float timeoutSec);
+bool Command_isTimedOut(Command* cmd);
+void Command_setInterruptible(Command* cmd, bool value);
+void Command_checkInstance(Command* cmd, CommandClass* class);
 
 #endif // _Command_h
