@@ -123,18 +123,18 @@ typedef struct Servo         Servo;
  * Public API: Device (applies to all Device types with cast)       *
  ********************************************************************/
 
-String          Device_getName(Device*);
-DeviceType      Device_getType(Device*);
-String          Device_getTypeName(Device*);
-Device*         Device_getDigitalDevice(DigitalPort);
-DigitalPortMode Device_getDigitalPortMode(DigitalPort);
-Device*         Device_getAnalogDevice(AnalogPort);
-Device*         Device_getPWMDevice(PWMPort);
-PowerExpander*  Device_getPWMExpander(PWMPort);
-Device*         Device_getUARTDevice(UARTPort);
-Device*         Device_getI2cDevice(I2c);
+String          Device_getName(Device* device);
+DeviceType      Device_getType(Device* device);
+String          Device_getTypeName(Device* device);
+Device*         Device_getDigitalDevice(DigitalPort port);
+DigitalPortMode Device_getDigitalPortMode(DigitalPort port);
+Device*         Device_getAnalogDevice(AnalogPort port);
+Device*         Device_getPWMDevice(PWMPort port);
+PowerExpander*  Device_getPWMExpander(PWMPort port);
+Device*         Device_getUARTDevice(UARTPort port);
+Device*         Device_getI2cDevice(I2c i2c);
 const List*     Device_getDeviceList();
-Device*         Device_getByType(DeviceType);
+Device*         Device_getByType(DeviceType type);
 
 /********************************************************************
  * Public API: DigitalIn                                            *
@@ -146,47 +146,47 @@ typedef enum {
     InterruptMode_FallingEdge
 } InterruptMode;
 
-DigitalIn*    DigitalIn_newBump(String, DigitalPort);
-DigitalIn*    DigitalIn_newLimit(String, DigitalPort);
-DigitalIn*    DigitalIn_newJumper(String, DigitalPort);
-DigitalPort   DigitalIn_getPort(DigitalIn*);
-bool          DigitalIn_isInverted(DigitalIn*);
-void          DigitalIn_setInverted(DigitalIn*, bool);
-bool          DigitalIn_get(DigitalIn*);
-InterruptMode DigitalIn_getInterruptMode(DigitalIn*);
-void          DigitalIn_setInterruptMode(DigitalIn*, InterruptMode);
-bool          DigitalIn_getInterrupted(DigitalIn*);
-Button*       DigitalIn_getButton(DigitalIn*);
+DigitalIn*    DigitalIn_newBump(String name, DigitalPort port);
+DigitalIn*    DigitalIn_newLimit(String name, DigitalPort port);
+DigitalIn*    DigitalIn_newJumper(String name, DigitalPort port);
+DigitalPort   DigitalIn_getPort(DigitalIn* in);
+bool          DigitalIn_isInverted(DigitalIn* in);
+void          DigitalIn_setInverted(DigitalIn* in, bool value);
+bool          DigitalIn_get(DigitalIn* in);
+InterruptMode DigitalIn_getInterruptMode(DigitalIn* in);
+void          DigitalIn_setInterruptMode(DigitalIn* in, InterruptMode mode);
+bool          DigitalIn_getInterrupted(DigitalIn* in);
+Button*       DigitalIn_getButton(DigitalIn* in);
 
 /********************************************************************
  * Public API: Encoder                                              *
  ********************************************************************/
 
-Encoder*    Encoder_newQuadrature(String, DigitalPort, DigitalPort, bool);
-Encoder*    Encoder_new(String, DigitalPort);
-DigitalPort Encoder_getPort(Encoder*);
-DigitalPort Encoder_getPort2(Encoder*);
-bool        Encoder_isReversed(Encoder*);
-bool        Encoder_isEnabled(Encoder*);
-void        Encoder_setEnabled(Encoder*, bool);
-float       Encoder_getScaleFactor(Encoder*);
-void        Encoder_setScaleFactor(Encoder*, float);
-long        Encoder_getRaw(Encoder*);
-void        Encoder_presetRaw(Encoder*, long);
-float       Encoder_get(Encoder*);
-void        Encoder_preset(Encoder*, float);
+Encoder*    Encoder_newQuadrature(String name, DigitalPort port1, DigitalPort port, bool reversed);
+Encoder*    Encoder_new(String name, DigitalPort port);
+DigitalPort Encoder_getPort(Encoder* encoder);
+DigitalPort Encoder_getPort2(Encoder* encoder);
+bool        Encoder_isReversed(Encoder* encoder);
+bool        Encoder_isEnabled(Encoder* encoder);
+void        Encoder_setEnabled(Encoder* encoder, bool value);
+float       Encoder_getScaleFactor(Encoder* encoder);
+void        Encoder_setScaleFactor(Encoder* encoder, float scale);
+long        Encoder_getRaw(Encoder* encoder);
+void        Encoder_presetRaw(Encoder* encoder, long value);
+float       Encoder_get(Encoder* encoder);
+void        Encoder_preset(Encoder* encoder, float value);
 
 /********************************************************************
  * Public API: Sonar                                                *
  ********************************************************************/
 
-Sonar* Sonar_new(String, DigitalPort, DigitalPort);
-DigitalPort Sonar_getInputPort(Sonar*);
-DigitalPort Sonar_getOutputPort(Sonar*);
-bool   Sonar_isEnabled(Sonar*);
-void   Sonar_setEnabled(Sonar*, bool);
-int    Sonar_getDistanceInches(Sonar*);
-float  Sonar_getDistanceCentimeters(Sonar*);
+Sonar* Sonar_new(String name, DigitalPort inputPort, DigitalPort outputPort);
+DigitalPort Sonar_getInputPort(Sonar* sonar);
+DigitalPort Sonar_getOutputPort(Sonar* sonar);
+bool   Sonar_isEnabled(Sonar* sonar);
+void   Sonar_setEnabled(Sonar* sonar, bool value);
+int    Sonar_getDistanceInches(Sonar* sonar);
+float  Sonar_getDistanceCentimeters(Sonar* sonar);
 
 /********************************************************************
  * Public API: AnalogIn                                             *
@@ -194,16 +194,16 @@ float  Sonar_getDistanceCentimeters(Sonar*);
 
 #define MAX_ANALOG_IN_RAW   4096
 
-AnalogIn*  AnalogIn_newPotentiometer(String, AnalogPort);
-AnalogIn*  AnalogIn_newLineFollower(String, AnalogPort);
-AnalogIn*  AnalogIn_newLightSensor(String, AnalogPort);
-AnalogPort AnalogIn_getPort(AnalogIn*);
-float      AnalogIn_getScaleFactor(AnalogIn*);
-void       AnalogIn_setScaleFactor(AnalogIn*, float);
-int        AnalogIn_getRaw(AnalogIn*);
-void       AnalogIn_presetRaw(AnalogIn*, int);
-float      AnalogIn_get(AnalogIn*);
-void       AnalogIn_preset(AnalogIn*, float);
+AnalogIn*  AnalogIn_newPotentiometer(String name, AnalogPort port);
+AnalogIn*  AnalogIn_newLineFollower(String name, AnalogPort port);
+AnalogIn*  AnalogIn_newLightSensor(String name, AnalogPort port);
+AnalogPort AnalogIn_getPort(AnalogIn* in);
+float      AnalogIn_getScaleFactor(AnalogIn* in);
+void       AnalogIn_setScaleFactor(AnalogIn* in, float scale);
+int        AnalogIn_getRaw(AnalogIn* in);
+void       AnalogIn_presetRaw(AnalogIn* in, int value);
+float      AnalogIn_get(AnalogIn* in);
+void       AnalogIn_preset(AnalogIn* in, float value);
 
 /********************************************************************
  * Public API: Gyro                                                 *
@@ -211,35 +211,35 @@ void       AnalogIn_preset(AnalogIn*, float);
 
 #define GYRO_DEFAULT_DEADBAND 3
 
-Gyro*      Gyro_new(String, AnalogPort);
-AnalogPort Gyro_getPort(Gyro*);
-void       Gyro_init(Gyro*);
-bool       Gyro_isEnabled(Gyro*);
-void       Gyro_setEnabled(Gyro*, bool);
-int        Gyro_getDeadband(Gyro*);
-void       Gyro_setDeadband(Gyro*, int);
-float      Gyro_getAngleDegrees(Gyro *);
+Gyro*      Gyro_new(String name, AnalogPort port);
+AnalogPort Gyro_getPort(Gyro* gyro);
+void       Gyro_init(Gyro* gyro);
+bool       Gyro_isEnabled(Gyro* gyro);
+void       Gyro_setEnabled(Gyro* gyro, bool value);
+int        Gyro_getDeadband(Gyro* gyro);
+void       Gyro_setDeadband(Gyro* gyro, int value);
+float      Gyro_getAngleDegrees(Gyro * gyro);
 
 /********************************************************************
  * Public API: Accelerometer                                        *
  ********************************************************************/
 
-Accelerometer* Accelerometer_new(String, AnalogPort);
-AnalogPort     Accelerometer_getPort(Accelerometer*);
-void           Accelerometer_init(Accelerometer*);
-bool           Accelerometer_isEnabled(Accelerometer*);
-void           Accelerometer_setEnabled(Accelerometer*, bool);
-float          Accelerometer_getAccelerationG(Accelerometer*);
+Accelerometer* Accelerometer_new(String name, AnalogPort port);
+AnalogPort     Accelerometer_getPort(Accelerometer* accel);
+void           Accelerometer_init(Accelerometer* accel);
+bool           Accelerometer_isEnabled(Accelerometer* accel);
+void           Accelerometer_setEnabled(Accelerometer* accel, bool value);
+float          Accelerometer_getAccelerationG(Accelerometer* accel);
 
 /********************************************************************
  * Public API: DigitalOut                                           *
  ********************************************************************/
 
-DigitalOut* DigitalOut_newPneumaticValve(String, DigitalPort);
-DigitalOut* DigitalOut_newLED(String, DigitalPort);
-DigitalPort DigitalOut_getPort(DigitalOut*);
-bool        DigitalOut_get(DigitalOut*);
-void        DigitalOut_set(DigitalOut*, bool);
+DigitalOut* DigitalOut_newPneumaticValve(String name, DigitalPort port);
+DigitalOut* DigitalOut_newLED(String name, DigitalPort port);
+DigitalPort DigitalOut_getPort(DigitalOut* out);
+bool        DigitalOut_get(DigitalOut* out);
+void        DigitalOut_set(DigitalOut* out, bool value);
 
 /********************************************************************
  * Public API: Motor                                                *
@@ -252,11 +252,11 @@ typedef enum {
     MotorType_393_HS = 394
 } MotorType;
 
-PWMPort     Motor_getPort(Motor*);
-MotorType   Motor_getMotorType(Motor*);
-I2c         Motor_getI2c(Motor*);
-MotorGroup* Motor_getGroup(Motor*);
-bool        Motor_isReversed(Motor*);
+PWMPort     Motor_getPort(Motor* motor);
+MotorType   Motor_getMotorType(Motor* motor);
+I2c         Motor_getI2c(Motor* motor);
+MotorGroup* Motor_getGroup(Motor* motor);
+bool        Motor_isReversed(Motor* motor);
 
 /********************************************************************
  * Public API: MotorGroup                                           *
@@ -269,46 +269,46 @@ typedef enum {
     FeedbackType_Potentiometer
 } FeedbackType;
 
-MotorGroup* MotorGroup_new(String);
-void        MotorGroup_add(MotorGroup*, String, PWMPort, MotorType, bool);
-void        MotorGroup_addWithIME(MotorGroup*, String, PWMPort, MotorType, bool, I2c);
-const List* MotorGroup_getMotorList(MotorGroup*);
+MotorGroup* MotorGroup_new(String name);
+void        MotorGroup_add(MotorGroup* group, String name, PWMPort port, MotorType type, bool reversed);
+void        MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorType type, bool reversed, I2c i2c);
+const List* MotorGroup_getMotorList(MotorGroup* group);
 
 // open loop control //
-Power MotorGroup_getPower(MotorGroup*);
-void  MotorGroup_setPower(MotorGroup*, Power);
+Power MotorGroup_getPower(MotorGroup* group);
+void  MotorGroup_setPower(MotorGroup* group, Power power);
 
 // feedback monitoring //
-void         MotorGroup_addEncoder(MotorGroup*, Encoder*);
-void         MotorGroup_addPotentiometer(MotorGroup*, AnalogIn*);
-Device*      MotorGroup_getSensor(MotorGroup*);
-FeedbackType MotorGroup_getFeedbackType(MotorGroup*);
-bool         MotorGroup_isFeedbackEnabled(MotorGroup*);
-void         MotorGroup_setFeedbackEnabled(MotorGroup*, bool);
-float        MotorGroup_getOutputScaleFactor(MotorGroup*);
-void         MotorGroup_setOutputScaleFactor(MotorGroup*, float);
-float        MotorGroup_getFeedbackScaleFactor(MotorGroup*);
-void         MotorGroup_setFeedbackScaleFactor(MotorGroup*, float);
-bool         MotorGroup_isFeedbackReversed(MotorGroup*);
-void         MotorGroup_setFeedbackReversed(MotorGroup*, bool);
-float        MotorGroup_getPosition(MotorGroup*);
-void         MotorGroup_presetPosition(MotorGroup*, float);
-float        MotorGroup_getSpeed(MotorGroup*);
-void         MotorGroup_restorePosition(MotorGroup*);
+void         MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder);
+void         MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot);
+Device*      MotorGroup_getSensor(MotorGroup* group);
+FeedbackType MotorGroup_getFeedbackType(MotorGroup* group);
+bool         MotorGroup_isFeedbackEnabled(MotorGroup* group);
+void         MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value);
+float        MotorGroup_getOutputScaleFactor(MotorGroup* group);
+void         MotorGroup_setOutputScaleFactor(MotorGroup* group, float scale);
+float        MotorGroup_getFeedbackScaleFactor(MotorGroup* group);
+void         MotorGroup_setFeedbackScaleFactor(MotorGroup* group, float scale);
+bool         MotorGroup_isFeedbackReversed(MotorGroup* group);
+void         MotorGroup_setFeedbackReversed(MotorGroup* group, bool value);
+float        MotorGroup_getPosition(MotorGroup* group);
+void         MotorGroup_presetPosition(MotorGroup* group, float value);
+float        MotorGroup_getSpeed(MotorGroup* group);
+void         MotorGroup_restorePosition(MotorGroup* group);
 
 // closed loop control //
-bool    MotorGroup_isPIDEnabled(MotorGroup*);
-void    MotorGroup_setPIDEnabled(MotorGroup*, bool);
-void    MotorGroup_setPID(MotorGroup*, float, float, float);
-float   MotorGroup_getP(MotorGroup*);
-float   MotorGroup_getI(MotorGroup*);
-float   MotorGroup_getD(MotorGroup*);
-float   MotorGroup_getError(MotorGroup*);
-float   MotorGroup_getTolerance(MotorGroup*);
-void    MotorGroup_setTolerance(MotorGroup*, float);
-bool    MotorGroup_onTarget(MotorGroup*);
-float   MotorGroup_getSetpoint(MotorGroup*);
-void    MotorGroup_setSetpoint(MotorGroup*, float);
+bool    MotorGroup_isPIDEnabled(MotorGroup* group);
+void    MotorGroup_setPIDEnabled(MotorGroup* group, bool value);
+void    MotorGroup_setPID(MotorGroup* group, float kP, float kI, float kD);
+float   MotorGroup_getP(MotorGroup* group);
+float   MotorGroup_getI(MotorGroup* group);
+float   MotorGroup_getD(MotorGroup* group);
+float   MotorGroup_getError(MotorGroup* group);
+float   MotorGroup_getTolerance(MotorGroup* group);
+void    MotorGroup_setTolerance(MotorGroup* group, float tolerance);
+bool    MotorGroup_onTarget(MotorGroup* group);
+float   MotorGroup_getSetpoint(MotorGroup* group);
+void    MotorGroup_setSetpoint(MotorGroup* group, float value);
 
 /********************************************************************
  * Public API: Servo                                                *
@@ -316,10 +316,10 @@ void    MotorGroup_setSetpoint(MotorGroup*, float);
 
 #define SERVO_TRAVEL_DEGREES 100
 
-Servo*  Servo_new(String, PWMPort);
-PWMPort Servo_getPort(Servo*);
-float   Servo_getAngleDegrees(Servo*);
-void    Servo_setAngleDegrees(Servo*, float);
+Servo*  Servo_new(String name, PWMPort port);
+PWMPort Servo_getPort(Servo* servo);
+float   Servo_getAngleDegrees(Servo* servo);
+void    Servo_setAngleDegrees(Servo* servo, float angle);
 
 /********************************************************************
  * Public API: PowerExpander                                        *
@@ -330,22 +330,22 @@ typedef enum {
     PowerExpanderType_Rev_A2 = 700
 } PowerExpanderType;
 
-PowerExpander*    PowerExpander_new(String, PowerExpanderType, AnalogPort);
-PowerExpanderType PowerExpander_getType(PowerExpander*);
-AnalogPort        PowerExpander_getStatusPort(PowerExpander*);
-void              PowerExpander_setPWMPorts(PowerExpander*, PWMPort, PWMPort, PWMPort, PWMPort);
-void              PowerExpander_getPWMPorts(PowerExpander*, PWMPort*, PWMPort*, PWMPort*, PWMPort*);
-float             PowerExpander_getBatteryVoltage(PowerExpander*);
+PowerExpander*    PowerExpander_new(String name, PowerExpanderType type, AnalogPort port);
+PowerExpanderType PowerExpander_getType(PowerExpander* expand);
+AnalogPort        PowerExpander_getStatusPort(PowerExpander* expand);
+void              PowerExpander_setPWMPorts(PowerExpander* expand, PWMPort port1, PWMPort port2, PWMPort port3, PWMPort port4);
+void              PowerExpander_getPWMPorts(PowerExpander* expand, PWMPort* port1, PWMPort* port2, PWMPort* port3, PWMPort* port4);
+float             PowerExpander_getBatteryVoltage(PowerExpander* expand);
 
 /********************************************************************
  * Public API: LCD                                                  *
  ********************************************************************/
 
 // note: there are more LCD methods in UserInterface.h //
-LCD*     LCD_new(String, UARTPort);
-UARTPort LCD_getPort(LCD*);
-void     LCD_setBacklight(LCD*, bool);
-bool     LCD_getBacklight(LCD*);
+LCD*     LCD_new(String name, UARTPort port);
+UARTPort LCD_getPort(LCD* lcd);
+void     LCD_setBacklight(LCD* lcd, bool value);
+bool     LCD_getBacklight(LCD* lcd);
 
 /********************************************************************
  * Public API: SerialPort                                           *
@@ -397,14 +397,14 @@ typedef struct {
     SerialMode        mode;
 } SerialOptions;
 
-SerialPort*   SerialPort_new(String, UARTPort);
-void          SerialPort_open(SerialPort*, BaudRate);
-void          SerialPort_openWithOptions(SerialPort*, BaudRate, SerialOptions);
-BaudRate      SerialPort_getBaudRate(SerialPort*);
-SerialOptions SerialPort_getOptions(SerialPort*);
-unsigned char SerialPort_getByteCount(SerialPort*);
-unsigned char SerialPort_readByte(SerialPort*);
-void          SerialPort_writeByte(SerialPort*, unsigned char byte);
+SerialPort*   SerialPort_new(String name, UARTPort port);
+void          SerialPort_open(SerialPort* serial, BaudRate baud);
+void          SerialPort_openWithOptions(SerialPort* serial, BaudRate baud, SerialOptions opts);
+BaudRate      SerialPort_getBaudRate(SerialPort* serial);
+SerialOptions SerialPort_getOptions(SerialPort* serial);
+unsigned char SerialPort_getByteCount(SerialPort* serial);
+unsigned char SerialPort_readByte(SerialPort* serial);
+void          SerialPort_writeByte(SerialPort* serial, unsigned char byte);
 
 #endif // _Hardware_h
 
