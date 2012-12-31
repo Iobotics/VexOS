@@ -45,7 +45,7 @@ Dashboard*  Dashboard_delete(Dashboard* dash);
 void        Dashboard_addWindow(Dashboard* dash, Window* win);
 void        Dashboard_addWindowWithPosition(Dashboard* dash, Window* win, char x, char y);
 const List* Dashboard_getWindowList(Dashboard* dash);
-void        Dashboard_removeWindow(Dashboard* dash, Window* dash);
+void        Dashboard_removeWindow(Dashboard* dash, Window* win);
 const List* Dashboard_getList();
 void        Dashboard_refresh();
 LCDScreen*  Dashboard_getLCDScreen();
