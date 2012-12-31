@@ -86,14 +86,14 @@ void UniDrive_autoEnd();
 UniDriveAction UniDrive_autoGetAction();
 
 // methods you must implement //
-void UniDrive_configure(Subsystem*, UniDriveSetup* setup);
-Command* UniDrive_getDefaultCommand(Subsystem*);
+void UniDrive_configure(Subsystem* sys, UniDriveSetup* setup);
+Command* UniDrive_getDefaultCommand(Subsystem* sys);
 
 // Command Components //
 DeclareCommandClass(UniDriveMove);
 DeclareCommandClass(UniDriveTurn);
 DeclareCommandClass(UniDriveWithJoystick);
-void UniDriveWithJoystick_setPowerScaler(Command* cmd, PowerScaler*);
+void UniDriveWithJoystick_setPowerScaler(Command* cmd, PowerScaler* scaler);
 DeclareCommandClass(UniDriveCancel);
 
 /********************************************************************
@@ -148,8 +148,8 @@ void   UniLift_resetPosition(int id);
 void   UniLift_setPower(Power power);
 
 // methods you must implement //
-void UniLift_configure(Subsystem*, UniLiftSetup* setup);
-Command* UniLift_getDefaultCommand(Subsystem*);
+void UniLift_configure(Subsystem* sys, UniLiftSetup* setup);
+Command* UniLift_getDefaultCommand(Subsystem* sys);
 
 // Command Components //
 DeclareCommandClass(UniLiftSet);
@@ -177,8 +177,8 @@ void   UniIntake_setDirection(int id);
 void   UniIntake_setPower(Power power);
 
 // methods you must implement //
-void UniIntake_configure(Subsystem*, UniIntakeSetup* setup);
-Command* UniIntake_getDefaultCommand(Subsystem*);
+void UniIntake_configure(Subsystem* sys, UniIntakeSetup* setup);
+Command* UniIntake_getDefaultCommand(Subsystem* sys);
 
 // Command Components //
 DeclareCommandClass(UniIntakeSet);
