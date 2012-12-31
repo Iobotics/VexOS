@@ -40,12 +40,12 @@ typedef struct LCDScreen LCDScreen;
 
 #define DASH_PERIOD     100
 
-Dashboard*  Dashboard_new(String);
-Dashboard*  Dashboard_delete(Dashboard*);
-void        Dashboard_addWindow(Dashboard*, Window*);
-void        Dashboard_addWindowWithPosition(Dashboard*, Window*, char, char);
-const List* Dashboard_getWindowList(Dashboard*);
-void        Dashboard_removeWindow(Dashboard*, Window*);
+Dashboard*  Dashboard_new(String name);
+Dashboard*  Dashboard_delete(Dashboard* dash);
+void        Dashboard_addWindow(Dashboard* dash, Window* win);
+void        Dashboard_addWindowWithPosition(Dashboard* dash, Window* win, char x, char y);
+const List* Dashboard_getWindowList(Dashboard* dash);
+void        Dashboard_removeWindow(Dashboard* dash, Window* dash);
 const List* Dashboard_getList();
 void        Dashboard_refresh();
 LCDScreen*  Dashboard_getLCDScreen();
@@ -82,21 +82,21 @@ typedef struct {
     unsigned char x, y;
 } Point;
 
-typedef void (WindowDrawCallback)(Window*, bool);
+typedef void (WindowDrawCallback)(Window* win, bool fullRefresh);
 
-Window*    Window_new(String, WindowDrawCallback*);
-Window*    Window_delete(Window*);
-String     Window_getName(Window*);
-Dashboard* Window_getDashboard(Window*);
-void       Window_setSize(Window*, char, char);
-char       Window_getWidth(Window*);
-char       Window_getHeight(Window*);
-void       Window_setPosition(Window*, char, char);
-Point      Window_getPosition(Window*);
-char       Window_getLeft(Window*);
-char       Window_getTop(Window*);
-Rect       Window_getInnerRect(Window*);
-Rect       Window_getOuterRect(Window*);
+Window*    Window_new(String name, WindowDrawCallback* callback);
+Window*    Window_delete(Window* win);
+String     Window_getName(Window* win);
+Dashboard* Window_getDashboard(Window* win);
+void       Window_setSize(Window* win, char width, char height);
+char       Window_getWidth(Window* win);
+char       Window_getHeight(Window* win);
+void       Window_setPosition(Window* win, char x, char y);
+Point      Window_getPosition(Window* win);
+char       Window_getLeft(Window* win);
+char       Window_getTop(Window* win);
+Rect       Window_getInnerRect(Window* win);
+Rect       Window_getOuterRect(Window* win);
 
 /********************************************************************
  * Public API: LCD                                                  *
@@ -111,10 +111,10 @@ typedef enum {
     LCDTextOptions_RightArrow   = 0x04
 } LCDTextOptions;
 
-void LCD_addScreen(LCD*, LCDScreen*);
-void LCD_removeScreen(LCD*, LCDScreen*);
-void LCD_setText(LCD*, unsigned char, LCDTextOptions, String, ...);
-bool LCD_restoreLastScreen(LCD*);
+void LCD_addScreen(LCD* lcd, LCDScreen* screen);
+void LCD_removeScreen(LCD* lcd, LCDScreen* screen);
+void LCD_setText(LCD* lcd, unsigned char line, LCDTextOptions opts, String fmtString, ...);
+bool LCD_restoreLastScreen(LCD* lcd);
 
 /********************************************************************
  * Public API: LCDScreen                                            *
@@ -126,13 +126,13 @@ typedef enum {
     LCDButtonType_Right  = 0x04
 } LCDButtonType;
 
-typedef void (LCDDrawCallback)(LCDScreen*, LCDButtonType);
-typedef bool (LCDStatusCallback)(LCDScreen*);
+typedef void (LCDDrawCallback)(LCDScreen* screen, LCDButtonType buttons);
+typedef bool (LCDStatusCallback)(LCDScreen* screen);
 
-LCDScreen* LCDScreen_new(String name, LCDDrawCallback*, LCDStatusCallback*);
-LCDScreen* LCDScreen_delete(LCDScreen*);
-String     LCDScreen_getName(LCDScreen*);
-LCD*       LCDScreen_getLCD(LCDScreen*);
+LCDScreen* LCDScreen_new(String name, LCDDrawCallback* drawCallback, LCDStatusCallback* statusCallback);
+LCDScreen* LCDScreen_delete(LCDScreen* screen);
+String     LCDScreen_getName(LCDScreen* screen);
+LCD*       LCDScreen_getLCD(LCDScreen* screen);
 
 /********************************************************************
  * Public API: Autonomous (UI Hook)                                 *
@@ -181,5 +181,5 @@ typedef enum {
     DeviceWindowType_UART
 } DeviceWindowType;
 
-Window* Device_getWindow(DeviceWindowType);
+Window* Device_getWindow(DeviceWindowType type);
 
