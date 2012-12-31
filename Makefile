@@ -78,8 +78,8 @@ $(OBJDIR):
 .PHONY : project
 project: $(OBJDIR)/VexOS.lib
 ifdef ROBOTPROJECT
-	cp $(INCPUBDIR)\*.h $(ROBOTPROJECT)
-	cp $(OBJDIR)\VexOS.lib $(ROBOTPROJECT)
+	cp $(INCPUBDIR)/*.h $(ROBOTPROJECT)
+	cp $(OBJDIR)/VexOS.lib $(ROBOTPROJECT)
 else
 	$(error ROBOTPROJECT environment variable is not defined)
 endif
