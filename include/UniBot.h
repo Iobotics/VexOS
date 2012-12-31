@@ -94,6 +94,7 @@ DeclareCommandClass(UniDriveMove);
 DeclareCommandClass(UniDriveTurn);
 DeclareCommandClass(UniDriveWithJoystick);
 void UniDriveWithJoystick_setPowerScaler(Command* cmd, PowerScaler*);
+DeclareCommandClass(UniDriveCancel);
 
 /********************************************************************
  * UniLift: Universal Lift                                          *
@@ -154,6 +155,7 @@ Command* UniLift_getDefaultCommand(Subsystem*);
 DeclareCommandClass(UniLiftSet);
 DeclareCommandClass(UniLiftJog);
 DeclareCommandClass(UniLiftHome);
+DeclareCommandClass(UniLiftCancel);
 
 /********************************************************************
  * UniIntake: Universal Intake                                      *
