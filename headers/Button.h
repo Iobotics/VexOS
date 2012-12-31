@@ -43,11 +43,11 @@ struct Button {
  * Protected API                                                    *
  ********************************************************************/
 
-void Button_executeScheduler(ButtonScheduler*);
-Button* Button_getSchedulerButton(ButtonScheduler*);
+void Button_executeScheduler(ButtonScheduler* sched);
+Button* Button_getSchedulerButton(ButtonScheduler* sched);
 
-void Button_setvName(Button*, String, va_list);
-void Button_setvArgs(Button*, String, va_list);
-void Button_checkInstance(Button*, ButtonClass*);
+void Button_setvName(Button* button, String fmtString, va_list argp);
+void Button_setvArgs(Button* button, String fmrString, va_list argp);
+void Button_checkInstance(Button* button, ButtonClass* class);
 
 #endif // _Button_h

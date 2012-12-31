@@ -47,7 +47,7 @@ typedef enum {
     VEXOS_NOTINITIALIZED
 } ErrorCode;
 
-void   Error_setCode(ErrorCode);
+void   Error_setCode(ErrorCode code);
 String Error_getMessage();
 
 #ifdef DEBUG
