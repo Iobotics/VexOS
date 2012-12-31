@@ -63,7 +63,7 @@ struct Command {
  ********************************************************************/
 
 #define DefineCommandClass(xclass, ...) \
-    static void constructor(va_list); \
+    static void constructor(va_list argp); \
     static void initialize(); \
     static void execute(); \
     static bool isFinished(); \
@@ -82,68 +82,68 @@ struct Command {
         .end         = &end, \
         .interrupted = &interrupted \
     }; \
-    void Command_setvName(Command*, String, va_list); \
-    static void setName(String fmt, ...) { \
+    void Command_setvName(Command* cmd, String fmtString, va_list argp); \
+    static void setName(String fmtString, ...) { \
         va_list argp; \
-        va_start(argp, fmt); \
-        Command_setvName(self, fmt, argp); \
+        va_start(argp, fmtString); \
+        Command_setvName(self, fmtString, argp); \
         va_end(argp); \
     } \
-    void Command_setvArgs(Command*, String, va_list); \
-    static void setArgs(String fmt, ...) { \
+    void Command_setvArgs(Command* cmd, String fmtString, va_list argp); \
+    static void setArgs(String fmtString, ...) { \
         va_list argp; \
-        va_start(argp, fmt); \
-        Command_setvArgs(self, fmt, argp); \
+        va_start(argp, fmtString); \
+        Command_setvArgs(self, fmtString, argp); \
         va_end(argp); \
     } \
-    void Command_require(Command*, Subsystem*); \
+    void Command_require(Command* cmd, Subsystem* sys); \
     static void require(Subsystem* sys) { \
         Command_require(self, sys); \
     } \
-    void Command_setTimeout(Command*, unsigned long time); \
+    void Command_setTimeout(Command* cmd, unsigned long time); \
     static void setTimeout(unsigned long time) { \
         Command_setTimeout(self, time); \
     } \
-    bool Command_isTimedOut(Command*); \
+    bool Command_isTimedOut(Command* cmd); \
     static bool isTimedOut() { \
         return Command_isTimedOut(self); \
     } \
-    void Command_setInterruptible(Command*, bool); \
+    void Command_setInterruptible(Command* cmd, bool value); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
     } \
-    void Command_checkInstance(Command*, CommandClass*); \
+    void Command_checkInstance(Command* cmd, CommandClass* class); \
     static void checkInstance(Command* cmd) { \
         Command_checkInstance(cmd, &xclass); \
     }
 
 #define DefineCommandGroup(xclass) \
-    static void constructor(va_list); \
+    static void constructor(va_list argp); \
     static Command* self; \
     CommandClass xclass = { \
         .name             = #xclass, \
         .groupConstructor = &constructor, \
         .groupSelfPtr     = &self \
     }; \
-    void Command_setvName(Command*, String, va_list); \
-    static void setName(String fmt, ...) { \
+    void Command_setvName(Command* cmd, String fmtString, va_list argp); \
+    static void setName(String fmtString, ...) { \
         va_list argp; \
-        va_start(argp, fmt); \
-        Command_setvName(self, fmt, argp); \
+        va_start(argp, fmtString); \
+        Command_setvName(self, fmtString, argp); \
         va_end(argp); \
     } \
-    void Command_setvArgs(Command*, String, va_list); \
-    static void setArgs(String fmt, ...) { \
+    void Command_setvArgs(Command* cmd, String fmtString, va_list argp); \
+    static void setArgs(String fmtString, ...) { \
         va_list argp; \
-        va_start(argp, fmt); \
-        Command_setvArgs(self, fmt, argp); \
+        va_start(argp, fmtString); \
+        Command_setvArgs(self, fmtString, argp); \
         va_end(argp); \
     } \
-    void Command_setInterruptible(Command*, bool); \
+    void Command_setInterruptible(Command* cmd, bool value); \
     static void setInterruptible(bool value) { \
         Command_setInterruptible(self, value); \
     } \
-    void Command_checkInstance(Command*, CommandClass*); \
+    void Command_checkInstance(Command* cmd, CommandClass* class); \
     static void checkInstance(Command* cmd) { \
         Command_checkInstance(cmd, &xclass); \
     }

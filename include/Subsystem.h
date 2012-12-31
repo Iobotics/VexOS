@@ -49,7 +49,7 @@ struct Subsystem {
 
 extern List Subsystems;
 
-void Subsystem_setDefaultCommand(Subsystem*, Command*);
+void Subsystem_setDefaultCommand(Subsystem* sys, Command* cmd);
 
 /********************************************************************
  * User-friendliness Singleton Definition Macros                    *
