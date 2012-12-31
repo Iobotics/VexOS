@@ -53,7 +53,7 @@ static void initialize() {
     PowerScaler_addPoint(ps, 0.4, 0.1);
     PrintToScreen(PowerScaler_toString(ps));
     
-    Autonomous_addProgram(Command_new(&WaitCommand, 3000));
+    Autonomous_addProgram(Command_new(&WaitCommand, 3.0));
     Command* kw = Command_new(&GroupTest);
     Autonomous_addProgram(kw);
     Autonomous_addProgram(Command_new(&CommandGroup, "Self Destruct"));
@@ -66,4 +66,5 @@ static void initialize() {
     VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
 #endif
 }
+
 
