@@ -60,7 +60,7 @@ Encoder* Encoder_newQuadrature(String name, DigitalPort portA, DigitalPort portB
     ret->portB   = portB;
     ret->reverse = reverse;
     ret->enabled = false;
-    ret->scale   = (360.0 / TicksPerRev_QUAD_ENCODER);
+    ret->scale   = (1.0 / TicksPerRev_QUAD_ENCODER);
     Device_addDigital(portA, DigitalPortMode_Input, (Device*) ret);
     Device_addDigital(portB, DigitalPortMode_Input, (Device*) ret);
     return ret;
@@ -76,7 +76,7 @@ Encoder* Encoder_new(String name, DigitalPort port) {
     ret->portB   = 0;
     ret->reverse = false;
     ret->enabled = false;
-    ret->scale   = (360.0 / TicksPerRev_OLD_ENCODER);
+    ret->scale   = (1.0 / TicksPerRev_OLD_ENCODER);
     Device_addDigital(port, DigitalPortMode_Input, (Device*) ret);
     return ret;
 }

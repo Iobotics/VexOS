@@ -63,7 +63,7 @@ static AnalogIn* new(String name, DeviceType type, AnalogPort port) {
 AnalogIn* AnalogIn_newPotentiometer(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_Potentiometer, port);
-    in->scale = POTENTIOMETER_TRAVEL_DEGREES / (360.0 * MAX_ANALOG_IN_RAW);
+    in->scale = (POTENTIOMETER_TRAVEL_DEGREES / (360.0 * MAX_ANALOG_IN_RAW));
     ErrorEntryClear();
     return in;
 }
@@ -71,6 +71,7 @@ AnalogIn* AnalogIn_newPotentiometer(String name, AnalogPort port) {
 AnalogIn* AnalogIn_newLineFollower(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_LineFollower, port);
+    in->scale = (1.0 / MAX_ANALOG_IN_RAW);
     ErrorEntryClear();
     return in;
 }
@@ -78,6 +79,7 @@ AnalogIn* AnalogIn_newLineFollower(String name, AnalogPort port) {
 AnalogIn* AnalogIn_newLightSensor(String name, AnalogPort port) {
     ErrorEntryPoint();
     AnalogIn* in = new(name, DeviceType_LightSensor, port);
+    in->scale = (1.0 / MAX_ANALOG_IN_RAW);
     ErrorEntryClear();
     return in;
 }
