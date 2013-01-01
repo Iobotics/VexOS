@@ -130,6 +130,13 @@ float PIDController_getD(PIDController* pid) {
     return pid->data.kD;
 }
 
+void PIDController_getInputRange(PIDController* pid, float* min, float* max) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+
+    if(min) *min = pid->data.minIn;
+    if(max) *max = pid->data.maxIn;
+}
+
 void PIDController_setInputRange(PIDController* pid, float min, float max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
@@ -137,6 +144,13 @@ void PIDController_setInputRange(PIDController* pid, float min, float max) {
 
     pid->data.minIn = min;
     pid->data.maxIn = max;
+}
+
+void PIDController_getOutputRange(PIDController* pid, float* min, float* max) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+
+    if(min) *min = pid->data.minOut;
+    if(max) *max = pid->data.maxOut;
 }
 
 void PIDController_setOutputRange(PIDController* pid, float min, float max) {
