@@ -40,6 +40,7 @@
 extern struct Robot Robot;
 List Subsystems;
 
+// hidden method, not in header //
 void Subsystem_construct() {
     int i = 0;
     Subsystem* sys;
@@ -53,6 +54,7 @@ void Subsystem_construct() {
     }
 }
 
+// hidden method, not in header //
 void Subsystem_initialize() {
     ListNode* node = Subsystems.firstNode;
     while(node != NULL) {
