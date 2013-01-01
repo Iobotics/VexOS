@@ -18,12 +18,37 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
+//  --------------------------------------------------------------------------
+//
+//  Some algorithms, structures and code organization used by this file have
+//  been adapted from the WPILibJ software package. Those portions are:
+//
+//  Copyright (c) FIRST 2008-2012. All rights reserved.
+//  
+//  WPILibJ elements are distributed in this program in accordance to their 
+//  original FIRST BSD License, available as 'BSD_License_for_WPILib_code.txt' 
+//  present in this distribution.
+//
 
 #include "PID.h"
 
 /********************************************************************
  * Protected API                                                    *
  ********************************************************************/
+
+void PID_initialize(PIDState* pid) {
+    pid->kP           = 0.0;
+    pid->kI           = 0.0;
+    pid->kD           = 0.0;
+    pid->minIn        = -1.0;
+    pid->maxIn        = 1.0;
+    pid->minOut       = -1.0;
+    pid->maxOut       = 1.0;
+    pid->isContinuous = false;
+    pid->error        = 0.0;
+    pid->deltaError   = 0.0;
+    pid->sigmaError   = 0.0;
+}
 
 void PID_calculate(PIDState* pid) {
     // limit input //
