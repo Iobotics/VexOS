@@ -41,8 +41,8 @@ CFLAGS   := -mthumb -D DEBUG -O3 -Wall -std=gnu99 -ffunction-sections -c
 
 # objects #
 OS_OBJS  := Autonomous.o Battery.o Button.o ButtonClass.o Command.o CommandClass.o \
-			CommandGroup.o DebugValue.o Error.o List.o PID.o PIDController.o Joystick.o \
-			PowerScaler.o Scheduler.o Subsystem.o Timer.o VexOS.o
+			CommandGroup.o DebugValue.o Error.o Interrupt.o List.o PID.o PIDController.o \
+			Joystick.o PowerScaler.o Scheduler.o Subsystem.o Timer.o VexOS.o
 CMD_OBJS := PrintCommand.o StartCommand.o UniDriveCancel.o UniDriveMove.o UniDriveTurn.o \
 			UniDriveWithJoystick.o UniIntakeSet.o UniLiftCancel.o UniLiftHome.o UniLiftJog.o \
 			UniLiftSet.o WaitCommand.o WaitForChildren.o WaitUntilCommand.o
