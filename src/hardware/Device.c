@@ -186,7 +186,7 @@ void Device_configureCortex() {
     bool initIMEs = false;
     unsigned char motors[PWM_PORT_COUNT];
     for(int i = 0; i < PWM_PORT_COUNT; i++) {
-        motors[i] = i;
+        motors[i] = i + 1;
     }
     for(int i = 0; i < PWM_PORT_COUNT; i++) {
         // make sure we have a motor //
@@ -211,6 +211,10 @@ void Device_configureCortex() {
     unsigned char mtypes[PWM_PORT_COUNT];
     for(int i = 0; i < PWM_PORT_COUNT; i++) {
         Device* device = pwmPorts[i].device;
+        if(!device) {
+            mtypes[i] = EasyCMotor_None;
+            continue;
+        }
         switch(device->type) {
             case DeviceType_Motor:
                 if(Motor_getI2c((Motor*) device)) {
