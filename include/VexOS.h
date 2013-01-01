@@ -52,6 +52,14 @@
 // the other VexOS state values are used.                        //
 #define GLOBALDATA_MOTORGROUP_STATE 12
 
+// helper union to store floats in globaldata without casting, //
+// since casting would round, which is not the desired result  //
+// note that in ARM C, sizeof(unsigned long) == sizeof(float)  //
+typedef union {
+    unsigned long ulongValue;
+    float         floatValue;
+} GlobalDataValue;
+
 /********************************************************************
  * Public Object Definitions                                        *
  ********************************************************************/
