@@ -21,6 +21,7 @@
 
 #include "API.h"
 
+#include "Interrupt.h"
 #include "UserInterface.h"
 #include "Scheduler.h"
 #include "Error.h"
@@ -95,6 +96,7 @@ static void executeLoop(RunMode mode) {
                 Subsystem_construct();
                 Robot.constructor();
                 Device_configureCortex();
+                Interrupt_enable();
                 // run robot initializer //
                 runMode = RunMode_Initialize;
                 Subsystem_initialize();

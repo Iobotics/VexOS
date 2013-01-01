@@ -33,7 +33,7 @@
 typedef void (InterruptHandler)(void* object);
 
 bool Interrupt_isEnabled();
-void Interrupt_enabled();
+void Interrupt_enable();
 void Interrupt_disable();
 void Interrupt_add(void* object, InterruptHandler* handler, int freq, int order);
 void Interrupt_remove(void* object, InterruptHandler* handler);
