@@ -276,7 +276,10 @@ const List* MotorGroup_getMotorList(MotorGroup* group);
 
 // open loop control //
 Power MotorGroup_getPower(MotorGroup* group);
+Power MotorGroup_getActualPower(MotorGroup* group);
 void  MotorGroup_setPower(MotorGroup* group, Power power);
+void  MotorGroup_getPowerRange(MotorGroup* group, Power* min, Power* max);
+void  MotorGroup_setPowerRange(MotorGroup* group, Power min, Power max);
 
 // feedback monitoring //
 void         MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder);

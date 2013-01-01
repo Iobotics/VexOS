@@ -24,6 +24,8 @@
 #include "Hardware.h"
 #include "Device.h"
 #include "Motor.h"
+#include "Interrupt.h"
+#include "PID.h"
 #include "Error.h"
 
 /********************************************************************
@@ -37,15 +39,6 @@
 #define TicksPerRev_IME_393HS       392.0
 #define TicksPerRev_IME_269         240.448
 
-typedef struct {
-    unsigned char enabled;
-    long          setpoint;
-    int           power;
-    long          error;
-    long          deltaError;
-    long          sigmaError;
-} PIDData;
-
 struct MotorGroup {
     // device header //
     unsigned char  deviceId;
@@ -54,29 +47,51 @@ struct MotorGroup {
     Subsystem*     subsystem;
     // device item fields //
     List           children;
-    Power          power;
+    volatile Power powerActual;
+    Power          powerRequested;
+    Power          powerSlewRate;
+    float          outputScale;
     bool           feedbackEnabled;
     FeedbackType   feedbackType;
     Device*        feedbackDevice;
     bool           feedbackReversed;
-    unsigned char  globaldataSlot;
-    float          outputScale;
     float          feedbackScale;
-    PIDData        pidData;
-    float          kP, kI, kD;
-    long           tolerance;
+    volatile float position;
+    volatile float lastPosition;
+    volatile float speed;
+    bool           pidEnabled;
+    PIDState       pid;
+    float          pidTolerance;
+    unsigned char  globaldataSlot;
 };
 
 // internal state fields //
-static char globaldataNextSlot = GLOBALDATA_MOTORGROUP_STATE;
-static ImeData ime[MAX_IME];
-static bool          imeCapture;
-static unsigned char imeCount;
-static List processList;
+static char nextGlobalDataSlot = GLOBALDATA_MOTORGROUP_STATE;
+
+static bool    initialized;
+static char    imeWatch;
+static ImeData imeData[MAX_IME];
+
+static void imeInterrupt(void* object) {
+    if(!imeWatch) return;
+    GetIntegratedMotorEncodersData(imeData);
+}
+
+static void groupInterrupt(void* object) {
+    //MotorGroup* group = object;
+
+
+}
+
+static void initialize() {
+    // register the IME watcher //
+    Interrupt_add(NULL, &imeInterrupt, 1, 5);
+    initialized = true;
+}
 
 // no attempt was made to optimize this ISR, test it as is, then optimize if //
 // it starts to cause problems for the rest of the code.                     //
-static void processISR() {
+/*static void processISR() {
     // do not run during computations //
     if(VexOS_getRunMode() <= RunMode_Initialize) return;
 
@@ -190,7 +205,7 @@ static void removeProcessGroup(MotorGroup* group) {
     if(processList.nodeCount > 0 || imeCount > 0) {
         startInterrupt();
     }
-}
+}*/
 
 /********************************************************************
  * Public API                                                       *
@@ -203,20 +218,27 @@ MotorGroup* MotorGroup_new(String name) {
     ret->type             = DeviceType_MotorGroup;
     ret->name             = name;
     memset(&ret->children, 0, sizeof(List));
-    ret->power            = 0.0;
+    ret->powerActual      = 0.0;
+    ret->powerRequested   = 0.0;
+    ret->powerSlewRate    = 2.0; // disabled: slew entire range in one cycle //
+    ret->outputScale      = 1.0;
     ret->feedbackEnabled  = false;
     ret->feedbackType     = FeedbackType_None;
     ret->feedbackDevice   = NULL;
     ret->feedbackReversed = false;
-    ret->globaldataSlot   = 0;
-    ret->outputScale      = 1.0;
     ret->feedbackScale    = 1.0;
-    memset(&ret->pidData, 0, sizeof(PIDData));
-    ret->kP               = 0.0;
-    ret->kI               = 0.0;
-    ret->kD               = 0.0;
-    ret->tolerance        = 32; 
+    ret->speed            = 0.0;
+    ret->pidEnabled       = false;
+    PID_initialize(&ret->pid);
+    ret->pidTolerance     = -1;
+    ret->globaldataSlot   = 0;
     Device_addVirtualDevice((Device*) ret);
+
+    // initialization //
+    if(!initialized) initialize();
+    
+    // add a group-specific ISR //
+    Interrupt_add(ret, &groupInterrupt, 1, 10);
     return ret;
 }
 
@@ -245,9 +267,9 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
     group->feedbackReversed = reversed;
     // set feedback ratio based on IME type //
     switch(type) {
-        case MotorType_269:    group->feedbackScale = (360.0 / TicksPerRev_IME_269);   break;
-        case MotorType_393_HT: group->feedbackScale = (360.0 / TicksPerRev_IME_393HT); break;
-        case MotorType_393_HS: group->feedbackScale = (360.0 / TicksPerRev_IME_393HS); break;
+        case MotorType_269:    group->feedbackScale = (1.0 / TicksPerRev_IME_269);   break;
+        case MotorType_393_HT: group->feedbackScale = (1.0 / TicksPerRev_IME_393HT); break;
+        case MotorType_393_HS: group->feedbackScale = (1.0 / TicksPerRev_IME_393HS); break;
         default: break;
     }
 }
@@ -263,15 +285,21 @@ const List* MotorGroup_getMotorList(MotorGroup* group) {
 Power MotorGroup_getPower(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->power;
+    return group->powerRequested;
+}
+
+Power MotorGroup_getActualPower(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return group->powerActual;
 }
 
 void MotorGroup_setPower(MotorGroup* group, Power power) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    if(group->power == power) return;
+    if(group->powerRequested == power) return;
 
     // disable PID //
-    if(group->pidData.enabled) {
+    if(group->pidEnabled) {
         MotorGroup_setPIDEnabled(group, false);
     }
 
@@ -279,16 +307,23 @@ void MotorGroup_setPower(MotorGroup* group, Power power) {
     if(power > 1.0) power = 1.0;
     else if(power < -1.0) power = -1.0;
 
-    // set the motors //
-    group->power = power;
-    ListNode* node = group->children.firstNode;
-    while(node != NULL) {
-        Motor* motor = node->data;
-        Power mpower = power;
-        if(motor->reversed) mpower *= -1.0;
-        SetMotor(motor->port, (int) (mpower * MAX_MOTOR_POWER));
-        node = node->next;
-    }
+    // request the power, is set in the ISR //
+    group->powerRequested = power;
+}
+
+void MotorGroup_getPowerRange(MotorGroup* group, Power* min, Power* max) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    if(min) *min = group->pid.minOut;
+    if(max) *max = group->pid.maxOut;
+}
+
+void MotorGroup_setPowerRange(MotorGroup* group, Power min, Power max) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
+
+    group->pid.minOut = min;
+    group->pid.maxOut = max;
 }
 
 // feedback monitoring //
@@ -303,8 +338,7 @@ void MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder) {
 
     group->feedbackType   = FeedbackType_Encoder;
     group->feedbackDevice = device;
-    group->feedbackScale  = Encoder_getScaleFactor(encoder);
-    group->globaldataSlot = globaldataNextSlot++;
+    group->globaldataSlot = nextGlobalDataSlot++;
 }
 
 void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
@@ -317,8 +351,7 @@ void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
 
     group->feedbackType   = FeedbackType_Potentiometer;
     group->feedbackDevice = device;
-    group->feedbackScale  = AnalogIn_getScaleFactor(pot);
-    group->globaldataSlot = globaldataNextSlot++;
+    group->globaldataSlot = nextGlobalDataSlot++;
 }
 
 Device* MotorGroup_getSensor(MotorGroup* group) {
@@ -347,14 +380,12 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
 
     if(group->feedbackEnabled == value) return;
     group->feedbackEnabled = value;
+    if(!value && group->pidEnabled) {
+        MotorGroup_setPIDEnabled(group, false);
+    }
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            if(value) {
-               if(++imeCount == 1) startInterrupt();
-            } else {
-                if(group->pidData.enabled) MotorGroup_setPIDEnabled(group, false);
-                if(imeCount-- == 1) stopInterrupt();
-            }
+            imeWatch += (value)? 1: -1;
             break;
         case FeedbackType_Encoder:
             Encoder_setEnabled((Encoder*) group->feedbackDevice, value);
@@ -387,6 +418,7 @@ float MotorGroup_getFeedbackScaleFactor(MotorGroup* group) {
 void MotorGroup_setFeedbackScaleFactor(MotorGroup* group, float scale) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorIf(scale <= 0, VEXOS_ARGRANGE);
+    ErrorIf(group->feedbackType == FeedbackType_IME, VEXOS_OPINVALID);
 
     group->feedbackScale = scale;
 }
@@ -405,52 +437,39 @@ void MotorGroup_setFeedbackReversed(MotorGroup* group, bool value) {
 
 float MotorGroup_getPosition(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
     
-    if(!group->feedbackEnabled) return 0.0;
-
-    Device* device = group->feedbackDevice;
-    float scale = group->outputScale * group->feedbackScale;
-    if(group->feedbackReversed) scale *= -1;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            return GetIntegratedMotorEncoder(((Motor*) device)->port) * scale;
-        case FeedbackType_Encoder:
-            return Encoder_getRaw((Encoder*) device) * scale;
-        case FeedbackType_Potentiometer:
-            return AnalogIn_getRaw((AnalogIn*) device) * scale;
-        default: 
-            return 0.0;
-    }
+    if(!group->feedbackEnabled) return NAN;
+    return group->position * group->outputScale;
 }
 
 void MotorGroup_presetPosition(MotorGroup* group, float value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
 
     if(!group->feedbackEnabled) return;
-
+    float position = (value / (group->outputScale * group->feedbackScale));
+    
     Device* device = group->feedbackDevice;
-    long ticks = value / (group->outputScale * group->feedbackScale);
-    if(group->feedbackReversed) ticks *= -1;
-    group->pidData.setpoint = ticks;
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            PresetIntegratedMotorEncoder(((Motor*) device)->port, ticks);
+            PresetIntegratedMotorEncoder(((Motor*) device)->port, (long) position);
             break;
         case FeedbackType_Encoder:
-            Encoder_presetRaw((Encoder*) device, ticks);
+            Encoder_preset((Encoder*) device, position);
             break;
         case FeedbackType_Potentiometer:
-            AnalogIn_presetRaw((AnalogIn*) device, ticks);
+            AnalogIn_preset((AnalogIn*) device, position);
             break;
         default: 
             break;
     }
+    // set last position to prevent a speed glitch     //
+    // note that an interrupt between preset and this  //
+    // statement can still glitch, but chances are low //
+    group->lastPosition = position;
 }
 
 float MotorGroup_getSpeed(MotorGroup* group) {
@@ -459,22 +478,8 @@ float MotorGroup_getSpeed(MotorGroup* group) {
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
 
-    if(!group->feedbackEnabled) return 0.0;
-
-    Device* device = group->feedbackDevice;
-    float scale = group->outputScale;
-    if(group->feedbackReversed) scale *= -1;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            // returns rev/sec -> convert to degrees/sec @ output //
-            return GetIntegratedMotorEncoderSpeed(((Motor*) device)->port) 
-                * 360.0 * scale;
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            RaiseError(VEXOS_OPINVALID, "Not supported with current feedback mechanism");
-        default: 
-            return 0.0;
-    }
+    if(!group->feedbackEnabled) return NAN;
+    return group->speed * group->outputScale;
 }
 
 void MotorGroup_restorePosition(MotorGroup* group) {
@@ -506,191 +511,88 @@ void MotorGroup_restorePosition(MotorGroup* group) {
 bool MotorGroup_isPIDEnabled(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->pidData.enabled;
+    return group->pidEnabled;
 }
 
 void MotorGroup_setPIDEnabled(MotorGroup* group, bool value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
-    if(value == group->pidData.enabled) return;
+    if(value == group->pidEnabled) return;
 
     // if enabling, enable feedback if not active already //
     if(value && !group->feedbackEnabled) {
         MotorGroup_setFeedbackEnabled(group, true);
     }
 
-    Device* device = group->feedbackDevice;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            group->pidData.enabled = value;
-            if(value) {
-                // if more than one motor, add to process groups //
-                if(group->children.nodeCount > 1) {
-                    addProcessGroup(group);
-                }
-                StartIntegratedMotorEncoderPID(((Motor*) device)->port, group->pidData.setpoint);
-            } else {
-                StopIntegratedMotorEncoderPID(((Motor*) device)->port);
-                // if we have a slave list, remove it //
-                if(group->children.nodeCount > 1) {
-                    removeProcessGroup(group);
-                }
-            }
-            break;
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            group->pidData.enabled = value;
-            if(value) {
-                addProcessGroup(group);
-            } else {
-                removeProcessGroup(group);
-            }
-            break;
-        case FeedbackType_None:
-            RaiseError(VEXOS_OPINVALID, "Feedback mechanism is required for PID control");
-            break;
-    }
+    group->pidEnabled = value;
+    // if turning off, make sure motor power is zero //
     if(!value) {
-        ListNode* node = group->children.firstNode;
-        while(node != NULL) {
-            Motor* motor = node->data;
-            SetMotor(motor->port, 0);
-            node = node->next;
-        }
+        MotorGroup_setPower(group, 0.0);
     }
 }
 
 void MotorGroup_setPID(MotorGroup* group, float kP, float kI, float kD) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
     ErrorIf(kP < 0 || kI < 0 || kD < 0, VEXOS_ARGRANGE);
 
-    group->kP = kP;
-    group->kI = kI;
-    group->kD = kD;
-
-    Device* device = group->feedbackDevice;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            // define PID //
-            DefineIntegratedMotorEncoderPID(((Motor*) device)->port, kP, kI, kD, 
-                    group->tolerance);
-            break;
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            // constants are set above //
-            break;
-        case FeedbackType_None:
-            RaiseError(VEXOS_OPINVALID, "Feedback mechanism is required for PID control");
-            break;
-    }
+    group->pid.kP = kP;
+    group->pid.kI = kI;
+    group->pid.kD = kD;
 }
 
 float MotorGroup_getP(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->kP;
+    return group->pid.kP;
 }
 
 float MotorGroup_getI(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->kI;
+    return group->pid.kI;
 }
 
 float MotorGroup_getD(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->kD;
+    return group->pid.kD;
 }
 
 float MotorGroup_getError(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->pidData.error * group->feedbackScale * group->outputScale;
+    return group->pid.error * group->outputScale;
 }
 
 float MotorGroup_getTolerance(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     
-    return group->tolerance * group->feedbackScale * group->outputScale;
+    return group->pidTolerance * group->outputScale;
 }
 
 void MotorGroup_setTolerance(MotorGroup* group, float value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
     ErrorIf(value < 0, VEXOS_ARGINVALID);
 
-    Device* device = group->feedbackDevice;
-    long tolTicks = value / (group->outputScale * group->feedbackScale);
-    group->tolerance = tolTicks;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            if(group->pidData.enabled) {
-                MotorGroup_setPIDEnabled(group, false);
-                // redefine the PID with new tolerance //
-                DefineIntegratedMotorEncoderPID(((Motor*) device)->port, group->kP,
-                    group->kI, group->kD, tolTicks);
-                MotorGroup_setPIDEnabled(group, true);
-            }
-            break;
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            // tolerance is set above //
-            break;
-        case FeedbackType_None:
-            break;
-    }
+    group->pidTolerance = (value / group->outputScale);
 }
 
 bool MotorGroup_onTarget(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
-    if(!group->pidData.enabled) return true;
-
-    Device* device = group->feedbackDevice;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            return OnTargetIntegratedMotorEncoderPID(((Motor*) device)->port);
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            return (-group->tolerance <= group->pidData.error 
-                  && group->pidData.error <= group->tolerance);
-            break;
-        case FeedbackType_None:
-            RaiseError(VEXOS_OPINVALID, "Feedback mechanism is required for PID control");
-            break;
-    }
-    return true;
+    
+    if(!group->pidEnabled) return true;
+    return (group->pid.error > -group->pidTolerance)
+        && (group->pid.error <  group->pidTolerance);
 }
 
 float MotorGroup_getSetpoint(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->pidData.setpoint * group->feedbackScale * group->outputScale;
+    return group->pid.command * group->outputScale;
 }
 
 void MotorGroup_setSetpoint(MotorGroup* group, float value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
 
-    Device* device = group->feedbackDevice;
-    long ticks = value / (group->outputScale * group->feedbackScale);
-    if(group->feedbackReversed) ticks *= -1;
-    switch(group->feedbackType) {
-        case FeedbackType_IME:
-            if(group->pidData.enabled) {
-                UpdateSetpointIntegratedMotorEncoderPID(((Motor*) device)->port, ticks);
-            }
-            group->pidData.setpoint = ticks;
-            break;
-        case FeedbackType_Encoder:
-        case FeedbackType_Potentiometer:
-            group->pidData.setpoint = ticks;
-            break;
-        case FeedbackType_None:
-            RaiseError(VEXOS_OPINVALID, "Feedback mechanism is required for PID control");
-            break;
-    }
+    group->pid.command = (value / group->outputScale);
 }
-
