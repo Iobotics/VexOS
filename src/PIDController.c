@@ -30,9 +30,7 @@
 //  present in this distribution.
 //
 
-#include "API.h"
-
-#include "VexOS.h"
+#include "PID.h"
 #include "Error.h"
 
 /********************************************************************
@@ -40,121 +38,42 @@
  ********************************************************************/
 
 struct PIDController {
-    // state object //
-    void* state;
     // configuration fields //
-    float p, i, d;
-    float period;
-    float minOutput, maxOutput;
-    float minInput, maxInput;
-    bool isContinuous;
-    bool enabled;
-    float tolerance;
-    float setpoint;
-    PIDInput* pidInput;
+    PIDInput*  pidInput;
     PIDOutput* pidOutput;
-    // state fields //
-    float error, prevError, totalError;
-    float result;
+    void*      state;
+    bool       enabled;
+    float      tolerance;
+    // PID algorithm structure //
+    PIDState   data;
 };
-
-/********************************************************************
- * Private API                                                      *
- ********************************************************************/
-
-List pidControllers;
-
-static void calculate(PIDController* pid) {
-    if(!pid->enabled) return;
-    
-    pid->error = pid->setpoint - pid->pidInput(pid->state);
-    if(pid->isContinuous) {
-        if(Fabs(pid->error) > (pid->maxInput - pid->minInput) / 2.0) {
-            if(pid->error > 0.0) {
-                pid->error = pid->error - pid->maxInput + pid->minInput;
-            } else {
-                pid->error = pid->error + pid->maxInput - pid->minInput;
-            }
-        }
-    }
-    
-    // handle I //
-    if(((pid->totalError + pid->error) * pid->i < pid->maxOutput)
-        && ((pid->totalError + pid->error) * pid->i > pid->minOutput)) {
-        pid->totalError += pid->error;
-    }
-    
-    // handle P, D //
-    pid->result = (pid->p * pid->error + pid->i * pid->totalError + pid->d * (pid->error - pid->prevError));
-    pid->prevError = pid->error;
-    
-    if(pid->result > pid->maxOutput) {
-        pid->result = pid->maxOutput;
-    } else if(pid->result < pid->minOutput) {
-        pid->result = pid->minOutput;
-    }
-    pid->pidOutput(pid->state, pid->result);
-}
-
-static void pidISR() {
-    ListNode* node = pidControllers.firstNode;
-    while(node != NULL) {
-        calculate(node->data);
-        node = node->next;
-    }
-}
 
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/
 
-PIDController* PIDController_new(float p, float i, float d, PIDInput input, PIDOutput output, void* state) {
-    ErrorIf(p < 0.0, VEXOS_ARGRANGE);
-    ErrorIf(i < 0.0, VEXOS_ARGRANGE);
-    ErrorIf(d < 0.0, VEXOS_ARGRANGE);
+PIDController* PIDController_new(PIDInput input, PIDOutput output, void* state) {
     ErrorIf(input == NULL, VEXOS_ARGNULL);
     ErrorIf(output == NULL, VEXOS_ARGNULL);
     
     PIDController* pid = malloc(sizeof(PIDController));
     // set PID constants //
-    pid->p = p;
-    pid->i = i;
-    pid->d = d;
     pid->pidInput  = input;
     pid->pidOutput = output;
     pid->state     = state;
     // set defaults //
-    pid->minInput     = 0.0;
-    pid->maxInput     = 0.0;
-    pid->minOutput    = 1.0;
-    pid->maxOutput    = -1.0;
-    pid->isContinuous = false;
-    pid->enabled      = false;
-    pid->setpoint     = 0.0;
-    pid->tolerance    = 0.05;
-    // clear PID state //
-    pid->error        = 0.0;
-    pid->prevError    = 0.0;
-    pid->totalError   = 0.0;
-    pid->result       = 0.0;
-    
-    // add to list //
-    List_insertLast(&pidControllers, List_newNode(pid));
-    if(pidControllers.nodeCount == 1) {
-        RegisterImeInterruptServiceRoutine(&pidISR);
-    }
+    pid->enabled   = false;
+    // initialize with defaults //
+    PID_initialize(&pid->data);
+    // set tolerance as 5% of default input range //
+    pid->tolerance = (pid->data.maxIn - pid->data.minIn) * 0.05;
     return pid;
 }
 
 PIDController* PIDController_delete(PIDController* pid) {
     if(!pid) return NULL;
-    ListNode* node = List_findNode(&pidControllers, pid);
-    if(node != NULL) {
-        List_remove(node);
-        if(pidControllers.nodeCount == 0) {
-            UnRegisterImeInterruptServiceRoutine(&pidISR);
-        }
-    }
+    if(pid->enabled) PIDController_setEnabled(pid, false);
+    free(pid);
     return pid;
 }
 
@@ -164,67 +83,65 @@ void* PIDController_getState(PIDController* pid) {
     return pid->state;
 }
 
-float PIDController_get(PIDController* pid) {
+void PIDController_setPID(PIDController* pid, float kP, float kI, float kD) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    return pid->result;
-}
+    ErrorIf(kP < 0.0, VEXOS_ARGRANGE);
+    ErrorIf(kI < 0.0, VEXOS_ARGRANGE);
+    ErrorIf(kD < 0.0, VEXOS_ARGRANGE);
+    ErrorIf(pid->enabled, VEXOS_OPINVALID);
 
-float PIDController_getError(PIDController* pid) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    return pid->error;
+    pid->data.kP = kP;
+    pid->data.kI = kI;
+    pid->data.kD = kD;
 }
 
 float PIDController_getP(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
-    return pid->p;
+    return pid->data.kP;
 }
 
 float PIDController_getI(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
-    return pid->i;
+    return pid->data.kI;
 }
 
 float PIDController_getD(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
-    return pid->d;
+    return pid->data.kD;
 }
 
-float PIDController_getSetpoint(PIDController* pid) {
+void PIDController_setInputRange(PIDController* pid, float min, float max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    return pid->setpoint;
+    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
+    ErrorIf(pid->enabled, VEXOS_OPINVALID);
+
+    pid->data.minIn = min;
+    pid->data.maxIn = max;
 }
 
-bool PIDController_onTarget(PIDController* pid) {
+void PIDController_setOutputRange(PIDController* pid, float min, float max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    return (Fabs(pid->error) < pid->tolerance / 100 * (pid->maxInput - pid->minInput));
-}
+    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
+    ErrorIf(pid->enabled, VEXOS_OPINVALID);
 
-void PIDController_reset(PIDController* pid) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    PIDController_setEnabled(pid, false);
-    pid->prevError  = 0.0;
-    pid->totalError = 0.0;
-    pid->result     = 0.0;
+    pid->data.minOut = min;
+    pid->data.maxOut = max;
 }
 
 bool PIDController_isContinuous(PIDController* pid) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
-    return pid->isContinuous;
+    return pid->data.isContinuous;
 }
 
 void PIDController_setContinuous(PIDController* pid, bool value) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
+    ErrorIf(pid->enabled, VEXOS_OPINVALID);
     
-    pid->isContinuous = value;
+    pid->data.isContinuous = value;
 }
 
 bool PIDController_isEnabled(PIDController* pid) {
@@ -242,53 +159,39 @@ void PIDController_setEnabled(PIDController* pid, bool value) {
     pid->enabled = value;
 }
 
-void PIDController_setInputRange(PIDController* pid, float min, float max) {
+void PIDController_setTolerance(PIDController* pid, float tolerance) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
-
-    pid->minInput = min;
-    pid->maxInput = max;
-    PIDController_setSetpoint(pid, pid->setpoint);
-}
-
-void PIDController_setOutputRange(PIDController* pid, float min, float max) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
-
-    pid->minOutput = min;
-    pid->maxOutput = max;
-}
-
-void PIDController_setPID(PIDController* pid, float p, float i, float d) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    ErrorIf(p < 0.0, VEXOS_ARGRANGE);
-    ErrorIf(i < 0.0, VEXOS_ARGRANGE);
-    ErrorIf(d < 0.0, VEXOS_ARGRANGE);
+    ErrorIf(tolerance < 0, VEXOS_ARGRANGE);
     
-    pid->p = p;
-    pid->i = i;
-    pid->d = d;
+    pid->tolerance = tolerance;
+}
+
+bool PIDController_onTarget(PIDController* pid) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+    
+    return (ABS(pid->data.error) < pid->tolerance);
+}
+
+float PIDController_getError(PIDController* pid) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+    
+    return pid->data.error;
+}
+
+float PIDController_getOutput(PIDController* pid) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+    
+    return pid->data.output;
+}
+
+float PIDController_getSetpoint(PIDController* pid) {
+    ErrorIf(pid == NULL, VEXOS_ARGNULL);
+    
+    return pid->data.command;
 }
 
 void PIDController_setSetpoint(PIDController* pid, float setpoint) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
-    if(pid->maxInput > pid->minInput) {
-        if (setpoint > pid->maxInput) {
-            pid->setpoint = pid->maxInput;
-        } else if (setpoint < pid->minInput) {
-            pid->setpoint = pid->minInput;
-        } else {
-            pid->setpoint = setpoint;
-        }
-    } else {
-        pid->setpoint = setpoint;
-    }
-}
-
-void PIDController_setTolerance(PIDController* pid, float tolerance) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    ErrorIf(tolerance < 0 || tolerance > 1, VEXOS_ARGRANGE);
-    
-    pid->tolerance = tolerance;
+    pid->data.command = setpoint;
 }

@@ -292,26 +292,25 @@ void        DebugValue_set(DebugValue* val, ...);
 typedef float (PIDInput)(void* state);
 typedef void (PIDOutput)(void* state, float result);
 
-PIDController* PIDController_new(float kP, float kI, float kD, PIDInput inHandler, PIDOutput outHandler, void* state);
+PIDController* PIDController_new(PIDInput inHandler, PIDOutput outHandler, void* state);
 PIDController* PIDController_delete(PIDController* pid);
 void*   PIDController_getState(PIDController* pid);
-float   PIDController_get(PIDController* pid);
-float   PIDController_getError(PIDController* pid);
+void    PIDController_setPID(PIDController* pid, float kP, float kI, float kD);
 float   PIDController_getP(PIDController* pid);
 float   PIDController_getI(PIDController* pid);
 float   PIDController_getD(PIDController* pid);
-float   PIDController_getSetpoint(PIDController* pid);
-bool    PIDController_onTarget(PIDController* pid);
-void    PIDController_reset(PIDController* pid);
+void    PIDController_setInputRange(PIDController* pid, float min, float max);
+void    PIDController_setOutputRange(PIDController* pid, float min, float max);
 bool    PIDController_isContinuous(PIDController* pid);
 void    PIDController_setContinuous(PIDController* pid, bool value);
 bool    PIDController_isEnabled(PIDController* pid);
 void    PIDController_setEnabled(PIDController* pid, bool value);
-void    PIDController_setInputRange(PIDController* pid, float min, float max);
-void    PIDController_setOutputRange(PIDController* pid, float min, float max);
-void    PIDController_setPID(PIDController* pid, float kP, float kI, float kD);
-void    PIDController_setSetpoint(PIDController* pid, float setpoint);
 void    PIDController_setTolerance(PIDController* pid, float tolerance);
+bool    PIDController_onTarget(PIDController* pid);
+float   PIDController_getError(PIDController* pid);
+float   PIDController_getOutput(PIDController* pid);
+float   PIDController_getSetpoint(PIDController* pid);
+void    PIDController_setSetpoint(PIDController* pid, float setpoint);
 
 /********************************************************************
  * Public API: Timer                                                  *
@@ -391,6 +390,13 @@ struct Robot {
 #define DeclareButtonClass(class) \
     extern ButtonClass class;
 
+/********************************************************************
+ * Utility Macros                                                   *
+ ********************************************************************/
+
+#define ABS(x) ({ typeof(x) _x = (x); (_x < 0)? -_x: _x; })
+#define MAX(x, y) ({ typeof(x) _x = (x); typeof(y) _y = (y); (_x > _y)? _x: _y)
+#define MIN(x, y) ({ typeof(x) _x = (x); typeof(y) _y = (y); (_x < _y)? _x: _y)
 
 /********************************************************************
  * Built-in Generic Command & Button Classes                        *

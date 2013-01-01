@@ -65,8 +65,6 @@ static Power getPower(Power power) {
 #define RIGHT_FRONT 2
 #define RIGHT_REAR  3
 
-#define ABS(x)  (x < 0)? -(x): (x)
-
 static void computeHolonomic(float x, float y, float rotation) {
     float speeds[NUM_MOTORS];
 
