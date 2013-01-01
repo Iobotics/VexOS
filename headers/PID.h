@@ -32,14 +32,14 @@ typedef struct {
     // input and output //
     float command;
     float input;
-    float output;
+    volatile float output;
     // configuration fields //
     float kP, kI, kD;
     float minIn,  maxIn;
     float minOut, maxOut;
     bool  isContinuous;
     // state fields //
-    float error, deltaError, sigmaError;
+    volatile float error, deltaError, sigmaError;
 } PIDState;
 
 void PID_initialize(PIDState* pid);
