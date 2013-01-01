@@ -21,7 +21,7 @@ static MotorGroup* motors;
 static void constructor() { 
     motors = MotorGroup_new("intake");
     MotorGroup_add(motors, "intake left", MOTOR_INTAKE_L, MotorType_393_HT, true);
-    //MotorGroup_add(motors, "intake right", MOTOR_INTAKE_R, MotorType_393_HT, false);
+    MotorGroup_add(motors, "intake right", MOTOR_INTAKE_R, MotorType_393_HT, false);
 }
 
 static void initialize() {

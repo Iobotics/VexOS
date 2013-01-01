@@ -27,6 +27,11 @@ void autoPeriodic(EventType type, void* state) {
     PrintToScreen("  time: %d\n", GetMsClock());
 }
 
+void operatorPeriodic(EventType type, void* state) {
+    Wait(100);
+    PrintToScreen("  time: %d\n", GetMsClock());
+}
+
 int main(int argc, const char* argv[]) {
     GlobalData(GLOBALDATA_AUTO_PROGRAM) = 2;
     GlobalData(GLOBALDATA_DASH_NUMBER)  = 1;
@@ -34,7 +39,7 @@ int main(int argc, const char* argv[]) {
     printf("Hello, World!\n");
     StartTime = getTimeMs();
     VexOS_Initialize();
-    //VexOS_OperatorControl();
-    VexOS_Autonomous();
+    VexOS_OperatorControl();
+    //VexOS_Autonomous();
     return 0;
 }

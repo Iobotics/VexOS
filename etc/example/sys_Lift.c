@@ -38,12 +38,12 @@ static void constructor() {
     MotorGroup_setPID(right, Kp, Ki, Kd);
 
     resetSwitch = DigitalIn_newLimit("reset switch", DIGITAL_LIFT_RESET);
-
-    MotorGroup_setPIDEnabled(left, true);
-    MotorGroup_setPIDEnabled(right, true);
 }
 
-static void initialize() { }
+static void initialize() {
+    MotorGroup_setPIDEnabled(left,  true);
+    MotorGroup_setPIDEnabled(right, true);
+}
 
 /********************************************************************
  * Public API                                                       *

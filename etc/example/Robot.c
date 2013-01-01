@@ -23,6 +23,9 @@ static void constructor() {
     lcd      = LCD_new("Main LCD", UARTPort_1);
 }
 
+void autoPeriodic(EventType type, void* state);
+void operatorPeriodic(EventType type, void* state);
+
 static void initialize() {
     VexOS_setProgramName("My test program of DOOM!");
     InitIntegratedMotorEncoders();
@@ -64,6 +67,7 @@ static void initialize() {
     Autonomous_restoreLastProgram();
 #ifdef XCODE
     VexOS_addEventHandler(EventType_AutonomousPeriodic, &autoPeriodic, NULL);
+    VexOS_addEventHandler(EventType_OperatorPeriodic, &operatorPeriodic, NULL);
 #endif
 }
 

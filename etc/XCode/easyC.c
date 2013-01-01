@@ -48,6 +48,21 @@ void UnRegisterImeInterruptServiceRoutine(void (*handler)(void)) {
     
 }
 
+void SetSaveCompetitionIme(unsigned char ucSave) {
+    
+}
+
+long GetSavedCompetitionIme(unsigned char ucMotor) {
+    return 0;
+}
+
+void GetIntegratedMotorEncodersData(ImeData ime[MAX_IME]) {
+    for(int i = 0; i < MAX_IME; i++) {
+        ime[i].counter = i;
+        ime[i].speed   = i * 10;
+    }
+}
+
 void PrintTextToGD(unsigned char ucRow, unsigned char ucCol, unsigned long ulColor, const char *szText, ...) {
     
 }
@@ -264,6 +279,30 @@ float GetMainBattery() {
 
 float GetBackupBattery() {
     return 0.0;
+}
+
+void DefineControllerIO(unsigned char ucP1, unsigned char ucP2, unsigned char ucP3, unsigned char ucP4,
+                        unsigned char ucP5, unsigned char ucP6, unsigned char ucP7, unsigned char ucP8,
+                        unsigned char ucP9, unsigned char ucP10, unsigned char ucP11, unsigned char ucP12)
+{
+    PrintToScreen("DefineControllerIO(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d)\n",
+                  ucP1, ucP2, ucP3, ucP4, ucP5, ucP6, ucP7, ucP8, ucP9, ucP10, ucP11, ucP12);
+}
+
+void DefineImeTable(unsigned char ucMotor1I2C, unsigned char ucMotor2I2C, unsigned char ucMotor3I2C, unsigned char ucMotor4I2C,
+                    unsigned char ucMotor5I2C, unsigned char ucMotor6I2C, unsigned char ucMotor7I2C, unsigned char ucMotor8I2C,
+                    unsigned char ucMotor9I2C, unsigned char ucMotor10I2C)
+{
+    PrintToScreen("DefineImeTable(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d)\n",
+                  ucMotor1I2C, ucMotor2I2C, ucMotor3I2C, ucMotor4I2C, ucMotor5I2C, ucMotor6I2C, ucMotor7I2C, ucMotor8I2C, ucMotor9I2C, ucMotor10I2C);
+}
+
+void DefineMotorTypes(unsigned char ucMotorType1, unsigned char ucMotorType2, unsigned char ucMotorType3, unsigned char ucMotorType4,
+                      unsigned char ucMotorType5, unsigned char ucMotorType6, unsigned char ucMotorType7, unsigned char ucMotorType8,
+                      unsigned char ucMotorType9, unsigned char ucMotorType10)
+{
+    PrintToScreen("DefineMotorTypes(%d, %d, %d, %d, %d, %d, %d, %d, %d, %d)\n",
+                  ucMotorType1, ucMotorType2, ucMotorType3, ucMotorType4, ucMotorType5, ucMotorType6, ucMotorType7, ucMotorType8, ucMotorType9, ucMotorType10);
 }
 
 #define MAX_EASYC_GLOBALS 20
