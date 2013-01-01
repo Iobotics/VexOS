@@ -31,10 +31,11 @@
 //
 
 #include "PID.h"
+#include "Interrupt.h"
 #include "Error.h"
 
 /********************************************************************
- * PIDController Structure                                          *
+ * Private API                                                      *
  ********************************************************************/
 
 struct PIDController {
@@ -48,11 +49,23 @@ struct PIDController {
     PIDState   data;
 };
 
+static void pidInterrupt(void* object) {
+    PIDController* pid = object;
+
+    if(pid->enabled) {
+        // process the PID data //
+        pid->data.input = pid->pidInput(pid->state);
+        PID_calculate(&pid->data);
+        pid->pidOutput(pid->state, pid->data.output);
+    }
+}
+
 /********************************************************************
  * Public API                                                       *
  ********************************************************************/
 
-PIDController* PIDController_new(PIDInput input, PIDOutput output, void* state) {
+PIDController* PIDController_new(PIDInput* input, PIDOutput* output, void* state) {
+    ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
     ErrorIf(input == NULL, VEXOS_ARGNULL);
     ErrorIf(output == NULL, VEXOS_ARGNULL);
     
@@ -67,12 +80,16 @@ PIDController* PIDController_new(PIDInput input, PIDOutput output, void* state) 
     PID_initialize(&pid->data);
     // set tolerance as 5% of default input range //
     pid->tolerance = (pid->data.maxIn - pid->data.minIn) * 0.05;
+
+    // add the interrupt handler //
+    Interrupt_add(pid, &pidInterrupt, 1, 1);
     return pid;
 }
 
 PIDController* PIDController_delete(PIDController* pid) {
     if(!pid) return NULL;
     if(pid->enabled) PIDController_setEnabled(pid, false);
+    Interrupt_remove(pid, &pidInterrupt);
     free(pid);
     return pid;
 }

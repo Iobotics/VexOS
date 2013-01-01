@@ -292,7 +292,7 @@ void        DebugValue_set(DebugValue* val, ...);
 typedef float (PIDInput)(void* state);
 typedef void (PIDOutput)(void* state, float result);
 
-PIDController* PIDController_new(PIDInput inHandler, PIDOutput outHandler, void* state);
+PIDController* PIDController_new(PIDInput* inHandler, PIDOutput* outHandler, void* state);
 PIDController* PIDController_delete(PIDController* pid);
 void*   PIDController_getState(PIDController* pid);
 void    PIDController_setPID(PIDController* pid, float kP, float kI, float kD);
