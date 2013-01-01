@@ -50,6 +50,9 @@ typedef enum {
 void   Error_setCode(ErrorCode code);
 String Error_getMessage();
 
+// from easyC API.h, duplicated here so we don't need to include full header //
+void PrintToScreen(String fmt, ...);
+
 #ifdef DEBUG
   /********************************************************************
    * Debugging Error Macros (includes trace information)              *
