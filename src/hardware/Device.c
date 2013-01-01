@@ -51,6 +51,7 @@ typedef struct {
 } PWMPortConfig;
 
 static unsigned char     lastDeviceId = 0;
+static Subsystem*        currentSubsystem;
 static List              devices;
 static DigitalPortConfig digitalPorts[DIGITAL_PORT_COUNT];
 static Device*           analogPorts[ANALOG_PORT_COUNT];
@@ -150,10 +151,20 @@ static void updateUARTWindow(Window* win, bool full) {
     }
 }
 
+static bool addDevice(Device* device) {
+    if(List_indexOfData(&devices, device) != -1) return false;
+    List_insertLast(&devices, List_newNode(device));
+
+    device->deviceId  = ++lastDeviceId;
+    device->subsystem = currentSubsystem;
+    return true;
+}
+
 /********************************************************************
  * Protected API                                                    *
  ********************************************************************/
 
+// hidden method, not in header //
 void Device_configureCortex() {
     // set the Cortex port directions //
     unsigned char dirs[DIGITAL_PORT_COUNT];
@@ -229,6 +240,10 @@ void Device_configureCortex() {
     }
 }
 
+void Device_setSubsystem(Subsystem* sys) {
+    currentSubsystem = sys;
+}
+
 void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
     ErrorIf(port < DigitalPort_1 || port > DigitalPort_12, VEXOS_ARGRANGE);
     ErrorMsgIf(digitalPorts[port - 1].device, VEXOS_OPINVALID, 
@@ -237,10 +252,7 @@ void Device_addDigital(DigitalPort port, DigitalPortMode mode, Device* device) {
 
     digitalPorts[port - 1].device = device;
     digitalPorts[port - 1].mode   = mode;
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
-    device->deviceId = ++lastDeviceId;
+    addDevice(device);
 }
 
 void Device_addAnalog(AnalogPort port, Device* device) {
@@ -250,10 +262,7 @@ void Device_addAnalog(AnalogPort port, Device* device) {
     ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     analogPorts[port - 1] = device;
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
-    device->deviceId = ++lastDeviceId;
+    addDevice(device);
 }
 
 void Device_addPWM(PWMPort port, Device* device) {
@@ -264,10 +273,7 @@ void Device_addPWM(PWMPort port, Device* device) {
 
     pwmPorts[port - 1].device   = device;
     pwmPorts[port - 1].expander = NULL;
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
-    device->deviceId = ++lastDeviceId;
+    addDevice(device);
 }
 
 void Device_addI2c(I2c i2c, Device* device) {
@@ -277,13 +283,15 @@ void Device_addI2c(I2c i2c, Device* device) {
     ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     i2cDevices[i2c - 1] = device;
+    addDevice(device);
 }
 
 void Device_setPWMExpander(PWMPort port, PowerExpander* device) {
     ErrorIf(port < PWMPort_1 || port > PWMPort_10, VEXOS_ARGRANGE);
     ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
-    pwmPorts[port - 1].expander = (PowerExpander*) device;
+    pwmPorts[port - 1].expander = device;
+    addDevice((Device*) device);
 }
 
 void Device_addUART(UARTPort port, Device* device) {
@@ -293,18 +301,12 @@ void Device_addUART(UARTPort port, Device* device) {
     ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
 
     uartPorts[port - 1] = device;
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
-    device->deviceId = ++lastDeviceId;
+    addDevice(device);
 }
 
 void Device_addVirtualDevice(Device* device) {
     ErrorIf(VexOS_getRunMode() != RunMode_Setup, VEXOS_HARDWARELOCK);
-    if(List_indexOfData(&devices, device) == -1) {
-        List_insertLast(&devices, List_newNode(device));
-    }
-    device->deviceId = ++lastDeviceId;
+    addDevice(device);
 }
 
 /********************************************************************

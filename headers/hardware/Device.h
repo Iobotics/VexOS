@@ -30,8 +30,10 @@ struct Device {
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    Subsystem*    subsystem;
 };
 
+void Device_setSubsystem(Subsystem*);
 void Device_addDigital(DigitalPort, DigitalPortMode, Device*);
 void Device_addAnalog(AnalogPort, Device*);
 void Device_addPWM(PWMPort, Device*);

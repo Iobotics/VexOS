@@ -34,6 +34,7 @@ struct DigitalOut {
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    Subsystem*    subsystem;
     // device item fields //
     DigitalPort   port;
     bool          value;

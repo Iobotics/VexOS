@@ -32,6 +32,8 @@
 
 #include "Error.h"
 #include "Subsystem.h"
+#include "Hardware.h"
+#include "Device.h"
 
 /********************************************************************
  * Protected API                                                    *
@@ -48,7 +50,9 @@ void Subsystem_construct() {
         if(sys->initialized) continue;
         *(sys->selfPtr)  = sys;
         // call constructor //
+        Device_setSubsystem(sys);
         if(sys->constructor) sys->constructor();
+        Device_setSubsystem(NULL);
         sys->initialized = true;
         List_insertLast(&Subsystems, List_newNode(sys));
     }

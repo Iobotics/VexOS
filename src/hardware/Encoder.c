@@ -37,6 +37,7 @@ struct Encoder {
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    Subsystem*    subsystem;
     // device item fields //
     DigitalPort   portA;
     DigitalPort   portB;

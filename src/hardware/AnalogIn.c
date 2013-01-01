@@ -36,6 +36,7 @@ struct AnalogIn {
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    Subsystem*    subsystem;
     // device item fields //
     AnalogPort    port;
     float         scale;

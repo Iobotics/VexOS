@@ -51,6 +51,7 @@ struct MotorGroup {
     unsigned char  deviceId;
     DeviceType     type;
     String         name;
+    Subsystem*     subsystem;
     // device item fields //
     List           children;
     Power          power;

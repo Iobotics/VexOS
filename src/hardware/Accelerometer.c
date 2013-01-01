@@ -34,6 +34,7 @@ struct Accelerometer {
     unsigned char deviceId;
     DeviceType    type;
     String        name;
+    Subsystem*    subsystem;
     // device item fields //
     AnalogPort    port;
     bool          enabled;

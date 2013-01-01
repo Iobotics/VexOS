@@ -34,6 +34,7 @@ struct SerialPort {
     unsigned char     deviceId;
     DeviceType        type;
     String            name;
+    Subsystem*        subsystem;
     // device item fields //
     UARTPort          port;
     BaudRate          baudRate;

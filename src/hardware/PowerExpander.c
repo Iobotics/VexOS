@@ -34,6 +34,7 @@ struct PowerExpander {
     unsigned char     deviceId;
     DeviceType        type;
     String            name;
+    Subsystem*        subsystem;
     // device item fields //
     AnalogPort        statusPort;
     PowerExpanderType expandType;
