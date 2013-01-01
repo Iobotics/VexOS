@@ -19,8 +19,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.  
 //
 
-#ifndef _INTERRUPT_h
-#define _INTERRUPT_h
+#ifndef _Interrupt_h
+#define _Interrupt_h
 
 #include "VexOS.h"
 
@@ -28,7 +28,9 @@
  * Protected API                                                    *
  ********************************************************************/
 
-#define MAX_INTERRUPT_HANDLERS  10
+#define MAX_INTERRUPT_HANDLERS      10
+#define INTERRUPT_FREQ_HZ           50
+#define INTERRUPT_PERIOD_SECONDS    (1.0 / INTERRUPT_FREQ_HZ)
 
 typedef void (InterruptHandler)(void* object);
 
@@ -38,4 +40,4 @@ void Interrupt_disable();
 void Interrupt_add(void* object, InterruptHandler* handler, int freq, int order);
 void Interrupt_remove(void* object, InterruptHandler* handler);
 
-#endif // _INTERRUPT_h
+#endif // _Interrupt_h
