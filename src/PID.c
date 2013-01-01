@@ -37,41 +37,20 @@
  ********************************************************************/
 
 void PID_initialize(PIDState* pid) {
-    pid->kP           = 0.0;
-    pid->kI           = 0.0;
-    pid->kD           = 0.0;
-    pid->minIn        = -1.0;
-    pid->maxIn        = 1.0;
-    pid->minOut       = -1.0;
-    pid->maxOut       = 1.0;
-    pid->isContinuous = false;
-    pid->error        = 0.0;
-    pid->deltaError   = 0.0;
-    pid->sigmaError   = 0.0;
+    pid->kP         = 0.0;
+    pid->kI         = 0.0;
+    pid->kD         = 0.0;
+    pid->minOut     = -1.0;
+    pid->maxOut     = 1.0;
+    pid->error      = 0.0;
+    pid->deltaError = 0.0;
+    pid->sigmaError = 0.0;
 }
 
 void PID_calculate(PIDState* pid) {
-    // limit input //
-    float input = pid->input;
-    if(input > pid->maxIn) {
-        input = pid->maxIn;
-    } else if(input < pid->minIn) {
-        input = pid->minIn;
-    }
-
     // compute error //
-    float error = pid->command - input;
-    // handle input that wraps around (i.e. absolute encoder) //
-    if(pid->isContinuous) {
-        if(ABS(pid->error) > (pid->maxIn - pid->minIn) / 2.0) {
-            if(error > 0.0) {
-                error += pid->minIn - pid->maxIn;
-            } else {
-                error += pid->maxIn - pid->minIn;
-            }
-        }
-    }
-    
+    float error = pid->command - pid->input;
+
     // accumulate error if not at limits, prevents "wind-up" //
     float x_iterm = (pid->sigmaError + error) * pid->kI;
     if((x_iterm < pid->maxOut) && (x_iterm > pid->minOut)) {

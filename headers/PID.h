@@ -35,7 +35,6 @@ typedef struct {
     volatile float output;
     // configuration fields //
     float kP, kI, kD;
-    float minIn,  maxIn;
     float minOut, maxOut;
     bool  isContinuous;
     // state fields //

@@ -303,8 +303,6 @@ void    PIDController_getInputRange(PIDController* pid, float* min, float* max);
 void    PIDController_setInputRange(PIDController* pid, float min, float max);
 void    PIDController_getOutputRange(PIDController* pid, float* min, float* max);
 void    PIDController_setOutputRange(PIDController* pid, float min, float max);
-bool    PIDController_isContinuous(PIDController* pid);
-void    PIDController_setContinuous(PIDController* pid, bool value);
 bool    PIDController_isEnabled(PIDController* pid);
 void    PIDController_setEnabled(PIDController* pid, bool value);
 void    PIDController_setTolerance(PIDController* pid, float tolerance);

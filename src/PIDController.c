@@ -44,6 +44,7 @@ struct PIDController {
     PIDOutput* pidOutput;
     void*      state;
     bool       enabled;
+    float      minIn, maxIn;
     float      tolerance;
     // PID algorithm structure //
     PIDState   data;
@@ -76,11 +77,12 @@ PIDController* PIDController_new(PIDInput* input, PIDOutput* output, void* state
     pid->state     = state;
     // set defaults //
     pid->enabled   = false;
+    pid->minIn     = 0.0;
+    pid->maxIn     = 0.0;
+    pid->tolerance = 0.0;
     // initialize with defaults //
     PID_initialize(&pid->data);
-    // set tolerance as 5% of default input range //
-    pid->tolerance = (pid->data.maxIn - pid->data.minIn) * 0.05;
-
+    
     // add the interrupt handler //
     Interrupt_add(pid, &pidInterrupt, 1, 1);
     return pid;
@@ -133,8 +135,8 @@ float PIDController_getD(PIDController* pid) {
 void PIDController_getInputRange(PIDController* pid, float* min, float* max) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
 
-    if(min) *min = pid->data.minIn;
-    if(max) *max = pid->data.maxIn;
+    if(min) *min = pid->minIn;
+    if(max) *max = pid->maxIn;
 }
 
 void PIDController_setInputRange(PIDController* pid, float min, float max) {
@@ -142,8 +144,9 @@ void PIDController_setInputRange(PIDController* pid, float min, float max) {
     ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
     ErrorIf(pid->enabled, VEXOS_OPINVALID);
 
-    pid->data.minIn = min;
-    pid->data.maxIn = max;
+    pid->minIn = min;
+    pid->maxIn = max;
+    PIDController_setSetpoint(pid, pid->data.command);
 }
 
 void PIDController_getOutputRange(PIDController* pid, float* min, float* max) {
@@ -160,19 +163,6 @@ void PIDController_setOutputRange(PIDController* pid, float min, float max) {
 
     pid->data.minOut = min;
     pid->data.maxOut = max;
-}
-
-bool PIDController_isContinuous(PIDController* pid) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    
-    return pid->data.isContinuous;
-}
-
-void PIDController_setContinuous(PIDController* pid, bool value) {
-    ErrorIf(pid == NULL, VEXOS_ARGNULL);
-    ErrorIf(pid->enabled, VEXOS_OPINVALID);
-    
-    pid->data.isContinuous = value;
 }
 
 bool PIDController_isEnabled(PIDController* pid) {
@@ -224,5 +214,13 @@ float PIDController_getSetpoint(PIDController* pid) {
 void PIDController_setSetpoint(PIDController* pid, float setpoint) {
     ErrorIf(pid == NULL, VEXOS_ARGNULL);
     
+    if(pid->maxIn > pid->minIn) {
+        if(setpoint < pid->minIn) {
+            setpoint = pid->minIn;
+        } else if(setpoint > pid->maxIn) {
+            setpoint = pid->maxIn;
+        }
+    }
+
     pid->data.command = setpoint;
 }
