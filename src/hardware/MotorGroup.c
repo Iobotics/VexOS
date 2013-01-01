@@ -23,47 +23,21 @@
 
 #include "Hardware.h"
 #include "Device.h"
-#include "Motor.h"
+#include "MotorGroup.h"
 #include "Interrupt.h"
-#include "PID.h"
 #include "Error.h"
 
 /********************************************************************
  * Private API                                                      *
  ********************************************************************/
 
-#define MAX_MOTOR_POWER     127
+#define MAX_MOTOR_POWER         127
+#define SPEED_COMPUTE_CYLCES    5
 
 // encoder ticks per revolution //
-#define TicksPerRev_IME_393HT       627.2
-#define TicksPerRev_IME_393HS       392.0
-#define TicksPerRev_IME_269         240.448
-
-struct MotorGroup {
-    // device header //
-    unsigned char  deviceId;
-    DeviceType     type;
-    String         name;
-    Subsystem*     subsystem;
-    // device item fields //
-    List           children;
-    volatile Power powerActual;
-    Power          powerRequested;
-    Power          powerSlewRate;
-    float          outputScale;
-    bool           feedbackEnabled;
-    FeedbackType   feedbackType;
-    Device*        feedbackDevice;
-    bool           feedbackReversed;
-    float          feedbackScale;
-    volatile float position;
-    volatile float lastPosition;
-    volatile float speed;
-    bool           pidEnabled;
-    PIDState       pid;
-    float          pidTolerance;
-    unsigned char  globaldataSlot;
-};
+#define TicksPerRev_IME_393HT   627.2
+#define TicksPerRev_IME_393HS   392.0
+#define TicksPerRev_IME_269     240.448
 
 // internal state fields //
 static char nextGlobalDataSlot = GLOBALDATA_MOTORGROUP_STATE;
@@ -72,15 +46,112 @@ static bool    initialized;
 static char    imeWatch;
 static ImeData imeData[MAX_IME];
 
+// called before group interrupts //
 static void imeInterrupt(void* object) {
     if(!imeWatch) return;
     GetIntegratedMotorEncodersData(imeData);
 }
 
+// called for each group //
 static void groupInterrupt(void* object) {
-    //MotorGroup* group = object;
+    static int speedCycle = 0; 
+    MotorGroup* group = object;
 
+    // make sure we process feedback //
+    if(!group->feedbackEnabled) goto handle_power;
 
+    // get the current position //
+    Device* device = group->feedbackDevice;
+    Motor*  motor;
+    GlobalDataValue gdata;
+    switch(group->feedbackType) {
+        case FeedbackType_IME:
+            // get the position //
+            motor = (Motor*) device;
+            gdata.floatValue = imeData[motor->i2c - 1].counter * group->feedbackScale;
+            if(motor->reversed) {
+                gdata.floatValue = -gdata.floatValue;
+            }
+            // check for change due to slow decay of IME speed data (based on period) //
+            if(gdata.floatValue != group->pid.input) {
+                // reverse-engineered conversion function to rev/s //
+                group->speed = imeData[motor->i2c - 1].speed;
+            } else {
+                group->speed = 0.0;
+            }
+            group->pid.input = gdata.floatValue;
+            break;
+        case FeedbackType_Encoder:
+            gdata.floatValue = Encoder_get((Encoder*) group->feedbackDevice);
+            GlobalData(group->globaldataSlot) = gdata.ulongValue;
+            group->pid.input = gdata.floatValue * group->feedbackScale;
+            break;
+        case FeedbackType_Potentiometer:
+            gdata.floatValue = AnalogIn_get((AnalogIn*) group->feedbackDevice);
+            GlobalData(group->globaldataSlot) = gdata.ulongValue;
+            group->pid.input = gdata.floatValue * group->feedbackScale;
+            break;
+        default: break;
+    }
+    // we computed with pid.input because it was non-volatile //
+    // this is more efficient, we know volatile things won't  //
+    // change in the ISR, but the compiler doesn't know that  //
+    group->position = group->pid.input;
+    
+    // for non-IMEs update speed every 100ms (5 loops @ 20ms / loop) //
+    if(  (group->feedbackType != FeedbackType_IME)
+      && !(speedCycle++ % SPEED_COMPUTE_CYLCES))
+    {
+        if(!group->speedStartup) {
+            group->speed = (group->pid.input - group->lastPosition) 
+                            / (SPEED_COMPUTE_CYLCES * INTERRUPT_PERIOD_SECONDS);
+            // run the speed handler, if present //
+            if(group->speedHandler) group->speedHandler(group);
+        } else {
+            group->speedStartup = false;
+        }
+        group->lastPosition = group->pid.input;
+    }
+
+    // run the PID loop, if PID is enabled //
+    if(group->pidEnabled) {
+        PID_calculate(&group->pid);
+        group->powerRequested = group->pid.output;
+    }
+
+    // update the motors with open-loop functions //
+handle_power:
+    // handle limit switches //
+    if(  (group->powerRequested < 0 && group->limitSwitchRev && DigitalIn_get(group->limitSwitchRev)) 
+      || (group->powerRequested > 0 && group->limitSwitchFwd && DigitalIn_get(group->limitSwitchFwd))) 
+    {
+        group->powerActual = 0;
+    } else {
+        // check if there is something to do //
+        if(group->powerActual == group->powerRequested) return;
+
+        // handle slewing //
+        if(group->powerRequested > group->powerActual) {
+            group->powerActual += group->powerSlewRate;
+            if(group->powerActual > group->powerRequested) {
+                group->powerActual = group->powerRequested;
+            }
+        } else {
+            group->powerActual -= group->powerSlewRate;
+            if(group->powerActual < group->powerRequested) {
+                group->powerActual = group->powerRequested;
+            }
+        }
+    }
+
+    // update the motors //
+    ListNode* mnode = group->children.firstNode;
+    while(mnode) {
+        motor = mnode->data;
+        float mpower = (motor->reversed)? -group->powerActual: group->powerActual; 
+        SetMotor(motor->port, mpower * MAX_MOTOR_POWER); 
+        mnode = mnode->next;
+    }
 }
 
 static void initialize() {
@@ -89,123 +160,17 @@ static void initialize() {
     initialized = true;
 }
 
-// no attempt was made to optimize this ISR, test it as is, then optimize if //
-// it starts to cause problems for the rest of the code.                     //
-/*static void processISR() {
-    // do not run during computations //
-    if(VexOS_getRunMode() <= RunMode_Initialize) return;
+/********************************************************************
+ * Protected API                                                    *
+ ********************************************************************/
 
-    // general IME data //
-    if(imeCapture && imeCount > 0) {
-        GetIntegratedMotorEncodersData(ime);
-    }
-
-    ListNode* node  = processList.firstNode;
-    ListNode* mnode = NULL;
-    bool reverse;
-    long sensor;
-    while(node != NULL) {
-        MotorGroup* group = node->data;
-        switch(group->feedbackType) {
-            case FeedbackType_IME:
-                // read PID data from IME and write power to other motors //
-                mnode = group->children.firstNode;
-                if(!mnode) break;
-                IME_GetPIDControlData(((Motor*) mnode->data)->port, 
-                    &group->pidData.enabled, 
-                    &group->pidData.setpoint, 
-                    &group->pidData.power, 
-                    &group->pidData.error,
-                    &group->pidData.deltaError,
-                    &group->pidData.sigmaError);
-                reverse = ((Motor*) mnode->data)->reversed;
-                mnode = mnode->next;
-                while(mnode != NULL) {
-                    if(!((Motor*) mnode->data)->reversed ^ reverse) {
-                        SetMotor(((Motor*) mnode->data)->port, group->pidData.power);
-                    } else {
-                        SetMotor(((Motor*) mnode->data)->port, -group->pidData.power);
-                    }
-                    mnode = mnode->next;
-                }
-                group->power = group->pidData.power / MAX_MOTOR_POWER;
-                break;
-            case FeedbackType_Encoder:
-            case FeedbackType_Potentiometer:
-                // update the PID structure //
-                if(!group->pidData.enabled) break;
-                
-                // get sensor value and save to globalData //
-                if(group->feedbackType == FeedbackType_Encoder) {
-                    sensor = Encoder_getRaw((Encoder*) group->feedbackDevice);
-                } else {
-                    sensor = AnalogIn_getRaw((AnalogIn*) group->feedbackDevice);
-                }
-                GlobalData(group->globaldataSlot) = sensor;
-
-                // compute error //
-                group->pidData.error = group->pidData.setpoint - sensor;
-                
-                // handle I //
-                if(((group->pidData.sigmaError + group->pidData.error) * group->kI < MAX_MOTOR_POWER)
-                   && ((group->pidData.sigmaError + group->pidData.error) * group->kI > -MAX_MOTOR_POWER)) {
-                    group->pidData.sigmaError += group->pidData.error;
-                }
-    
-                // handle P, D //
-                group->pidData.power = (group->kP * group->pidData.error 
-                                      + group->kI * group->pidData.sigmaError 
-                                      + group->kD * (group->pidData.error - group->pidData.deltaError));
-                group->pidData.deltaError = group->pidData.error;
-    
-                // limit output //
-                if(group->pidData.power > MAX_MOTOR_POWER) {
-                    group->pidData.power = MAX_MOTOR_POWER;
-                } else if(group->pidData.power < -MAX_MOTOR_POWER) {
-                    group->pidData.power = -MAX_MOTOR_POWER;
-                }
-
-                // set the motors // 
-                mnode = group->children.firstNode;
-                while(mnode != NULL) {
-                    if(!((Motor*) mnode->data)->reversed) {
-                        SetMotor(((Motor*) mnode->data)->port, group->pidData.power);
-                    } else {
-                        SetMotor(((Motor*) mnode->data)->port, -group->pidData.power);
-                    }
-                    mnode = mnode->next;
-                }
-
-                group->power = group->pidData.power / MAX_MOTOR_POWER;
-                break;
-            case FeedbackType_None:
-                break;
-        }
-        node = node->next;
-    }
+SpeedHandler* MotorGroup_getSpeedHandler(MotorGroup* group) {
+    return group->speedHandler;
 }
 
-#define startInterrupt()    RegisterImeInterruptServiceRoutine(processISR)
-#define stopInterrupt()     UnRegisterImeInterruptServiceRoutine(processISR)
-
-static void addProcessGroup(MotorGroup* group) {
-    if(processList.nodeCount > 0 || imeCount > 0) {
-        stopInterrupt();
-    }
-    List_insertLast(&processList, List_newNode(group));
-    startInterrupt();
+void MotorGroup_setSpeedHandler(MotorGroup* group, SpeedHandler* handler) {
+    group->speedHandler = handler;
 }
-
-static void removeProcessGroup(MotorGroup* group) {
-    stopInterrupt();
-    ListNode* node = List_findNode(&processList, group);
-    if(node) {
-        List_remove(node);
-    }
-    if(processList.nodeCount > 0 || imeCount > 0) {
-        startInterrupt();
-    }
-}*/
 
 /********************************************************************
  * Public API                                                       *
@@ -220,14 +185,19 @@ MotorGroup* MotorGroup_new(String name) {
     memset(&ret->children, 0, sizeof(List));
     ret->powerActual      = 0.0;
     ret->powerRequested   = 0.0;
+    ret->powerDeadbandMin = 0.0;
+    ret->powerDeadbandMax = 0.0;
     ret->powerSlewRate    = 2.0; // disabled: slew entire range in one cycle //
     ret->outputScale      = 1.0;
     ret->feedbackEnabled  = false;
     ret->feedbackType     = FeedbackType_None;
     ret->feedbackDevice   = NULL;
-    ret->feedbackReversed = false;
     ret->feedbackScale    = 1.0;
+    ret->limitSwitchRev   = NULL;
+    ret->limitSwitchFwd   = NULL;
     ret->speed            = 0.0;
+    ret->speedStartup     = false;
+    ret->speedHandler     = NULL;
     ret->pidEnabled       = false;
     PID_initialize(&ret->pid);
     ret->pidTolerance     = -1;
@@ -262,9 +232,8 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
     // add motor at start of the list //
     Motor* motor = Motor_new(group, name, port, type, reversed, i2c);
     List_insertFirst(&group->children, List_newNode(motor));
-    group->feedbackType     = FeedbackType_IME;
-    group->feedbackDevice   = (Device*) motor;
-    group->feedbackReversed = reversed;
+    group->feedbackType   = FeedbackType_IME;
+    group->feedbackDevice = (Device*) motor;
     // set feedback ratio based on IME type //
     switch(type) {
         case MotorType_269:    group->feedbackScale = (1.0 / TicksPerRev_IME_269);   break;
@@ -298,14 +267,25 @@ void MotorGroup_setPower(MotorGroup* group, Power power) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     if(group->powerRequested == power) return;
 
-    // disable PID //
+    // disable PID if manual power setting is used //
     if(group->pidEnabled) {
         MotorGroup_setPIDEnabled(group, false);
     }
 
-    // power clipping //
-    if(power > 1.0) power = 1.0;
-    else if(power < -1.0) power = -1.0;
+    // clip to range //
+    if(power < group->pid.minOut) {
+        power = group->pid.minOut;
+    } else if(power > group->pid.maxOut) {
+        power = group->pid.maxOut;
+    }
+
+    // handle deadband //
+    if(  (group->powerDeadbandMin < group->powerDeadbandMax)
+      && (power > group->powerDeadbandMin)
+      && (power < group->powerDeadbandMax))
+    {
+        power = 0;
+    }
 
     // request the power, is set in the ISR //
     group->powerRequested = power;
@@ -324,6 +304,70 @@ void MotorGroup_setPowerRange(MotorGroup* group, Power min, Power max) {
 
     group->pid.minOut = min;
     group->pid.maxOut = max;
+}
+
+void MotorGroup_getDeadband(MotorGroup* group, Power* min, Power* max) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    if(min) *min = group->powerDeadbandMin;
+    if(max) *max = group->powerDeadbandMax;
+}
+
+void MotorGroup_setDeadband(MotorGroup* group, Power min, Power max) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+    ErrorMsgIf(min > max, VEXOS_ARGINVALID, "Lower bound is greater than upper bound");
+
+    group->powerDeadbandMin = min;
+    group->powerDeadbandMax = max;
+}
+
+Power MotorGroup_getSlewRate(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return group->powerSlewRate;
+}
+
+void MotorGroup_setSlewRate(MotorGroup* group, Power incrementPerCycle) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+    ErrorIf(incrementPerCycle <= 0, VEXOS_ARGRANGE);
+
+    group->powerSlewRate = incrementPerCycle;
+}
+
+DigitalIn* MotorGroup_getReverseLimitSwitch(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return group->limitSwitchRev;
+}
+
+void MotorGroup_setReverseLimitSwitch(MotorGroup* group, DigitalIn* input) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    group->limitSwitchRev = input;
+}
+
+bool MotorGroup_isReverseLimitOK(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return (group->limitSwitchRev)? !DigitalIn_get(group->limitSwitchRev): true;
+}
+
+DigitalIn* MotorGroup_getForwardLimitSwitch(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return group->limitSwitchFwd;
+}
+
+void MotorGroup_setForwardLimitSwitch(MotorGroup* group, DigitalIn* input) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    group->limitSwitchFwd = input;
+}
+
+bool MotorGroup_isForwardLimitOK(MotorGroup* group) {
+    ErrorIf(group == NULL, VEXOS_ARGNULL);
+
+    return (group->limitSwitchFwd)? !DigitalIn_get(group->limitSwitchFwd): true;
 }
 
 // feedback monitoring //
@@ -380,8 +424,13 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
 
     if(group->feedbackEnabled == value) return;
     group->feedbackEnabled = value;
-    if(!value && group->pidEnabled) {
-        MotorGroup_setPIDEnabled(group, false);
+    if(!value) {
+        if(group->pidEnabled) {
+            MotorGroup_setPIDEnabled(group, false);
+        }
+        group->lastPosition = 0.0;
+        group->speed        = 0.0;
+        group->pid.input    = 0.0;
     }
     switch(group->feedbackType) {
         case FeedbackType_IME:
@@ -389,8 +438,11 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
             break;
         case FeedbackType_Encoder:
             Encoder_setEnabled((Encoder*) group->feedbackDevice, value);
+            if(value) group->speedStartup = true;
             break;
         case FeedbackType_Potentiometer:
+            if(value) group->speedStartup = true;
+            break;
         default: 
             break;
     }
@@ -417,22 +469,10 @@ float MotorGroup_getFeedbackScaleFactor(MotorGroup* group) {
 
 void MotorGroup_setFeedbackScaleFactor(MotorGroup* group, float scale) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(scale <= 0, VEXOS_ARGRANGE);
+    ErrorIf(scale == 0.0, VEXOS_ARGINVALID);
     ErrorIf(group->feedbackType == FeedbackType_IME, VEXOS_OPINVALID);
 
     group->feedbackScale = scale;
-}
-
-bool MotorGroup_isFeedbackReversed(MotorGroup* group) {
-    ErrorIf(group == NULL, VEXOS_ARGNULL);
-
-    return group->feedbackReversed;
-}
-
-void MotorGroup_setFeedbackReversed(MotorGroup* group, bool value) {
-    ErrorIf(group == NULL, VEXOS_ARGNULL);
-
-    group->feedbackReversed = value;
 }
 
 float MotorGroup_getPosition(MotorGroup* group) {
@@ -490,16 +530,19 @@ void MotorGroup_restorePosition(MotorGroup* group) {
 
     Device* device = group->feedbackDevice;
     PWMPort port;
+    GlobalDataValue gdata;
     switch(group->feedbackType) {
         case FeedbackType_IME:
             port = ((Motor*) device)->port;
             PresetIntegratedMotorEncoder(port, GetSavedCompetitionIme(port));
             break;
         case FeedbackType_Encoder:
-            Encoder_presetRaw((Encoder*) device, GlobalData(group->globaldataSlot));
+            gdata.ulongValue = GlobalData(group->globaldataSlot);
+            Encoder_preset((Encoder*) device, gdata.floatValue);
             break;
         case FeedbackType_Potentiometer:
-            AnalogIn_presetRaw((AnalogIn*) device, GlobalData(group->globaldataSlot));
+            gdata.ulongValue = GlobalData(group->globaldataSlot);
+            AnalogIn_preset((AnalogIn*) device, gdata.floatValue);
             break;
         default: 
             break;

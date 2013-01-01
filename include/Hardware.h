@@ -275,11 +275,21 @@ void        MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, 
 const List* MotorGroup_getMotorList(MotorGroup* group);
 
 // open loop control //
-Power MotorGroup_getPower(MotorGroup* group);
-Power MotorGroup_getActualPower(MotorGroup* group);
-void  MotorGroup_setPower(MotorGroup* group, Power power);
-void  MotorGroup_getPowerRange(MotorGroup* group, Power* min, Power* max);
-void  MotorGroup_setPowerRange(MotorGroup* group, Power min, Power max);
+Power      MotorGroup_getPower(MotorGroup* group);
+Power      MotorGroup_getActualPower(MotorGroup* group);
+void       MotorGroup_setPower(MotorGroup* group, Power power);
+void       MotorGroup_getPowerRange(MotorGroup* group, Power* min, Power* max);
+void       MotorGroup_setPowerRange(MotorGroup* group, Power min, Power max);
+void       MotorGroup_getDeadband(MotorGroup* group, Power* min, Power* max);
+void       MotorGroup_setDeadband(MotorGroup* group, Power min, Power max);
+Power      MotorGroup_getSlewRate(MotorGroup* group);
+void       MotorGroup_setSlewRate(MotorGroup* group, Power incrementPerCycle);
+DigitalIn* MotorGroup_getReverseLimitSwitch(MotorGroup* group);
+void       MotorGroup_setReverseLimitSwitch(MotorGroup* group, DigitalIn* input);
+bool       MotorGroup_isReverseLimitOK(MotorGroup* group);
+DigitalIn* MotorGroup_getForwardLimitSwitch(MotorGroup* group);
+void       MotorGroup_setForwardLimitSwitch(MotorGroup* group, DigitalIn* input);
+bool       MotorGroup_isForwardLimitOK(MotorGroup* group);
 
 // feedback monitoring //
 void         MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder);
@@ -292,8 +302,6 @@ float        MotorGroup_getOutputScaleFactor(MotorGroup* group);
 void         MotorGroup_setOutputScaleFactor(MotorGroup* group, float scale);
 float        MotorGroup_getFeedbackScaleFactor(MotorGroup* group);
 void         MotorGroup_setFeedbackScaleFactor(MotorGroup* group, float scale);
-bool         MotorGroup_isFeedbackReversed(MotorGroup* group);
-void         MotorGroup_setFeedbackReversed(MotorGroup* group, bool value);
 float        MotorGroup_getPosition(MotorGroup* group);
 void         MotorGroup_presetPosition(MotorGroup* group, float value);
 float        MotorGroup_getSpeed(MotorGroup* group);
