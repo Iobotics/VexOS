@@ -13,12 +13,22 @@
 #include <math.h>
 #include "API.h"
 
+#define INTERRUPT_MILLIS    20
 extern double StartTime;
 double getTimeMs();
 
+typedef void (Handler)();
+static Handler* _handler;
+
 void Wait(long ulTime) {
-    unsigned long start = GetMsClock();
-    while((GetMsClock() - start) < ulTime);
+    unsigned long start   = GetMsClock();
+    unsigned long nextISR = 0;
+    while((GetMsClock() - start) < ulTime) {
+        if(GetMsClock() > nextISR) {
+            nextISR += INTERRUPT_MILLIS;
+            if(_handler) _handler();
+        }
+    }
 }
 
 unsigned long GetMsClock() {
@@ -40,12 +50,12 @@ double Fabs(double value) {
     return (value < 0)? -value: value;
 }
 
-void RegisterImeInterruptServiceRoutine(void (*handler)(void)) {
-    
+void RegisterImeInterruptServiceRoutine(Handler* handler) {
+    _handler = handler;
 }
 
-void UnRegisterImeInterruptServiceRoutine(void (*handler)(void)) {
-    
+void UnRegisterImeInterruptServiceRoutine(Handler* handler) {
+    if(_handler == handler) _handler = NULL;
 }
 
 void SetSaveCompetitionIme(unsigned char ucSave) {
