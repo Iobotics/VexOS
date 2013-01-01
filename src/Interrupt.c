@@ -29,7 +29,6 @@
  ********************************************************************/
 
 static bool enabled = false;
-static bool locked  = true;
 typedef struct {
     void*             object;
     InterruptHandler* handler;
@@ -43,7 +42,7 @@ static InterruptData handlers[MAX_INTERRUPT_HANDLERS];
 static void runISR() {
     static int count = 0;
     for(int i = 0; i < numHandlers; i++) {
-        if(handlers[i].freq % count) continue;
+        if(count % handlers[i].freq) continue;
         handlers[i].handler(handlers[i].object);
     }
     count++;
@@ -53,17 +52,12 @@ static void runISR() {
  * Protected API                                                    *
  ********************************************************************/
 
-// hidden method, not in header //
-void Interrupt_setLocked(bool value) {
-    locked = value;
-}
-
 bool Interrupt_isEnabled() {
     return enabled;
 }
 
 void Interrupt_enable() {
-    if(locked || enabled) return;
+    if(enabled) return;
     RegisterImeInterruptServiceRoutine(&runISR);
     enabled = true;
 }
