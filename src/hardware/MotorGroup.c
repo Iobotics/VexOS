@@ -73,9 +73,10 @@ static void groupInterrupt(void* object) {
                 gdata.floatValue = -gdata.floatValue;
             }
             // check for change due to slow decay of IME speed data (based on period) //
-            if(gdata.floatValue != group->pid.input) {
+            if(gdata.floatValue != group->pid.input && imeData[motor->i2c - 1].speed != 0) {
                 // reverse-engineered conversion function to rev/s //
-                group->speed = imeData[motor->i2c - 1].speed;
+                group->speed = (200.0 / imeData[motor->i2c - 1].speed);
+                if(gdata.floatValue < group->pid.input) group->speed = -group->speed;
             } else {
                 group->speed = 0.0;
             }
