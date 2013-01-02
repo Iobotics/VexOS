@@ -196,6 +196,8 @@ MotorGroup* MotorGroup_new(String name) {
     ret->feedbackScale    = 1.0;
     ret->limitSwitchRev   = NULL;
     ret->limitSwitchFwd   = NULL;
+    ret->position         = 0.0;
+    ret->lastPosition     = 0.0;
     ret->speed            = 0.0;
     ret->speedStartup     = false;
     ret->speedHandler     = NULL;
