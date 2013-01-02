@@ -133,6 +133,7 @@ static void executeLoop(RunMode mode) {
         if(end > -1) fireEvent(end);
     } else {
         // error handling trap //
+        Interrupt_disable();
         Wait(500);
         Error_setCode(err);
         Info("****\n");
