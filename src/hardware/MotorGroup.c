@@ -32,7 +32,7 @@
  ********************************************************************/
 
 #define MAX_MOTOR_POWER         127
-#define SPEED_COMPUTE_CYLCES    5
+#define SPEED_COMPUTE_CYCLES    5
 
 // encoder ticks per revolution //
 #define TicksPerRev_IME_393HT   627.2
@@ -54,7 +54,6 @@ static void imeInterrupt(void* object) {
 
 // called for each group //
 static void groupInterrupt(void* object) {
-    static int speedCycle = 0; 
     MotorGroup* group = object;
 
     // make sure we process feedback //
@@ -62,7 +61,7 @@ static void groupInterrupt(void* object) {
 
     // get the current position //
     Device* device = group->feedbackDevice;
-    Motor*  motor;
+    Motor*  motor  = NULL;
     GlobalDataValue gdata;
     switch(group->feedbackType) {
         case FeedbackType_IME:
@@ -71,14 +70,6 @@ static void groupInterrupt(void* object) {
             gdata.floatValue = imeData[motor->i2c - 1].counter * group->feedbackScale;
             if(motor->reversed) {
                 gdata.floatValue = -gdata.floatValue;
-            }
-            // check for change due to slow decay of IME speed data (based on period) //
-            if(gdata.floatValue != group->pid.input && imeData[motor->i2c - 1].speed != 0) {
-                // reverse-engineered conversion function to rev/s //
-                group->speed = (200.0 / imeData[motor->i2c - 1].speed);
-                if(gdata.floatValue < group->pid.input) group->speed = -group->speed;
-            } else {
-                group->speed = 0.0;
             }
             group->pid.input = gdata.floatValue;
             break;
@@ -98,20 +89,31 @@ static void groupInterrupt(void* object) {
     // this is more efficient, we know volatile things won't  //
     // change in the ISR, but the compiler doesn't know that  //
     group->position = group->pid.input;
-    
-    // for non-IMEs update speed every 100ms (5 loops @ 20ms / loop) //
-    if(  (group->feedbackType != FeedbackType_IME)
-      && !(speedCycle++ % SPEED_COMPUTE_CYLCES))
-    {
-        if(!group->speedStartup) {
-            group->speed = (group->pid.input - group->lastPosition) 
-                            / (SPEED_COMPUTE_CYLCES * INTERRUPT_PERIOD_SECONDS);
-            // run the speed handler, if present //
+   
+    // compute speed every 5 cycles (100ms), avoid glitch during startup // 
+    group->speedCycle--;
+    if(group->speedCycle <= 0) {
+        // this is a valid countdown, compute based on feedback type //
+        if(group->speedCycle == 0) {
+            if(group->feedbackType == FeedbackType_IME) {
+                // IME use the built-in period value to determine speed //
+                int xspeed = imeData[motor->i2c - 1].speed;
+                if((xspeed != 0) && (group->pid.input != group->lastPosition)) {
+                    if(group->pid.input < group->lastPosition) xspeed = -xspeed;
+                    // reversed engineered speed conversion formal //
+                    group->speed = (125440.0 * ABS(group->feedbackScale) / xspeed);
+                } else {
+                    group->speed = 0.0;
+                }
+            } else {
+                // other cases use delta in position over time //
+                group->speed = (group->pid.input - group->lastPosition) 
+                                / (SPEED_COMPUTE_CYCLES * INTERRUPT_PERIOD_SECONDS);
+            }
             if(group->speedHandler) group->speedHandler(group);
-        } else {
-            group->speedStartup = false;
         }
         group->lastPosition = group->pid.input;
+        group->speedCycle   = (group->speedCycle == -1)? 1: SPEED_COMPUTE_CYCLES;
     }
 
     // run the PID loop, if PID is enabled //
@@ -199,7 +201,7 @@ MotorGroup* MotorGroup_new(String name) {
     ret->position         = 0.0;
     ret->lastPosition     = 0.0;
     ret->speed            = 0.0;
-    ret->speedStartup     = false;
+    ret->speedCycle       = 0;  // forces a startup //
     ret->speedHandler     = NULL;
     ret->pidEnabled       = false;
     PID_initialize(&ret->pid);
@@ -239,7 +241,7 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
     group->feedbackDevice = (Device*) motor;
     // set feedback ratio based on IME type //
     switch(type) {
-        case MotorType_269:    group->feedbackScale = (1.0 / TicksPerRev_IME_269);   break;
+        case MotorType_269:    group->feedbackScale = (1.0 / -TicksPerRev_IME_269);  break;
         case MotorType_393_HT: group->feedbackScale = (1.0 / TicksPerRev_IME_393HT); break;
         case MotorType_393_HS: group->feedbackScale = (1.0 / TicksPerRev_IME_393HS); break;
         default: break;
@@ -324,17 +326,23 @@ void MotorGroup_setDeadband(MotorGroup* group, Power min, Power max) {
     group->powerDeadbandMax = max;
 }
 
-Power MotorGroup_getSlewRate(MotorGroup* group) {
+Power MotorGroup_getSlewTime(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
 
-    return group->powerSlewRate;
+    return (group->powerSlewRate >= 2.0)? 0: group->powerSlewRate;
 }
 
-void MotorGroup_setSlewRate(MotorGroup* group, Power incrementPerCycle) {
+void MotorGroup_setSlewTime(MotorGroup* group, float time) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(incrementPerCycle <= 0, VEXOS_ARGRANGE);
+    ErrorIf(time < 0, VEXOS_ARGRANGE);
 
-    group->powerSlewRate = incrementPerCycle;
+    if(time > 0) {
+        group->powerSlewRate = (INTERRUPT_PERIOD_SECONDS / time);
+    } else {
+        // for slew == 0, this will go full scale in one cycle //
+        // which is the fastest we can do anyway with the ISR  //
+        group->powerSlewRate = 2.0;
+    }
 }
 
 DigitalIn* MotorGroup_getReverseLimitSwitch(MotorGroup* group) {
@@ -431,9 +439,11 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
         if(group->pidEnabled) {
             MotorGroup_setPIDEnabled(group, false);
         }
+        group->position     = 0.0;
         group->lastPosition = 0.0;
         group->speed        = 0.0;
-        group->pid.input    = 0.0;
+    } else {
+        group->speedCycle = 0;
     }
     switch(group->feedbackType) {
         case FeedbackType_IME:
@@ -441,11 +451,8 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
             break;
         case FeedbackType_Encoder:
             Encoder_setEnabled((Encoder*) group->feedbackDevice, value);
-            if(value) group->speedStartup = true;
             break;
         case FeedbackType_Potentiometer:
-            if(value) group->speedStartup = true;
-            break;
         default: 
             break;
     }

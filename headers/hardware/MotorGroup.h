@@ -54,7 +54,7 @@ struct MotorGroup {
     volatile float position;
     volatile float lastPosition;
     volatile float speed;
-    bool           speedStartup;
+    int            speedCycle;
     SpeedHandler*  speedHandler;
     bool           pidEnabled;
     PIDState       pid;
