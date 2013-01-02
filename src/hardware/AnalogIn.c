@@ -118,7 +118,7 @@ void AnalogIn_presetRaw(AnalogIn* in, int value) {
 float AnalogIn_get(AnalogIn* in) {
     ErrorIf(in == NULL, VEXOS_ARGNULL);
 
-    return (GetAnalogInputHR(in->port) - in->offset) * in->scale;
+    return (((int) GetAnalogInputHR(in->port)) - in->offset) * in->scale;
 }
 
 void AnalogIn_preset(AnalogIn* in, float value) {
