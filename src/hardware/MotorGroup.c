@@ -550,12 +550,18 @@ void MotorGroup_restorePosition(MotorGroup* group) {
                "MotorGroup has no feedback mechanism: %s", group->name);
 
     Device* device = group->feedbackDevice;
-    PWMPort port;
+    Motor* motor = NULL;
+    long imePos  = 0;
     GlobalDataValue gdata;
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            port = ((Motor*) device)->port;
-            PresetIntegratedMotorEncoder(port, GetSavedCompetitionIme(port));
+            motor = (Motor*) device;
+            imePos = GetSavedCompetitionIme(motor->port);
+            if(group->feedbackScale < 0) {
+                imePos = -imePos;
+            }
+            PresetIntegratedMotorEncoder(motor->port, imePos);
+            gdata.floatValue = imePos;
             break;
         case FeedbackType_Encoder:
             gdata.ulongValue = GlobalData(group->globaldataSlot);
@@ -566,8 +572,13 @@ void MotorGroup_restorePosition(MotorGroup* group) {
             AnalogIn_preset((AnalogIn*) device, gdata.floatValue);
             break;
         default: 
+            gdata.floatValue = 0;
             break;
     }
+    group->position     = gdata.floatValue * group->feedbackScale;
+    group->lastPosition = group->position;
+    PrintToScreen("restore:  %f, %d\n", group->position, imePos);
+    PrintToScreen("position: %f\n", group->position * group->outputScale);
 }
 
 // closed loop control //
