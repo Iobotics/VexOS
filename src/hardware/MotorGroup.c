@@ -205,7 +205,7 @@ MotorGroup* MotorGroup_new(String name) {
     ret->speedHandler     = NULL;
     ret->pidEnabled       = false;
     PID_initialize(&ret->pid);
-    ret->pidTolerance     = -1;
+    ret->pidTolerance     = (10.0 / 360); // motor within 10 degrees //
     ret->globaldataSlot   = 0;
     Device_addVirtualDevice((Device*) ret);
 
@@ -468,7 +468,6 @@ float MotorGroup_getOutputScaleFactor(MotorGroup* group) {
 
 void MotorGroup_setOutputScaleFactor(MotorGroup* group, float scale) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
-    ErrorIf(scale <= 0, VEXOS_ARGRANGE);
 
     group->outputScale = scale;
 }
@@ -632,22 +631,21 @@ float MotorGroup_getError(MotorGroup* group) {
 float MotorGroup_getTolerance(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     
-    return group->pidTolerance * group->outputScale;
+    return group->pidTolerance * ABS(group->outputScale);
 }
 
 void MotorGroup_setTolerance(MotorGroup* group, float value) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     ErrorIf(value < 0, VEXOS_ARGINVALID);
 
-    group->pidTolerance = (value / group->outputScale);
+    group->pidTolerance = (value / ABS(group->outputScale));
 }
 
 bool MotorGroup_onTarget(MotorGroup* group) {
     ErrorIf(group == NULL, VEXOS_ARGNULL);
     
     if(!group->pidEnabled) return true;
-    return (group->pid.error > -group->pidTolerance)
-        && (group->pid.error <  group->pidTolerance);
+    return (ABS(group->pid.error) < group->pidTolerance);
 }
 
 float MotorGroup_getSetpoint(MotorGroup* group) {
