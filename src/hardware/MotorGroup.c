@@ -500,18 +500,27 @@ void MotorGroup_presetPosition(MotorGroup* group, float value) {
                "MotorGroup has no feedback mechanism: %s", group->name);
 
     if(!group->feedbackEnabled) return;
-    float position = (value / (group->outputScale * group->feedbackScale));
+    float sensorPos = (value / (group->outputScale * group->feedbackScale));
+    float motorPos  = 0;
     
     Device* device = group->feedbackDevice;
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            PresetIntegratedMotorEncoder(((Motor*) device)->port, (long) position);
+            PresetIntegratedMotorEncoder(((Motor*) device)->port, (long) sensorPos);
+            // there will be rounding errors because ticks are integers  //
+            // change position to rounded values so we don't get phantom //
+            // speed when the ISR sees a change of position from sensor  //
+            motorPos = ((long) sensorPos) * group->feedbackScale;
             break;
         case FeedbackType_Encoder:
-            Encoder_preset((Encoder*) device, position);
+            Encoder_preset((Encoder*) device, sensorPos);
+            // same as above //
+            motorPos = Encoder_get((Encoder*) device) * group->feedbackScale;
             break;
         case FeedbackType_Potentiometer:
-            AnalogIn_preset((AnalogIn*) device, position);
+            AnalogIn_preset((AnalogIn*) device, sensorPos);
+            // same as above //
+            motorPos = AnalogIn_get((AnalogIn*) device) * group->feedbackScale;            
             break;
         default: 
             break;
@@ -519,7 +528,8 @@ void MotorGroup_presetPosition(MotorGroup* group, float value) {
     // set last position to prevent a speed glitch     //
     // note that an interrupt between preset and this  //
     // statement can still glitch, but chances are low //
-    group->lastPosition = position;
+    group->position     = motorPos;
+    group->lastPosition = motorPos;
 }
 
 float MotorGroup_getSpeed(MotorGroup* group) {
