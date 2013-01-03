@@ -83,8 +83,9 @@ PIDController* PIDController_new(PIDInput* input, PIDOutput* output, void* state
     // initialize with defaults //
     PID_initialize(&pid->data);
     
-    // add the interrupt handler //
-    Interrupt_add(pid, &pidInterrupt, 1, 1);
+    // add the interrupt handler: at priority 9, it runs before     //
+    // MotorGroup power updates, allowing low phase lag for sensors //
+    Interrupt_add(pid, &pidInterrupt, 1, 9);
     return pid;
 }
 
