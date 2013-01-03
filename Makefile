@@ -20,7 +20,7 @@
 ##
 
 # distribution zip file #
-DISTZIP := vexos_0_9_7
+DISTZIP := vexos_0_9_8
 
 # project paths #
 SRCDIR    := src
