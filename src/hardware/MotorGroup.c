@@ -62,29 +62,32 @@ static void groupInterrupt(void* object) {
     // get the current position //
     Device* device = group->feedbackDevice;
     Motor*  motor  = NULL;
+    long imeTicks;
     GlobalDataValue gdata;
+    gdata.ulongValue = 0;
     switch(group->feedbackType) {
         case FeedbackType_IME:
             // get the position //
-            motor = (Motor*) device;
-            gdata.floatValue = imeData[motor->i2c - 1].counter * group->feedbackScale;
-            if(motor->reversed) {
+            motor    = (Motor*) device;
+            imeTicks = imeData[motor->i2c - 1].counter;
+            gdata.floatValue = imeTicks * group->feedbackScale;
+            if(motor->reversed ^ (motor->motorType == MotorType_269)) {
                 gdata.floatValue = -gdata.floatValue;
             }
             group->pid.input = gdata.floatValue;
+            gdata.ulongValue = imeTicks;
             break;
         case FeedbackType_Encoder:
             gdata.floatValue = Encoder_get((Encoder*) group->feedbackDevice);
-            GlobalData(group->globaldataSlot) = gdata.ulongValue;
             group->pid.input = gdata.floatValue * group->feedbackScale;
             break;
         case FeedbackType_Potentiometer:
             gdata.floatValue = AnalogIn_get((AnalogIn*) group->feedbackDevice);
-            GlobalData(group->globaldataSlot) = gdata.ulongValue;
             group->pid.input = gdata.floatValue * group->feedbackScale;
             break;
         default: break;
     }
+    GlobalData(group->globaldataSlot) = gdata.ulongValue;
     // we computed with pid.input because it was non-volatile //
     // this is more efficient, we know volatile things won't  //
     // change in the ISR, but the compiler doesn't know that  //
@@ -101,7 +104,7 @@ static void groupInterrupt(void* object) {
                 if((xspeed != 0) && (group->pid.input != group->lastPosition)) {
                     if(group->pid.input < group->lastPosition) xspeed = -xspeed;
                     // reversed engineered speed conversion formal //
-                    group->speed = (125440.0 * ABS(group->feedbackScale) / xspeed);
+                    group->speed = (125440.0 * group->feedbackScale / xspeed);
                 } else {
                     group->speed = 0.0;
                 }
@@ -241,11 +244,12 @@ void MotorGroup_addWithIME(MotorGroup* group, String name, PWMPort port, MotorTy
     group->feedbackDevice = (Device*) motor;
     // set feedback ratio based on IME type //
     switch(type) {
-        case MotorType_269:    group->feedbackScale = (1.0 / -TicksPerRev_IME_269);  break;
+        case MotorType_269:    group->feedbackScale = (1.0 / TicksPerRev_IME_269);   break;
         case MotorType_393_HT: group->feedbackScale = (1.0 / TicksPerRev_IME_393HT); break;
         case MotorType_393_HS: group->feedbackScale = (1.0 / TicksPerRev_IME_393HS); break;
         default: break;
     }
+    group->globaldataSlot = nextGlobalDataSlot--;
 }
 
 const List* MotorGroup_getMotorList(MotorGroup* group) {
@@ -393,7 +397,7 @@ void MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder) {
 
     group->feedbackType   = FeedbackType_Encoder;
     group->feedbackDevice = device;
-    group->globaldataSlot = nextGlobalDataSlot++;
+    group->globaldataSlot = nextGlobalDataSlot--;
     Encoder_preset(encoder, 0.0);
 }
 
@@ -407,7 +411,7 @@ void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
 
     group->feedbackType   = FeedbackType_Potentiometer;
     group->feedbackDevice = device;
-    group->globaldataSlot = nextGlobalDataSlot++;
+    group->globaldataSlot = nextGlobalDataSlot--;
     AnalogIn_preset(pot, 0.0);
 }
 
@@ -445,6 +449,7 @@ void MotorGroup_setFeedbackEnabled(MotorGroup* group, bool value) {
         group->lastPosition = 0.0;
         group->speed        = 0.0;
     } else {
+        // this forces a start-up condition //
         group->speedCycle = 0;
     }
     switch(group->feedbackType) {
@@ -502,35 +507,31 @@ void MotorGroup_presetPosition(MotorGroup* group, float value) {
 
     if(!group->feedbackEnabled) return;
     float sensorPos = (value / (group->outputScale * group->feedbackScale));
-    float motorPos  = 0;
     
     Device* device = group->feedbackDevice;
+    Motor* motor;
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            PresetIntegratedMotorEncoder(((Motor*) device)->port, (long) sensorPos);
-            // there will be rounding errors because ticks are integers  //
-            // change position to rounded values so we don't get phantom //
-            // speed when the ISR sees a change of position from sensor  //
-            motorPos = ((long) sensorPos) * group->feedbackScale;
+            motor = (Motor*) device;
+            // preset does NOT invert the value when set, so we need to //
+            // pre-invert so that we continue to get consistent data on //
+            // the 269 motor that measures ticks backwards in ImeData   //
+            if(motor->motorType == MotorType_269) {
+                sensorPos = -sensorPos;
+            }
+            PresetIntegratedMotorEncoder(motor->port, (long) sensorPos);
             break;
         case FeedbackType_Encoder:
             Encoder_preset((Encoder*) device, sensorPos);
-            // same as above //
-            motorPos = Encoder_get((Encoder*) device) * group->feedbackScale;
             break;
         case FeedbackType_Potentiometer:
             AnalogIn_preset((AnalogIn*) device, sensorPos);
-            // same as above //
-            motorPos = AnalogIn_get((AnalogIn*) device) * group->feedbackScale;            
             break;
         default: 
             break;
     }
-    // set last position to prevent a speed glitch     //
-    // note that an interrupt between preset and this  //
-    // statement can still glitch, but chances are low //
-    group->position     = motorPos;
-    group->lastPosition = motorPos;
+    // force speed recompute so we avoid glitches //
+    group->speedCycle = 0;
 }
 
 float MotorGroup_getSpeed(MotorGroup* group) {
@@ -549,36 +550,23 @@ void MotorGroup_restorePosition(MotorGroup* group) {
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
 
-    Device* device = group->feedbackDevice;
-    Motor* motor = NULL;
-    long imePos  = 0;
     GlobalDataValue gdata;
+    gdata.ulongValue = GlobalData(group->globaldataSlot);
+    
+    Device* device = group->feedbackDevice;
     switch(group->feedbackType) {
         case FeedbackType_IME:
-            motor = (Motor*) device;
-            imePos = GetSavedCompetitionIme(motor->port);
-            if(group->feedbackScale < 0) {
-                imePos = -imePos;
-            }
-            PresetIntegratedMotorEncoder(motor->port, imePos);
-            gdata.floatValue = imePos;
+            PresetIntegratedMotorEncoder(((Motor*) device)->port, (long) gdata.ulongValue);
             break;
         case FeedbackType_Encoder:
-            gdata.ulongValue = GlobalData(group->globaldataSlot);
             Encoder_preset((Encoder*) device, gdata.floatValue);
             break;
         case FeedbackType_Potentiometer:
-            gdata.ulongValue = GlobalData(group->globaldataSlot);
             AnalogIn_preset((AnalogIn*) device, gdata.floatValue);
             break;
-        default: 
-            gdata.floatValue = 0;
-            break;
+        default: break;
     }
-    group->position     = gdata.floatValue * group->feedbackScale;
-    group->lastPosition = group->position;
-    PrintToScreen("restore:  %f, %d\n", group->position, imePos);
-    PrintToScreen("position: %f\n", group->position * group->outputScale);
+    group->speedCycle = 0;
 }
 
 // closed loop control //

@@ -47,10 +47,11 @@
 #define GLOBALDATA_DASH_NUMBER      19
 #define GLOBALDATA_LCD_SCREEN       18
 #define GLOBALDATA_DEBUG_VALUE      17
-// saved non-IME MotorGroup PID positions grow upwards from this //
-// value. this means there are effectively 5 slots available if  //
-// the other VexOS state values are used.                        //
-#define GLOBALDATA_MOTORGROUP_STATE 12
+// saved positions for MotorGroups with feedback grow down from this  //
+// value, meaning there are a maximum of 10 slots, though rarely that //
+// many are needed. IMEs must be saved manually due to a quirk in     //
+// easyC that makes built-in save incompatible with presetting IMEs   //
+#define GLOBALDATA_MOTORGROUP_STATE 10
 
 // helper union to store floats in globaldata without casting, //
 // since casting would round, which is not the desired result  //
