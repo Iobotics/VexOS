@@ -43,10 +43,11 @@
  ********************************************************************/
 
 // global data slots //
-#define GLOBALDATA_AUTO_PROGRAM     20
-#define GLOBALDATA_DASH_NUMBER      19
-#define GLOBALDATA_LCD_SCREEN       18
-#define GLOBALDATA_DEBUG_VALUE      17
+#define GLOBALDATA_LAST_RUN_MODE    20
+#define GLOBALDATA_AUTO_PROGRAM     19
+#define GLOBALDATA_DASH_NUMBER      18
+#define GLOBALDATA_LCD_SCREEN       17
+#define GLOBALDATA_DEBUG_VALUE      16
 // saved positions for MotorGroups with feedback grow down from this  //
 // value, meaning there are a maximum of 10 slots, though rarely that //
 // many are needed. IMEs must be saved manually due to a quirk in     //
@@ -111,6 +112,7 @@ typedef void (EventHandler)(EventType, void*);
 
 // main system functions //
 RunMode       VexOS_getRunMode();
+RunMode       VexOS_getLastRunMode();
 unsigned long VexOS_getRunTime();
 float         VexOS_getLoopFrequency();
 String        VexOS_getProgramName();

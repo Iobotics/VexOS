@@ -47,6 +47,7 @@ typedef struct {
 // run loop processing //
 #define LOOP_SAMPLE     100
 static RunMode       runMode;
+static RunMode       lastRunMode;
 static unsigned long lastTime;
 static unsigned long loopTime;
 static unsigned int  loopCount;
@@ -57,6 +58,11 @@ static String programName;
 /********************************************************************
  * Private API: Run Loops                                           *
  ********************************************************************/
+
+static void setRunMode(RunMode mode) {
+    runMode = mode;
+    GlobalData(GLOBALDATA_LAST_RUN_MODE) = mode;
+}
 
 static void loopStart() {
     loopCount = 0;
@@ -92,13 +98,14 @@ static void executeLoop(RunMode mode) {
         switch(mode) {
             case RunMode_Initialize:
                 // setup Subsystems and hardware //
-                runMode = RunMode_Setup;
+                lastRunMode = GlobalData(GLOBALDATA_LAST_RUN_MODE);
+                setRunMode(RunMode_Setup);
                 Subsystem_construct();
                 Robot.constructor();
                 Device_configureCortex();
                 Interrupt_enable();
                 // run robot initializer //
-                runMode = RunMode_Initialize;
+                setRunMode(RunMode_Initialize);
                 Subsystem_initialize();
                 Robot.initialize();
                 // set loop parameters //
@@ -108,13 +115,13 @@ static void executeLoop(RunMode mode) {
                 enabled  = false;
                 break;
             case RunMode_Autonomous:
-                runMode  = RunMode_Autonomous;
+                setRunMode(RunMode_Autonomous);
                 start    = EventType_AutonomousStart;
                 periodic = EventType_AutonomousPeriodic;
                 end      = -1;
                 break;
             case RunMode_Operator:
-                runMode  = RunMode_Operator;
+                setRunMode(RunMode_Operator);
                 start    = EventType_OperatorStart;
                 periodic = EventType_OperatorPeriodic;
                 end      = -1;
@@ -149,6 +156,10 @@ static void executeLoop(RunMode mode) {
 
 RunMode VexOS_getRunMode() {
     return runMode;
+}
+
+RunMode VexOS_getLastRunMode() {
+    return lastRunMode;
 }
 
 unsigned long VexOS_getRunTime() {
