@@ -550,6 +550,10 @@ void MotorGroup_restorePosition(MotorGroup* group) {
     ErrorMsgIf(group->feedbackType == FeedbackType_None, VEXOS_OPINVALID,
                "MotorGroup has no feedback mechanism: %s", group->name);
 
+    // enable feedback //
+    MotorGroup_setFeedbackEnabled(group, true);
+
+    // look up global data //
     GlobalDataValue gdata;
     gdata.ulongValue = GlobalData(group->globaldataSlot);
     
