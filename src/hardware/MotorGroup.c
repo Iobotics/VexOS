@@ -398,7 +398,6 @@ void MotorGroup_addEncoder(MotorGroup* group, Encoder* encoder) {
     group->feedbackType   = FeedbackType_Encoder;
     group->feedbackDevice = device;
     group->globaldataSlot = nextGlobalDataSlot--;
-    Encoder_preset(encoder, 0.0);
 }
 
 void MotorGroup_addPotentiometer(MotorGroup* group, AnalogIn* pot) {
