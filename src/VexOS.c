@@ -232,6 +232,8 @@ bool VexOS_hasEventHandler(EventType type, EventHandler* handler) {
 }
 
 void VexOS_setupStandardUI() {
+    ErrorIf(VexOS_getRunMode() == RunMode_Setup, VEXOS_NOTINITIALIZED);
+
     Dashboard* mainDash = Dashboard_new("Main");
     Dashboard_addWindowWithPosition(mainDash, Status_getWindow(),      0, 0);
     Dashboard_addWindowWithPosition(mainDash, Battery_getWindow(),    24, 0);
