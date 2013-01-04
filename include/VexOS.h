@@ -36,7 +36,7 @@
 
 #define VEXOS_MAJOR_VERSION     0
 #define VEXOS_MINOR_VERSION     9
-#define VEXOS_BUILD_VERSION     8
+#define VEXOS_BUILD_VERSION     9
 
 /********************************************************************
  * Reserved GlobalData Slots                                        *
