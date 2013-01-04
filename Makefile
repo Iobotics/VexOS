@@ -37,7 +37,8 @@ CC := $(TOOLSBIN)\arm-none-eabi-gcc.exe
 AR := $(TOOLSBIN)\arm-none-eabi-ar.exe
 INCLUDES := -I $(INCPUBDIR) -I $(INCINTDIR) -I $(INCINTDIR)/hardware -I $(INCINTDIR)/ui \
 			-I $(ETCDIR)/easyC
-CFLAGS   := -mthumb -D DEBUG -O3 -Wall -std=gnu99 -ffunction-sections -c
+CFLAGS   := -mthumb -mcpu=cortex-m3 -mlittle-endian -D DEBUG -O3 -Wall -std=gnu99 \
+			-ffunction-sections -c
 
 # objects #
 OS_OBJS  := Autonomous.o Battery.o Button.o ButtonClass.o Command.o CommandClass.o \
