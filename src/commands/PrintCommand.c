@@ -30,8 +30,6 @@
 //  present in this distribution.
 //
 
-#include "API.h"
-
 #include "CommandClass.h"
 #include "Error.h"
 
