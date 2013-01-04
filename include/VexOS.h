@@ -289,10 +289,14 @@ typedef enum {
     DebugValueType_Format
 } DebugValueType;
 
+typedef void (DebugValueCallback)(DebugValue* val);
+
 DebugValue* DebugValue_new(String name, DebugValueType type);
 DebugValue* DebugValue_newWithFormat(String name, DebugValueType type, String fmtString);
-DebugValue* DebugValue_delete(DebugValue* val);
-void        DebugValue_set(DebugValue* val, ...);
+DebugValue* DebugValue_delete(DebugValue* value);
+void        DebugValue_setPointer(DebugValue* value, void* valuePtr);
+void        DebugValue_setCallback(DebugValue* value, DebugValueCallback* callback);
+void        DebugValue_set(DebugValue* value, ...);
 
 /********************************************************************
  * Public API: PIDController                                        *

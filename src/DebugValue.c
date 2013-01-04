@@ -29,23 +29,35 @@
  * DebugValue Structure                                             *
  ********************************************************************/
 
+typedef enum {
+    ValueAccessType_Manual,
+    ValueAccessType_Pointer,
+    ValueAccessType_Callback
+} ValueAccessType;
+
 struct DebugValue {
-    String          name;
-    DebugValueType  valueType;
-    unsigned long   changeTime;
-    unsigned long   displayTime;
-    String          formatString;
-    String          valueString;
+    String              name;
+    DebugValueType      valueType;
+    String              formatString;
+    unsigned long       changeTime;
+    unsigned long       displayTime;
+    String              valueString;
+    // value pull //
+    ValueAccessType     accessType;
+    void*               valuePtr;
+    DebugValueCallback* callback;
 };
 
 /********************************************************************
  * Private API                                                      *
  ********************************************************************/
 
+#define SAMPLE_TIME   250
 #define CHANGE_PERIOD 1000
 
 static ListNode* currentValue;
 static List debugValues;
+static unsigned long nextSampleTime;
 
 static void setCurrentValue(ListNode* node) {
     currentValue = node;
@@ -60,6 +72,46 @@ static bool restoreCurrentValue() {
         return true;
     }
     return false;
+}
+
+static void pullValues(EventType type, void* state) {
+    // enforce sampling interval //
+    unsigned long time = GetMsClock();
+    if(time < nextSampleTime) return;
+
+    ListNode* node = debugValues.firstNode;
+    while(node != NULL) {
+        DebugValue* value = node->data;
+        switch(value->accessType) {
+            case ValueAccessType_Manual: break;
+            case ValueAccessType_Pointer:
+                // if a pointer, deference by type //
+                if(!value->valuePtr) break;
+                switch(value->valueType) {
+                    case DebugValueType_Int:
+                        DebugValue_set(value, *((int*) value->valuePtr));
+                        break;
+                    case DebugValueType_String:
+                        DebugValue_set(value, *((String) value->valuePtr));
+                        break;
+                    case DebugValueType_Float:
+                        DebugValue_set(value, *((float*) value->valuePtr));
+                        break;
+                    case DebugValueType_Bool:
+                        DebugValue_set(value, *((bool*) value->valuePtr));
+                        break;
+                    case DebugValueType_Format: 
+                        // this won't happen //
+                        break;
+                }
+                break;
+            case ValueAccessType_Callback:
+                if(value->callback) value->callback(value);
+                break;
+        }
+        node = node->next;
+    }
+    nextSampleTime = time + SAMPLE_TIME;
 }
 
 static void updateWindow(Window* win, bool full) {
@@ -95,7 +147,7 @@ static void updateWindow(Window* win, bool full) {
         // check if value has changed since last update //
         if(value->changeTime > lastTime || time > value->displayTime) {
             Color color = ((time - value->changeTime) < CHANGE_PERIOD)?
-        Color_DarkGreen: Color_Black;
+                          Color_DarkGreen: Color_Black;
             PrintTextToGD(line, left, color, "%-15.15s %-12.12s\n", value->name, value->valueString);
             value->displayTime = (value->displayTime > time)? (time + CHANGE_PERIOD): ULONG_MAX;
         }
@@ -176,7 +228,17 @@ DebugValue* DebugValue_newWithFormat(String name, DebugValueType type, String fo
             break;
     }
     value->valueString = NULL;
+    value->accessType  = ValueAccessType_Manual;
+    value->valuePtr    = NULL;
+    value->callback    = NULL;
     List_insertLast(&debugValues, List_newNode(value));
+
+    // add the event handlers //
+    if(debugValues.nodeCount == 1) {
+        VexOS_addEventHandler(EventType_DisabledPeriodic,   &pullValues, NULL);
+        VexOS_addEventHandler(EventType_AutonomousPeriodic, &pullValues, NULL);
+        VexOS_addEventHandler(EventType_OperatorPeriodic,   &pullValues, NULL);
+    }
     return value;
 }
 
@@ -187,15 +249,36 @@ DebugValue* DebugValue_delete(DebugValue* value) {
     if(node == NULL) return value;
     if(currentValue == node) setCurrentValue(NULL);
     List_remove(node);
-    
+    // check for last value and remove handlers //
+    if(debugValues.nodeCount == 0) {
+        VexOS_removeEventHandler(EventType_DisabledPeriodic,   &pullValues);
+        VexOS_removeEventHandler(EventType_AutonomousPeriodic, &pullValues);
+        VexOS_removeEventHandler(EventType_OperatorPeriodic,   &pullValues);
+    }
     free((void*) value->valueString);
     free(value);
     return NULL;
 }
 
+void DebugValue_setPointer(DebugValue* value, void* valuePtr) {
+    value->accessType = (valuePtr)? ValueAccessType_Pointer: ValueAccessType_Manual;
+    value->valuePtr   = valuePtr;
+    value->callback   = NULL;
+}
+
+void DebugValue_setCallback(DebugValue* value, DebugValueCallback* callback) {
+    value->accessType = (callback)? ValueAccessType_Callback: ValueAccessType_Manual;
+    value->valuePtr   = NULL;
+    value->callback   = callback;
+}
+
 void DebugValue_set(DebugValue* value, ...) {
     ErrorIf(value == NULL, VEXOS_ARGNULL);
     
+    // make sure we haven't changed within sample time //
+    unsigned long time = GetMsClock();
+    if(value->changeTime >= (time - SAMPLE_TIME)) return;
+
     // create the new value string from varargs //
     char* vstring;
     va_list argp;
@@ -215,8 +298,8 @@ void DebugValue_set(DebugValue* value, ...) {
         }
         // update if different //
         value->valueString = vstring;
-        value->changeTime  = GetMsClock();
-    } else if(value->valueType != DebugValueType_Bool){
+        value->changeTime  = time;
+    } else if(value->valueType != DebugValueType_Bool) {
         // not different, free new string if we allocated it //
         free(vstring);
     }
