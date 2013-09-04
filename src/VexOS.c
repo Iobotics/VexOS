@@ -45,7 +45,7 @@ typedef struct {
 } EventData;
 
 // run loop processing //
-#define LOOP_SAMPLE     100
+#define LOOP_SAMPLE     101
 static RunMode       runMode;
 static RunMode       lastRunMode;
 static unsigned long lastTime;
